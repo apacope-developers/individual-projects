@@ -1,0 +1,96 @@
+/* ===========================
+   LifeLine — Custom Styles
+   =========================== */
+
+* { scrollbar-width: thin; scrollbar-color: #3F3F46 transparent; }
+*::-webkit-scrollbar { width: 6px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb { background: #3F3F46; border-radius: 3px; }
+
+/* Background grid pattern */
+.bg-grid {
+    background-image:
+        radial-gradient(ellipse 80% 50% at 50% 0%, rgba(239,68,68,0.06) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 80% 100%, rgba(45,212,191,0.04) 0%, transparent 60%),
+        linear-gradient(rgba(63,63,70,0.15) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(63,63,70,0.15) 1px, transparent 1px);
+    background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+}
+
+/* Sidebar */
+.sidebar { width: 220px; transition: width 0.3s; }
+.sidebar .nav-label { opacity: 1; transition: opacity 0.2s; }
+.nav-item { transition: all 0.2s; position: relative; }
+.nav-item::before { content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 3px; height: 0; background: #EF4444; border-radius: 0 4px 4px 0; transition: height 0.2s; }
+.nav-item.active::before { height: 60%; }
+
+/* Bottom bar (mobile) */
+.bottom-bar { display: none; }
+@media (max-width: 768px) {
+    .sidebar { display: none !important; }
+    .bottom-bar { display: flex; }
+    .main-content { padding-bottom: 80px !important; }
+}
+
+/* Fade-in animation for pages */
+.fade-in { animation: fadeSlide 0.35s ease; }
+@keyframes fadeSlide { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+/* Cards */
+.card { background: #18181B; border: 1px solid #27272A; border-radius: 12px; transition: all 0.25s; }
+.card:hover { border-color: #3F3F46; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+.card-static { background: #18181B; border: 1px solid #27272A; border-radius: 12px; }
+
+/* Quick action card overlay */
+.quick-card { cursor: pointer; position: relative; overflow: hidden; }
+.quick-card::after { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(239,68,68,0.08), transparent); opacity: 0; transition: opacity 0.3s; }
+.quick-card:hover::after { opacity: 1; }
+
+/* Body map zones */
+.body-zone { fill: rgba(45,212,191,0.08); stroke: rgba(45,212,191,0.25); stroke-width: 1; cursor: pointer; transition: all 0.3s; }
+.body-zone:hover, .body-zone.active { fill: rgba(239,68,68,0.2); stroke: #EF4444; stroke-width: 1.5; }
+.body-outline { fill: none; stroke: #3F3F46; stroke-width: 1.5; }
+
+/* Severity badges */
+.sev-critical { background: rgba(239,68,68,0.15); color: #FCA5A5; border: 1px solid rgba(239,68,68,0.3); }
+.sev-urgent { background: rgba(249,115,22,0.15); color: #FDBA74; border: 1px solid rgba(249,115,22,0.3); }
+.sev-moderate { background: rgba(234,179,8,0.15); color: #FDE047; border: 1px solid rgba(234,179,8,0.3); }
+.sev-minor { background: rgba(34,197,94,0.15); color: #86EFAC; border: 1px solid rgba(34,197,94,0.3); }
+
+/* CPR Pulse */
+.cpr-pulse { animation: pulse calc(60s / var(--bpm)) ease-in-out infinite; }
+@keyframes pulse { 0%,100% { transform: scale(0.85); opacity: 0.5; } 50% { transform: scale(1.1); opacity: 1; } }
+
+/* SOS effects */
+.sos-pulse-border { animation: sosBorder 1.5s ease-in-out infinite; }
+@keyframes sosBorder { 0%,100% { box-shadow: inset 0 0 40px rgba(239,68,68,0.3); } 50% { box-shadow: inset 0 0 80px rgba(239,68,68,0.6); } }
+.glow-red { text-shadow: 0 0 20px rgba(239,68,68,0.3); }
+
+/* SOS Floating button */
+.sos-fab { position: fixed; bottom: 24px; left: 24px; z-index: 5000; width: 60px; height: 60px; border-radius: 50%; background: #EF4444; color: white; border: none; font-size: 20px; cursor: pointer; box-shadow: 0 4px 20px rgba(239,68,68,0.4); transition: all 0.3s; }
+.sos-fab:hover { transform: scale(1.1); box-shadow: 0 6px 30px rgba(239,68,68,0.6); }
+@media (max-width: 768px) { .sos-fab { bottom: 90px; left: 16px; width: 52px; height: 52px; font-size: 18px; } }
+
+/* Search input */
+.search-input { background: #18181B; border: 1px solid #27272A; color: #FAFAFA; border-radius: 10px; padding: 10px 16px 10px 42px; width: 100%; outline: none; transition: border-color 0.2s; }
+.search-input:focus { border-color: #EF4444; }
+.search-input::placeholder { color: #71717A; }
+
+/* Kit checkbox */
+.kit-check { appearance: none; width: 20px; height: 20px; border: 2px solid #3F3F46; border-radius: 6px; cursor: pointer; transition: all 0.2s; flex-shrink: 0; }
+.kit-check:checked { background: #2DD4BF; border-color: #2DD4BF; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 16 16' fill='%2309090B' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3E%3C/svg%3E"); }
+
+/* Symptom checker progress dots */
+.step-dot { width: 10px; height: 10px; border-radius: 50%; background: #3F3F46; transition: all 0.3s; }
+.step-dot.active { background: #EF4444; box-shadow: 0 0 8px rgba(239,68,68,0.5); }
+.step-dot.done { background: #2DD4BF; }
+
+/* Toast notifications */
+#toastContainer > div { padding: 12px 20px; border-radius: 10px; background: #27272A; border: 1px solid #3F3F46; color: #FAFAFA; font-size: 14px; animation: toastIn 0.3s ease, toastOut 0.3s ease 2.7s forwards; max-width: 340px; }
+@keyframes toastIn { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes toastOut { from { opacity: 1; } to { opacity: 0; transform: translateX(40px); } }
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}

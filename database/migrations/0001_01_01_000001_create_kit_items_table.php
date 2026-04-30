@@ -1,0 +1,24 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('kit_items', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->enum('category', ['bandages', 'medications', 'tools', 'other'])->default('other');
+            $table->boolean('is_checked')->default(false);
+            $table->timestamps();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('kit_items');
+    }
+};
