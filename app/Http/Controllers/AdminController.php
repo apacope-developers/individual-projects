@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Doctor;
 use Illuminate\Http\Request;
 
 class AdminController extends Controller
@@ -21,9 +22,9 @@ class AdminController extends Controller
     public function index()
     {
         $users = User::where('is_admin', false)->latest()->get();
-        $adminCount = User::where('is_admin', true)->count();
         $userCount = User::where('is_admin', false)->count();
-        return view('admin', compact('users', 'adminCount', 'userCount'));
+        $adminCount = User::where('is_admin', true)->count();
+        return view('admin.dashboard', compact('users', 'userCount', 'adminCount'));
     }
 
     public function deleteUser(User $user)
@@ -33,6 +34,49 @@ class AdminController extends Controller
         }
         $user->delete();
         return back()->with('success', 'User deleted successfully.');
+    }
+
+    public function storeUser(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:8|confirmed',
+            'is_admin' => 'boolean'
+        ]);
+
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => bcrypt($request->password),
+            'is_admin' => $request->boolean('is_admin', false)
+        ]);
+
+        return back()->with('success', 'User created successfully.');
+    }
+
+    public function updateUser(Request $request, User $user)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'password' => 'nullable|string|min:8|confirmed',
+            'is_admin' => 'boolean'
+        ]);
+
+        $user->update([
+            'name' => $request->name,
+            'email' => $request->email,
+            'is_admin' => $request->boolean('is_admin', false)
+        ]);
+
+        if ($request->filled('password')) {
+            $user->update([
+                'password' => bcrypt($request->password)
+            ]);
+        }
+
+        return back()->with('success', 'User updated successfully.');
     }
 
     // Body Map CRUD
@@ -160,7 +204,6 @@ class AdminController extends Controller
             session(['emergency_contacts' => [
                 ['id' => 'default_1', 'name' => 'Emergency Services', 'phone' => '912', 'type' => 'emergency', 'icon' => 'fa-phone-volume', 'isDefault' => true],
                 ['id' => 'default_2', 'name' => 'Poison Control', 'phone' => '1-800-222-1222', 'type' => 'emergency', 'icon' => 'fa-skull-crossbones', 'isDefault' => true],
-                ['id' => 'custom_1', 'name' => 'Dr. Sarah Mitchell', 'phone' => '555-0142', 'type' => 'medical', 'icon' => 'fa-user-doctor', 'isDefault' => false],
                 ['id' => 'custom_2', 'name' => 'Mom', 'phone' => '555-0198', 'type' => 'personal', 'icon' => 'fa-user', 'isDefault' => false]
             ]]);
         }
@@ -296,5 +339,127 @@ class AdminController extends Controller
         session(['emergency_contacts' => $contacts]);
         
         return redirect()->route('admin.contacts')->with('success', "Force deleted contact $id. Remaining: " . count($contacts));
+    }
+
+    // Doctor Management
+    public function doctorsIndex()
+    {
+        $doctors = Doctor::latest()->get();
+        $stats = [
+            'total' => Doctor::count(),
+            'active' => Doctor::where('status', 'active')->count(),
+            'pending' => Doctor::where('status', 'pending')->count(),
+            'available' => Doctor::where('is_available', true)->count(),
+        ];
+        $users = User::where('is_admin', false)->latest()->get();
+        $userCount = User::where('is_admin', false)->count();
+        $adminCount = User::where('is_admin', true)->count();
+        return view('admin.doctors', compact('doctors', 'stats', 'users', 'userCount', 'adminCount'));
+    }
+
+    public function storeDoctor(Request $request)
+    {
+        // Debug: Log incoming request data
+        \Log::info('Doctor creation attempt', [
+            'request_data' => $request->all(),
+            'method' => $request->method(),
+            'ajax' => $request->ajax(),
+        ]);
+
+        try {
+            $validated = $request->validate([
+                'first_name' => 'required|string|max:255',
+                'last_name' => 'required|string|max:255',
+                'email' => 'required|email|unique:doctors',
+                'phone' => 'required|string|unique:doctors',
+                'whatsapp' => 'nullable|string',
+                'gender' => 'required|in:male,female,other',
+                'date_of_birth' => 'required|date|before:today',
+                'specialty' => 'required|string',
+                'hospital_clinic' => 'required|string',
+                'province' => 'required|in:Kigali,Northern,Southern,Eastern,Western',
+                'district' => 'required|string',
+                'address' => 'required|string',
+                'emergency_contact_name' => 'required|string',
+                'emergency_contact_phone' => 'required|string',
+            ]);
+
+            // Debug: Log validation success
+            \Log::info('Doctor validation passed', ['validated_data' => $validated]);
+
+            // Set default status
+            $validated['status'] = 'pending';
+            $validated['is_available'] = true;
+
+            $doctor = Doctor::create($validated);
+            
+            // Debug: Log creation success
+            \Log::info('Doctor created successfully', ['doctor_id' => $doctor->id]);
+            
+            return back()->with('success', 'Doctor added successfully. They will be reviewed before activation.');
+            
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Debug: Log validation errors
+            \Log::error('Doctor validation failed', [
+                'errors' => $e->errors(),
+                'request_data' => $request->all()
+            ]);
+            throw $e;
+            
+        } catch (\Exception $e) {
+            // Debug: Log general errors
+            \Log::error('Doctor creation failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'request_data' => $request->all()
+            ]);
+            
+            return back()->with('error', 'Failed to add doctor: ' . $e->getMessage());
+        }
+    }
+
+    public function updateDoctor(Request $request, Doctor $doctor)
+    {
+        $validated = $request->validate([
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'email' => 'required|email|unique:doctors,email,' . $doctor->id,
+            'phone' => 'required|string|unique:doctors,phone,' . $doctor->id,
+            'whatsapp' => 'nullable|string',
+            'gender' => 'required|in:male,female,other',
+            'date_of_birth' => 'required|date|before:today',
+            'specialty' => 'required|string',
+            'hospital_clinic' => 'required|string',
+            'province' => 'required|in:Kigali,Northern,Southern,Eastern,Western',
+            'district' => 'required|string',
+            'address' => 'required|string',
+            'status' => 'required|in:pending,verified,active,inactive',
+            'is_available' => 'required|boolean',
+            'working_hours' => 'nullable|array',
+            'emergency_contact_name' => 'required|string',
+            'emergency_contact_phone' => 'required|string',
+        ]);
+
+        $doctor->update($validated);
+        return back()->with('success', 'Doctor updated successfully.');
+    }
+
+    public function deleteDoctor(Doctor $doctor)
+    {
+        $doctor->delete();
+        return back()->with('success', 'Doctor deleted successfully.');
+    }
+
+    public function verifyDoctor(Doctor $doctor)
+    {
+        $doctor->update(['status' => 'active']);
+        return back()->with('success', 'Doctor verified and activated successfully.');
+    }
+
+    public function toggleDoctorAvailability(Doctor $doctor)
+    {
+        $doctor->update(['is_available' => !$doctor->is_available]);
+        $status = $doctor->is_available ? 'available' : 'unavailable';
+        return back()->with('success', "Doctor marked as {$status}.");
     }
 }

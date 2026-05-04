@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="csrf-token" content="{{ csrf_token() }}">
 <title>Admin Panel — LifeLine</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -51,8 +52,8 @@ h1,h2,h3,h4,h5,h6{font-family:'Space Grotesk',sans-serif}
       <a href="{{ route('admin.body-map') }}" class="sidebar-link"><i class="fa-solid fa-person w-5 text-center"></i><span>Body Map</span></a>
       <a href="{{ route('admin.symptom-checker') }}" class="sidebar-link"><i class="fa-solid fa-stethoscope w-5 text-center"></i><span>Symptom Checker</span></a>
       <a href="{{ route('admin.first-aid-guide') }}" class="sidebar-link"><i class="fa-solid fa-book-medical w-5 text-center"></i><span>First Aid Guide</span></a>
-      <a href="{{ route('admin.kit-inventory') }}" class="sidebar-link"><i class="fa-solid fa-kit-medical w-5 text-center"></i><span>Kit Inventory</span></a>
-      <a href="{{ route('admin.contacts') }}" class="sidebar-link"><i class="fa-solid fa-phone-volume w-5 text-center"></i><span>Emergency Contacts</span></a>
+            <a href="{{ route('admin.contacts') }}" class="sidebar-link"><i class="fa-solid fa-phone-volume w-5 text-center"></i><span>Emergency Contacts</span></a>
+      <a href="{{ route('admin.doctors') }}" class="sidebar-link"><i class="fa-solid fa-user-doctor w-5 text-center"></i><span>Rwanda Doctors</span></a>
       
       <div class="px-2 py-2 mt-2">
         <p class="text-xs text-zinc-500 font-medium mb-2">SYSTEM</p>
@@ -79,104 +80,7 @@ h1,h2,h3,h4,h5,h6{font-family:'Space Grotesk',sans-serif}
 
   <!-- Main -->
   <main class="flex-1 admin-main ml-56 p-6 md:p-8">
-    <!-- Header -->
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-      <div>
-        <h2 class="text-2xl font-bold">Admin Dashboard</h2>
-        <p class="text-zinc-500 text-sm">Manage users and monitor system activity</p>
-      </div>
-      @if(session('success'))
-        <div class="bg-green-600/10 border border-green-600/20 rounded-lg px-4 py-2 text-sm text-green-400">
-          <i class="fa-solid fa-check-circle mr-2"></i>{{ session('success') }}
-        </div>
-      @endif
-    </div>
-
-    <!-- Stats -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-      <div class="stat-card">
-        <div class="flex items-center justify-between mb-2">
-          <p class="text-zinc-500 text-xs">Total Users</p>
-          <div class="w-8 h-8 rounded-lg bg-teal-600/20 flex items-center justify-center"><i class="fa-solid fa-users text-teal-400 text-xs"></i></div>
-        </div>
-        <p class="text-3xl font-bold" style="color:#2DD4BF">{{ $userCount }}</p>
-      </div>
-      <div class="stat-card">
-        <div class="flex items-center justify-between mb-2">
-          <p class="text-zinc-500 text-xs">Admin Accounts</p>
-          <div class="w-8 h-8 rounded-lg bg-red-600/20 flex items-center justify-center"><i class="fa-solid fa-user-shield text-red-400 text-xs"></i></div>
-        </div>
-        <p class="text-3xl font-bold" style="color:#EF4444">{{ $adminCount }}</p>
-      </div>
-      <div class="stat-card">
-        <div class="flex items-center justify-between mb-2">
-          <p class="text-zinc-500 text-xs">System Status</p>
-          <div class="w-8 h-8 rounded-lg bg-green-600/20 flex items-center justify-center"><i class="fa-solid fa-circle-check text-green-400 text-xs"></i></div>
-        </div>
-        <p class="text-lg font-bold text-green-400">Online</p>
-      </div>
-      <div class="stat-card">
-        <div class="flex items-center justify-between mb-2">
-          <p class="text-zinc-500 text-xs">Database</p>
-          <div class="w-8 h-8 rounded-lg bg-blue-600/20 flex items-center justify-center"><i class="fa-solid fa-database text-blue-400 text-xs"></i></div>
-        </div>
-        <p class="text-lg font-bold text-blue-400">MySQL</p>
-      </div>
-    </div>
-
-    <!-- Users Table -->
-    <div class="bg-[#18181B] border border-zinc-800 rounded-xl overflow-hidden">
-      <div class="p-4 border-b border-zinc-800 flex items-center justify-between">
-        <h3 class="font-semibold text-sm"><i class="fa-solid fa-users mr-2 text-zinc-400"></i>Registered Users</h3>
-        <span class="badge badge-teal">{{ $users->count() }} total</span>
-      </div>
-
-      @if($users->isEmpty())
-        <div class="p-12 text-center">
-          <i class="fa-solid fa-users-slash text-3xl text-zinc-700 mb-3"></i>
-          <p class="text-zinc-500">No registered users yet</p>
-        </div>
-      @else
-        <div class="overflow-x-auto">
-          <table class="w-full">
-            <thead>
-              <tr class="border-b border-zinc-800 text-left">
-                <th class="px-4 py-3 text-xs text-zinc-400 font-medium">User</th>
-                <th class="px-4 py-3 text-xs text-zinc-400 font-medium">Email</th>
-                <th class="px-4 py-3 text-xs text-zinc-400 font-medium">Joined</th>
-                <th class="px-4 py-3 text-xs text-zinc-400 font-medium text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              @foreach($users as $user)
-              <tr class="table-row">
-                <td class="px-4 py-3">
-                  <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-user text-zinc-500 text-xs"></i></div>
-                    <div>
-                      <p class="text-sm font-medium">{{ $user->name }}</p>
-                      <p class="text-[11px] text-zinc-600">ID: {{ $user->id }}</p>
-                    </div>
-                  </div>
-                </td>
-                <td class="px-4 py-3 text-sm text-zinc-400">{{ $user->email }}</td>
-                <td class="px-4 py-3 text-xs text-zinc-500">{{ $user->created_at->format('M j, Y') }}</td>
-                <td class="px-4 py-3 text-right">
-                  <form method="POST" action="/admin/users/{{ $user->id }}" onsubmit="return confirm('Are you sure you want to delete this user?')">
-                    @csrf
-                    <button type="submit" class="btn btn-danger text-xs px-3 py-1.5">
-                      <i class="fa-solid fa-trash-can"></i> Delete
-                    </button>
-                  </form>
-                </td>
-              </tr>
-              @endforeach
-            </tbody>
-          </table>
-        </div>
-      @endif
-    </div>
-
+    @yield('content')
     <p class="text-zinc-600 text-xs mt-6 text-center">&copy; 2025 LifeLine Emergency First Aid System — Admin Panel</p>
   </main>
 </div>

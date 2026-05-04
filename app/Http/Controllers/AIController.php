@@ -52,7 +52,7 @@ class AIController extends Controller
         ]);
 
         try {
-            $suggestions = $this->aiService->getEmergencySuggestions($request->query);
+            $suggestions = $this->aiService->getEmergencySuggestions($request->input('query'));
             
             return response()->json([
                 'success' => true,

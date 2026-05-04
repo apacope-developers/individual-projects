@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use Gemini\Client as GeminiClient;
+use Gemini;
 use OpenAI;
 use Illuminate\Support\Facades\Log;
 
@@ -28,7 +29,7 @@ class MultiAIService
         $geminiApiKey = config('services.gemini.api_key');
         if ($geminiApiKey) {
             try {
-                $this->geminiClient = new GeminiClient($geminiApiKey);
+                $this->geminiClient = Gemini::client($geminiApiKey);
                 $this->availableProviders[] = 'gemini';
                 Log::info('Gemini provider initialized');
             } catch (\Exception $e) {

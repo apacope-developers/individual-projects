@@ -4,6 +4,7 @@ namespace App\Services;
 
 use Gemini\Client;
 use Gemini\Enums\Role;
+use Gemini;
 use Illuminate\Support\Facades\Log;
 
 class GoogleAIService
@@ -19,7 +20,7 @@ class GoogleAIService
             $this->client = null;
         } else {
             try {
-                $this->client = new Client($this->apiKey);
+                $this->client = Gemini::client($this->apiKey);
             } catch (\Exception $e) {
                 Log::error('Failed to initialize Gemini client: ' . $e->getMessage());
                 $this->client = null;

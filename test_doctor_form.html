@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Doctor Form</title>
+</head>
+<body>
+    <h2>Test Doctor Creation Form</h2>
+    
+    <form method="POST" action="http://127.0.0.1:8000/admin/doctors" target="_blank">
+        <input type="hidden" name="_token" value="csrf-token-here">
+        
+        <h3>Personal Information</h3>
+        First Name: <input type="text" name="first_name" value="Test" required><br><br>
+        Last Name: <input type="text" name="last_name" value="Doctor" required><br><br>
+        Email: <input type="email" name="email" value="test999@example.com" required><br><br>
+        Phone: <input type="text" name="phone" value="250999999999" required><br><br>
+        WhatsApp: <input type="text" name="whatsapp" value=""><br><br>
+        Gender: 
+        <select name="gender" required>
+            <option value="other" selected>Other</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+        </select><br><br>
+        Date of Birth: <input type="date" name="date_of_birth" value="1980-01-01" required><br><br>
+        
+        <h3>Professional Information</h3>
+        Specialty: 
+        <select name="specialty" required>
+            <option value="General Practice" selected>General Practice</option>
+        </select><br><br>
+        Hospital/Clinic: <input type="text" name="hospital_clinic" value="Test Hospital" required><br><br>
+        
+        <h3>Location Information</h3>
+        Province: 
+        <select name="province" required>
+            <option value="Kigali" selected>Kigali</option>
+        </select><br><br>
+        District: <input type="text" name="district" value="Kigali" required><br><br>
+        Address: <input type="text" name="address" value="Test Address" required><br><br>
+        
+        <h3>Emergency Contact</h3>
+        Emergency Contact Name: <input type="text" name="emergency_contact_name" value="Emergency Contact" required><br><br>
+        Emergency Contact Phone: <input type="text" name="emergency_contact_phone" value="250123456789" required><br><br>
+        
+        <button type="submit">Create Doctor</button>
+    </form>
+    
+    <p><strong>Note:</strong> You'll need to get the CSRF token from the admin page first.</p>
+    
+    <script>
+        // Instructions for getting CSRF token
+        console.log('To get CSRF token:');
+        console.log('1. Open http://127.0.0.1:8000/admin in browser');
+        console.log('2. Open Developer Tools (F12)');
+        console.log('3. Go to Console');
+        console.log('4. Type: document.querySelector("meta[name=csrf-token]").getAttribute("content")');
+        console.log('5. Copy the token and paste it into the form above');
+    </script>
+</body>
+</html>

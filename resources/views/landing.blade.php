@@ -22,8 +22,6 @@ h1,h2,h3,h4,h5,h6{font-family:'Space Grotesk',sans-serif}
 @keyframes pulseRing{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.4)}70%{box-shadow:0 0 0 15px rgba(239,68,68,0)}}
 .float-animation{animation:float 6s ease-in-out infinite}
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-20px)}}
-.scroll-indicator{animation:bounce 2s infinite}
-@keyframes bounce{0%,20%,50%,80%,100%{transform:translateY(0)}40%{transform:translateY(-10px)}60%{transform:translateY(-5px)}}
 .feature-icon{transition:all 0.3s ease}
 .feature-card:hover .feature-icon{transform:scale(1.1) rotate(5deg)}
 .video-overlay{position:absolute;inset:0;background:linear-gradient(to bottom,transparent 0%,rgba(0,0,0,0.7) 100%);pointer-events:none}
@@ -76,12 +74,8 @@ h1,h2,h3,h4,h5,h6{font-family:'Space Grotesk',sans-serif}
 <section class="min-h-screen flex items-center justify-center px-4 pt-16 relative">
   
   <div class="max-w-7xl mx-auto text-center relative z-10">
-    <div class="mb-8 float-animation">
-      <div class="inline-flex items-center gap-2 px-4 py-2 bg-red-600/20 backdrop-blur-sm border border-red-600/30 rounded-full mb-6">
-        <i class="fa-solid fa-shield-halved text-red-400"></i>
-        <span class="text-sm text-red-300">Emergency First Aid System</span>
-      </div>
-      <h1 class="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-white to-zinc-300 bg-clip-text text-transparent">
+    <div class="mb-8">
+            <h1 class="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-white to-zinc-300 bg-clip-text text-transparent">
         Your Lifeline in
         <span class="text-red-500">Critical Moments</span>
       </h1>
@@ -96,9 +90,6 @@ h1,h2,h3,h4,h5,h6{font-family:'Space Grotesk',sans-serif}
     <div class="flex flex-col sm:flex-row gap-4 justify-center mb-12">
       <a href="{{ route('register') }}" class="px-8 py-4 bg-red-600 hover:bg-red-500 rounded-xl font-semibold transition-all transform hover:scale-105 flex items-center justify-center gap-2">
         <i class="fa-solid fa-rocket"></i> Get Started Free
-      </a>
-      <a href="#how-it-works" class="px-8 py-4 bg-zinc-800/80 backdrop-blur-sm hover:bg-zinc-700 rounded-xl font-semibold transition-all border border-zinc-700">
-        <i class="fa-solid fa-play-circle mr-2"></i> Watch Demo
       </a>
     </div>
 
@@ -126,7 +117,7 @@ h1,h2,h3,h4,h5,h6{font-family:'Space Grotesk',sans-serif}
       </div>
     </div>
   </div>
-  <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 scroll-indicator">
+  <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2">
     <i class="fa-solid fa-chevron-down text-zinc-500"></i>
   </div>
 </section>
@@ -239,7 +230,7 @@ h1,h2,h3,h4,h5,h6{font-family:'Space Grotesk',sans-serif}
       
       <div class="relative">
         <div class="bg-[#18181B]/80 backdrop-blur-xl border border-zinc-800 rounded-2xl p-8 text-center card-hover">
-          <div class="w-16 h-16 rounded-full bg-red-600 flex items-center justify-center mx-auto mb-6 float-animation">
+          <div class="w-16 h-16 rounded-full bg-red-600 flex items-center justify-center mx-auto mb-6">
             <span class="text-2xl font-bold">1</span>
           </div>
           <h3 class="text-xl font-semibold mb-3">Assess Situation</h3>
@@ -253,7 +244,7 @@ h1,h2,h3,h4,h5,h6{font-family:'Space Grotesk',sans-serif}
 
       <div class="relative">
         <div class="bg-[#18181B]/80 backdrop-blur-xl border border-zinc-800 rounded-2xl p-8 text-center card-hover">
-          <div class="w-16 h-16 rounded-full bg-teal-600 flex items-center justify-center mx-auto mb-6 float-animation" style="animation-delay: 0.2s">
+          <div class="w-16 h-16 rounded-full bg-teal-600 flex items-center justify-center mx-auto mb-6">
             <span class="text-2xl font-bold">2</span>
           </div>
           <h3 class="text-xl font-semibold mb-3">Get Guidance</h3>
@@ -267,7 +258,7 @@ h1,h2,h3,h4,h5,h6{font-family:'Space Grotesk',sans-serif}
 
       <div class="relative">
         <div class="bg-[#18181B]/80 backdrop-blur-xl border border-zinc-800 rounded-2xl p-8 text-center card-hover">
-          <div class="w-16 h-16 rounded-full bg-orange-600 flex items-center justify-center mx-auto mb-6 float-animation" style="animation-delay: 0.4s">
+          <div class="w-16 h-16 rounded-full bg-orange-600 flex items-center justify-center mx-auto mb-6">
             <span class="text-2xl font-bold">3</span>
           </div>
           <h3 class="text-xl font-semibold mb-3">Take Action</h3>
@@ -428,6 +419,103 @@ h1,h2,h3,h4,h5,h6{font-family:'Space Grotesk',sans-serif}
     </div>
   </div>
 </footer>
+
+<!-- Video Demo Modal -->
+<div id="videoModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 hidden">
+  <div class="bg-[#18181B] border border-zinc-800 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+    <!-- Modal Header -->
+    <div class="flex items-center justify-between p-6 border-b border-zinc-800">
+      <div>
+        <h3 class="text-2xl font-bold text-white mb-2">LifeLine Demo Video</h3>
+        <p class="text-zinc-400">See how LifeLine helps in emergency situations</p>
+      </div>
+      <button id="closeVideoModal" class="text-zinc-400 hover:text-white transition-colors">
+        <i class="fa-solid fa-times text-xl"></i>
+      </button>
+    </div>
+    
+    <!-- Video Container -->
+    <div class="relative aspect-video bg-black">
+      <!-- YouTube Embed Placeholder -->
+      <div id="videoContainer" class="w-full h-full flex items-center justify-center">
+        <div class="text-center">
+          <div class="mb-8">
+            <i class="fa-solid fa-play-circle text-6xl text-red-500 mb-4"></i>
+            <h4 class="text-xl font-semibold text-white mb-2">LifeLine Demo Video</h4>
+            <p class="text-zinc-400 mb-6">Watch how LifeLine saves lives in critical moments</p>
+          </div>
+          
+          <!-- Video Content Preview -->
+          <div class="bg-[#09090B] border border-zinc-800 rounded-xl p-6 max-w-2xl mx-auto">
+            <h5 class="text-lg font-semibold text-white mb-4">What you'll see in this demo:</h5>
+            <div class="space-y-3 text-left">
+              <div class="flex items-start gap-3">
+                <i class="fa-solid fa-check-circle text-green-400 mt-1"></i>
+                <div>
+                  <strong class="text-white">Emergency Assessment:</strong>
+                  <p class="text-sm text-zinc-400">Quick symptom checking and AI-powered triage</p>
+                </div>
+              </div>
+              <div class="flex items-start gap-3">
+                <i class="fa-solid fa-check-circle text-green-400 mt-1"></i>
+                <div>
+                  <strong class="text-white">Interactive Body Map:</strong>
+                  <p class="text-sm text-zinc-400">Click-to-explore emergency guidance</p>
+                </div>
+              </div>
+              <div class="flex items-start gap-3">
+                <i class="fa-solid fa-check-circle text-green-400 mt-1"></i>
+                <div>
+                  <strong class="text-white">Step-by-Step First Aid:</strong>
+                  <p class="text-sm text-zinc-400">Clear visual instructions for emergencies</p>
+                </div>
+              </div>
+              <div class="flex items-start gap-3">
+                <i class="fa-solid fa-check-circle text-green-400 mt-1"></i>
+                <div>
+                  <strong class="text-white">CPR Guidance:</strong>
+                  <p class="text-sm text-zinc-400">Real-time metronome and audio cues</p>
+                </div>
+              </div>
+              <div class="flex items-start gap-3">
+                <i class="fa-solid fa-check-circle text-green-400 mt-1"></i>
+                <div>
+                  <strong class="text-white">Emergency Contacts:</strong>
+                  <p class="text-sm text-zinc-400">One-tap emergency services access</p>
+                </div>
+              </div>
+            </div>
+            
+            <div class="mt-6 p-4 bg-red-600/10 border border-red-600/20 rounded-lg">
+              <p class="text-sm text-red-300">
+                <i class="fa-solid fa-info-circle mr-2"></i>
+                Demo video coming soon! This will showcase real emergency scenarios.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Modal Footer -->
+    <div class="p-6 border-t border-zinc-800 bg-[#09090B]/50">
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="text-sm text-zinc-400">
+          <i class="fa-solid fa-clock mr-2"></i>
+          Duration: ~3 minutes
+        </div>
+        <div class="flex gap-3">
+          <button id="closeVideoModalFooter" class="px-6 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg transition-colors">
+            Close
+          </button>
+          <a href="{{ route('register') }}" class="px-6 py-2 bg-red-600 hover:bg-red-500 rounded-lg transition-colors text-white font-medium">
+            Try LifeLine Now
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script>
 // Emergency Database
@@ -804,6 +892,48 @@ window.addEventListener('scroll', function() {
   } else {
     nav.classList.remove('bg-[#09090B]');
   }
+});
+
+// Video Modal functionality
+document.addEventListener('DOMContentLoaded', function() {
+  const openVideoModal = document.getElementById('openVideoModal');
+  const closeVideoModal = document.getElementById('closeVideoModal');
+  const closeVideoModalFooter = document.getElementById('closeVideoModalFooter');
+  const videoModal = document.getElementById('videoModal');
+
+  if (!openVideoModal || !closeVideoModal || !closeVideoModalFooter || !videoModal) {
+    return;
+  }
+
+  // Open video modal
+  openVideoModal.addEventListener('click', function(e) {
+    e.preventDefault();
+    videoModal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  });
+
+  // Close video modal
+  function closeModal() {
+    videoModal.classList.add('hidden');
+    document.body.style.overflow = 'auto';
+  }
+
+  closeVideoModal.addEventListener('click', closeModal);
+  closeVideoModalFooter.addEventListener('click', closeModal);
+
+  // Close modal when clicking outside
+  videoModal.addEventListener('click', function(e) {
+    if (e.target === videoModal) {
+      closeModal();
+    }
+  });
+
+  // Close modal with Escape key
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && !videoModal.classList.contains('hidden')) {
+      closeModal();
+    }
+  });
 });
 </script>
 

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI API Test</title>
+</head>
+<body>
+    <h1>AI Emergency Search API Test</h1>
+    
+    <h2>Test First Aid Recommendation</h2>
+    <button onclick="testFirstAid()">Test First Aid API</button>
+    <div id="firstAidResult"></div>
+    
+    <h2>Test Emergency Suggestions</h2>
+    <button onclick="testSuggestions()">Test Suggestions API</button>
+    <div id="suggestionsResult"></div>
+    
+    <script>
+        async function testFirstAid() {
+            try {
+                const response = await fetch('/api/ai/first-aid', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        symptoms: 'chest pain and difficulty breathing'
+                    })
+                });
+                
+                const data = await response.json();
+                document.getElementById('firstAidResult').innerHTML = 
+                    '<h3>Response:</h3><pre>' + JSON.stringify(data, null, 2) + '</pre>';
+            } catch (error) {
+                document.getElementById('firstAidResult').innerHTML = 
+                    '<h3>Error:</h3><pre>' + error.message + '</pre>';
+            }
+        }
+        
+        async function testSuggestions() {
+            try {
+                const response = await fetch('/api/ai/suggestions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        query: 'chest pain'
+                    })
+                });
+                
+                const data = await response.json();
+                document.getElementById('suggestionsResult').innerHTML = 
+                    '<h3>Response:</h3><pre>' + JSON.stringify(data, null, 2) + '</pre>';
+            } catch (error) {
+                document.getElementById('suggestionsResult').innerHTML = 
+                    '<h3>Error:</h3><pre>' + error.message + '</pre>';
+            }
+        }
+    </script>
+</body>
+</html>
