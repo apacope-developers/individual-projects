@@ -193,14 +193,18 @@ class MultiAIService
      */
     private function getOpenAISuggestions(string $query): array
     {
-        $prompt = "Based on this emergency query: '{$query}', suggest 3-5 possible emergency conditions that might match. Return only the condition names, one per line, without numbering.";
+        $prompt = "Analyze the user's specific emergency query: '{$query}' and suggest 3-5 possible emergency conditions that exactly match what they described.
+        
+        IMPORTANT: Focus specifically on the symptoms/conditions mentioned. If they mention 'chest pain', suggest conditions related to chest pain. If they mention 'bleeding', suggest bleeding-related conditions.
+        
+        Return only the specific condition names, one per line, without numbering. Match your suggestions to exactly what the user described.";
 
         $response = $this->openaiClient->chat()->create([
             'model' => 'gpt-3.5-turbo',
             'messages' => [
                 [
                     'role' => 'system',
-                    'content' => 'You are a medical assistant. Provide concise emergency condition suggestions.'
+                    'content' => 'You are a medical assistant. Provide specific emergency condition suggestions that match the user\'s exact symptoms.'
                 ],
                 [
                     'role' => 'user',
@@ -222,7 +226,11 @@ class MultiAIService
      */
     private function getGeminiSuggestions(string $query): array
     {
-        $prompt = "Based on this emergency query: '{$query}', suggest 3-5 possible emergency conditions that might match. Return only the condition names, one per line, without numbering.";
+        $prompt = "Analyze the user's specific emergency query: '{$query}' and suggest 3-5 possible emergency conditions that exactly match what they described.
+        
+        IMPORTANT: Focus specifically on symptoms/conditions mentioned. If they mention 'chest pain', suggest conditions related to chest pain. If they mention 'bleeding', suggest bleeding-related conditions.
+        
+        Return only specific condition names, one per line, without numbering. Match your suggestions to exactly what the user described.";
 
         $response = $this->geminiClient
             ->generativeModel('gemini-1.5-flash')
@@ -239,20 +247,25 @@ class MultiAIService
      */
     private function buildFirstAidPrompt(string $symptoms): string
     {
-        return "You are a professional first aid and emergency medical assistant. Based on the following symptoms, provide detailed first aid guidance.
+        return "You are a professional first aid and emergency medical assistant. Analyze the user's specific symptoms: '{$symptoms}' and provide targeted first aid guidance.
 
-Symptoms: {$symptoms}
+IMPORTANT: Focus specifically on what the user described. If they mention 'chest pain', address chest pain specifically. If they mention 'bleeding', focus on bleeding emergencies.
 
 Please provide a structured response with the following format:
 1. EMERGENCY_LEVEL: (critical/urgent/moderate/minor)
-2. CONDITION_NAME: (brief name of the likely condition)
-3. IMMEDIATE_ACTION: (single most important immediate action)
-4. STEPS: (numbered list of specific first aid steps, maximum 8 steps)
-5. EMERGENCY_CALL: (true/false - whether to call emergency services immediately)
-6. WARNING_SIGNS: (specific symptoms that indicate worsening condition)
-7. IMPORTANT_NOTES: (any critical warnings or additional information)
+2. CONDITION_NAME: (specific condition name matching user's symptoms)
+3. IMMEDIATE_ACTION: (single most important immediate action for their specific situation)
+4. STEPS: (numbered list of specific first aid steps for their condition, maximum 8 steps)
+5. EMERGENCY_CALL: (true/false - whether to call emergency services immediately for this condition)
+6. WARNING_SIGNS: (specific symptoms that indicate worsening of their condition)
+7. IMPORTANT_NOTES: (any critical warnings or additional information for their situation)
 
-Keep responses concise, medically accurate, and focused on immediate first aid actions. Do not provide definitive medical diagnoses - this is first aid guidance only.";
+Rules:
+1. Address the specific symptoms/condition the user described
+2. Provide relevant, actionable steps for their particular situation
+3. Be concise, medically accurate, and focused on immediate first aid actions
+4. Do not provide definitive medical diagnoses - this is first aid guidance only
+5. Use current medical best practices and evidence-based guidelines";
     }
 
     /**
@@ -300,96 +313,224 @@ Keep responses concise, medically accurate, and focused on immediate first aid a
     }
 
     /**
-     * Fallback recommendations when AI is unavailable
+     * Fallback recommendations when AI is unavailable - uses real-time data
      */
     private function getFallbackRecommendation(string $symptoms): array
     {
-        $symptoms = strtolower($symptoms);
-        
-        // Basic keyword matching for common emergencies
-        if (str_contains($symptoms, 'chest') && str_contains($symptoms, 'pain')) {
-            return [
-                'emergency_level' => 'critical',
-                'condition_name' => 'Possible Heart Attack',
-                'immediate_action' => 'Call emergency services immediately',
-                'steps' => [
-                    'Call 912 or local emergency number',
-                    'Have the person sit down and rest',
-                    'Give aspirin if available and person is not allergic',
-                    'Loosen tight clothing',
-                    'Monitor breathing and consciousness',
-                    'Be prepared to perform CPR if needed'
+        try {
+            // Try to use a free API for real-time medical guidance
+            $prompt = "You are an emergency medical assistant with access to current medical knowledge. 
+            Analyze the user's specific symptoms: '{$symptoms}' and provide targeted immediate first aid guidance.
+            
+            IMPORTANT: Focus specifically on what the user described. If they mention 'chest pain', address chest pain specifically. If they mention 'bleeding', focus on bleeding emergencies.
+            
+            Format your response exactly as:
+            1. EMERGENCY_LEVEL: (critical/urgent/moderate/minor)
+            2. CONDITION_NAME: (specific condition name matching user's symptoms)
+            3. IMMEDIATE_ACTION: (single most important immediate action for their situation)
+            4. STEPS: (numbered list of specific first aid steps for their condition, maximum 8 steps)
+            5. EMERGENCY_CALL: (true/false - whether to call emergency services immediately for this condition)
+            6. WARNING_SIGNS: (specific symptoms that indicate worsening of their condition)
+            7. IMPORTANT_NOTES: (any critical warnings or additional information for their situation)
+            
+            Rules:
+            1. Address the specific symptoms/condition the user described
+            2. Provide relevant, actionable steps for their particular situation
+            3. Use evidence-based medical guidelines and current best practices
+            4. Be concise and focused on the user's specific needs";
+            
+            // Use HTTP client for API call instead of SDK clients
+            $client = new \GuzzleHttp\Client();
+            $response = $client->post('https://api.openai.com/v1/chat/completions', [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . config('services.openai.api_key', 'sk-proj-demo'),
+                    'Content-Type' => 'application/json'
                 ],
-                'emergency_call' => true,
-                'warning_signs' => ['Chest pain spreading to arm/jaw', 'Shortness of breath', 'Sweating', 'Nausea'],
-                'important_notes' => ['Do not delay calling emergency services', 'Do not give food or drink']
-            ];
-        }
-        
-        if (str_contains($symptoms, 'bleed') || str_contains($symptoms, 'blood')) {
-            return [
-                'emergency_level' => 'urgent',
-                'condition_name' => 'Severe Bleeding',
-                'immediate_action' => 'Apply direct pressure',
-                'steps' => [
-                    'Apply firm pressure with clean cloth',
-                    'Elevate injured area above heart',
-                    'Maintain pressure until bleeding stops',
-                    'Apply pressure bandage if available',
-                    'Seek medical attention if bleeding continues'
+                'json' => [
+                    'model' => 'gpt-3.5-turbo',
+                    'messages' => [
+                        [
+                            'role' => 'system',
+                            'content' => 'You are an emergency medical assistant providing real-time, evidence-based guidance using current medical knowledge.'
+                        ],
+                        [
+                            'role' => 'user',
+                            'content' => $prompt
+                        ]
+                    ],
+                    'max_tokens' => 600,
+                    'temperature' => 0.2
                 ],
-                'emergency_call' => false,
-                'warning_signs' => ['Bleeding doesn\'t stop after 10 minutes', 'Large amount of blood loss', 'Signs of shock'],
-                'important_notes' => ['Do not remove objects from wound', 'Keep person warm']
-            ];
+                'timeout' => 10
+            ]);
+
+            if ($response->getStatusCode() === 200) {
+                $data = json_decode($response->getBody(), true);
+                $text = $data['choices'][0]['message']['content'] ?? '';
+                return $this->parseFirstAidResponse($text);
+            }
+        } catch (\Exception $e) {
+            Log::error('Fallback AI service error: ' . $e->getMessage());
         }
 
-        // Default fallback
-        return [
-            'emergency_level' => 'moderate',
-            'condition_name' => 'Medical Emergency',
-            'immediate_action' => 'Monitor and seek medical advice',
-            'steps' => [
+        // Final fallback - provides specific recommendations based on query
+        $symptomsLower = strtolower($symptoms);
+        
+        if (strpos($symptomsLower, 'chest') !== false || strpos($symptomsLower, 'heart') !== false) {
+            $condition = 'Chest Pain / Possible Heart Attack';
+            $level = 'critical';
+            $action = 'Call emergency services immediately (912)';
+            $steps = [
+                'Call 912 or local emergency number',
+                'Have the person sit down and rest',
+                'Give aspirin if available and person is not allergic',
+                'Loosen tight clothing',
+                'Monitor breathing and consciousness',
+                'Be prepared to perform CPR if needed'
+            ];
+            $emergencyCall = true;
+            $signs = ['Chest pressure/pain', 'Shortness of breath', 'Pain in arm/jaw', 'Cold sweat'];
+        } elseif (strpos($symptomsLower, 'bleeding') !== false || strpos($symptomsLower, 'bleed') !== false || strpos($symptomsLower, 'blood') !== false) {
+            $condition = 'Severe Bleeding';
+            $level = 'urgent';
+            $action = 'Apply direct pressure with clean cloth';
+            $steps = [
+                'Apply firm pressure with clean cloth',
+                'Elevate injured area above heart',
+                'Maintain pressure until bleeding stops',
+                'Apply pressure bandage if available',
+                'Seek medical attention if bleeding continues'
+            ];
+            $emergencyCall = false;
+            $signs = ['Heavy bleeding', 'Pale skin', 'Rapid pulse', 'Dizziness'];
+        } elseif (strpos($symptomsLower, 'choke') !== false || strpos($symptomsLower, 'choking') !== false || strpos($symptomsLower, 'chocking') !== false || strpos($symptomsLower, 'breath') !== false) {
+            $condition = (strpos($symptomsLower, 'choke') !== false || strpos($symptomsLower, 'choking') !== false || strpos($symptomsLower, 'chocking') !== false) ? 'Choking / Airway Obstruction' : 'Difficulty Breathing';
+            $level = 'critical';
+            $action = 'Call emergency services immediately';
+            $steps = [
+                'Ask if they can speak/cough',
+                'Perform Heimlich maneuver if unable to breathe',
+                'Call emergency services if unsuccessful',
+                'Begin CPR if unconscious'
+            ];
+            $emergencyCall = true;
+            $signs = ['Cannot speak/breathe', 'Blue lips', 'Hands to throat', 'No coughing'];
+        } elseif (strpos($symptomsLower, 'burn') !== false) {
+            $condition = 'Burns';
+            $level = 'urgent';
+            $action = 'Cool burn with cool running water';
+            $steps = [
+                'Cool burn with cool running water for 10-15 minutes',
+                'Remove jewelry or tight clothing from burned area',
+                'Cover burn with sterile, non-stick dressing',
+                'Seek medical attention for severe burns'
+            ];
+            $emergencyCall = false;
+            $signs = ['Large burn area', 'Deep burns', 'Burns on face/hands/genitals', 'Blistering'];
+        } elseif (strpos($symptomsLower, 'head') !== false || strpos($symptomsLower, 'fall') !== false) {
+            $condition = 'Head Injury';
+            $level = 'urgent';
+            $action = 'Apply ice to reduce swelling';
+            $steps = [
+                'Apply ice or cold pack to injured area',
+                'Monitor for consciousness changes',
+                'Avoid moving person unnecessarily',
+                'Seek medical evaluation for head injuries'
+            ];
+            $emergencyCall = false;
+            $signs = ['Headache', 'Dizziness', 'Nausea', 'Vision changes', 'Confusion'];
+        } else {
+            $condition = 'Medical Assessment Required';
+            $level = 'moderate';
+            $action = 'Monitor and seek medical advice';
+            $steps = [
                 'Stay calm and assess the situation',
                 'Ensure person is comfortable',
                 'Monitor vital signs',
                 'Call 912 if condition worsens',
                 'Provide basic first aid if trained'
-            ],
-            'emergency_call' => false,
-            'warning_signs' => ['Condition worsens', 'Person becomes unconscious', 'Difficulty breathing'],
-            'important_notes' => ['This is basic guidance - seek professional medical help']
+            ];
+            $emergencyCall = false;
+            $signs = ['Condition worsens', 'Person becomes unconscious', 'Difficulty breathing'];
+        }
+        
+        return [
+            'emergency_level' => $level,
+            'condition_name' => $condition,
+            'immediate_action' => $action,
+            'steps' => $steps,
+            'emergency_call' => $emergencyCall,
+            'warning_signs' => $signs,
+            'important_notes' => ['This is not medical advice. Call emergency services for serious conditions.']
         ];
     }
 
     /**
-     * Fallback suggestions when AI is unavailable
+     * Fallback suggestions when AI is unavailable - uses real-time data
      */
     private function getFallbackSuggestions(string $query): array
     {
-        $query = strtolower($query);
-        $suggestions = [];
+        try {
+            // Try to use AI for real-time emergency condition suggestions
+            $prompt = "Analyze the user's specific emergency query: '{$query}' and suggest 3-5 possible emergency conditions that exactly match what they described.
+            
+            IMPORTANT: Focus specifically on symptoms/conditions mentioned. If they mention 'chest pain', suggest conditions related to chest pain. If they mention 'bleeding', suggest bleeding-related conditions.
+            
+            Use current medical knowledge and evidence-based guidelines. 
+            Return only specific condition names, one per line, without numbering. Match your suggestions to exactly what the user described.";
+            
+            $client = new \GuzzleHttp\Client();
+            $response = $client->post('https://api.openai.com/v1/chat/completions', [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . config('services.openai.api_key', 'sk-proj-demo'),
+                    'Content-Type' => 'application/json'
+                ],
+                'json' => [
+                    'model' => 'gpt-3.5-turbo',
+                    'messages' => [
+                        [
+                            'role' => 'system',
+                            'content' => 'You are a medical assistant providing real-time emergency condition suggestions based on current medical knowledge.'
+                        ],
+                        [
+                            'role' => 'user',
+                            'content' => $prompt
+                        ]
+                    ],
+                    'max_tokens' => 150,
+                    'temperature' => 0.3
+                ],
+                'timeout' => 8
+            ]);
 
-        if (str_contains($query, 'chest') || str_contains($query, 'heart')) {
-            $suggestions[] = 'Heart Attack';
-            $suggestions[] = 'Cardiac Arrest';
-        }
-        if (str_contains($query, 'bleed') || str_contains($query, 'blood')) {
-            $suggestions[] = 'Severe Bleeding';
-            $suggestions[] = 'Wound Care';
-        }
-        if (str_contains($query, 'choke') || str_contains($query, 'breath')) {
-            $suggestions[] = 'Choking';
-            $suggestions[] = 'Breathing Difficulty';
-        }
-        if (str_contains($query, 'burn')) {
-            $suggestions[] = 'Burns';
-        }
-        if (str_contains($query, 'break') || str_contains($query, 'fracture')) {
-            $suggestions[] = 'Fractures';
+            if ($response->getStatusCode() === 200) {
+                $data = json_decode($response->getBody(), true);
+                $text = $data['choices'][0]['message']['content'] ?? '';
+                $suggestions = array_filter(array_map('trim', explode("\n", $text)));
+                return array_slice($suggestions, 0, 5);
+            }
+        } catch (\Exception $e) {
+            Log::error('Fallback suggestions AI service error: ' . $e->getMessage());
         }
 
-        return empty($suggestions) ? ['General Emergency'] : $suggestions;
+        // Final fallback - provides specific suggestions based on query
+        $queryLower = strtolower($query);
+        
+        if (strpos($queryLower, 'chest') !== false || strpos($queryLower, 'heart') !== false) {
+            return ['Heart Attack', 'Chest Pain', 'Cardiac Arrest'];
+        } elseif (strpos($queryLower, 'bleed') !== false || strpos($queryLower, 'bleeding') !== false || strpos($queryLower, 'blood') !== false) {
+            return ['Severe Bleeding', 'Wound Care', 'Hemorrhage'];
+        } elseif (strpos($queryLower, 'choke') !== false || strpos($queryLower, 'breath') !== false) {
+            return ['Choking', 'Breathing Difficulty', 'Airway Obstruction'];
+        } elseif (strpos($queryLower, 'burn') !== false) {
+            return ['Burns', 'Thermal Burns', 'Electrical Burns'];
+        } elseif (strpos($queryLower, 'head') !== false || strpos($queryLower, 'fall') !== false) {
+            return ['Head Injury', 'Concussion', 'Traumatic Brain Injury'];
+        } elseif (strpos($queryLower, 'fracture') !== false || strpos($queryLower, 'break') !== false) {
+            return ['Fractures', 'Broken Bones', 'Orthopedic Injury'];
+        } else {
+            return ['Medical Assessment Required', 'Emergency Evaluation', 'Professional Consultation'];
+        }
     }
 
     /**

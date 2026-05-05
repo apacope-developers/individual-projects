@@ -119,6 +119,166 @@ var checkerQ1;
 // Make goTo function globally available
 window.goTo = goTo;
 
+// Button-based search function
+function performSearchClick() {
+    console.log('Search button clicked!');
+    const searchInput = document.getElementById('emergencySearch');
+    const searchResults = document.getElementById('searchResults');
+    
+    if (!searchInput || !searchResults) {
+        console.error('Search elements not found!');
+        alert('Search elements not found!');
+        return;
+    }
+    
+    const query = searchInput.value.trim();
+    console.log('Search query:', query);
+    
+    if (query.length < 2) {
+        searchResults.innerHTML = `
+            <div class="p-4 text-center text-zinc-400">
+                <i class="fa-solid fa-search mb-2 text-2xl"></i>
+                <p>Please enter at least 2 characters to search.</p>
+            </div>
+        `;
+        searchResults.classList.remove('hidden');
+        return;
+    }
+    
+    // Call the existing performSearch function
+    window.performSearch(query);
+}
+
+// Global performSearch function
+window.performSearch = function(query) {
+    const searchResults = document.getElementById('searchResults');
+    if (!searchResults) return;
+    
+    console.log('Searching for:', query);
+    
+    // Show loading state
+    searchResults.innerHTML = `
+        <div class="p-4 text-center text-zinc-400">
+            <div class="inline-block animate-spin w-6 h-6 border-2 border-zinc-600 border-t-red-400 rounded-full mb-2"></div>
+            <p>Getting AI recommendations...</p>
+        </div>
+    `;
+    searchResults.classList.remove('hidden');
+    
+    // Get AI recommendations
+    console.log('performSearch called with query:', query);
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    console.log('CSRF Token found:', csrfToken ? 'Yes' : 'No');
+    
+    fetch('/emergency-ai/recommendations', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': csrfToken,
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({ query: query })
+    })
+    .then(response => {
+        console.log('Response received, status:', response.status);
+        return response.json();
+    })
+    .then(data => {
+        console.log('Response data:', data);
+        if (data.success && data.data) {
+            displayAIRecommendations(data.data, query);
+        } else {
+            console.log('AI failed, using fallback search');
+            // Fallback to local search if AI fails
+            performFallbackSearch(query);
+        }
+    })
+    .catch(error => {
+        console.error('AI search error:', error);
+        console.log('Error caught, using fallback search');
+        // Fallback to local search
+        performFallbackSearch(query);
+    });
+};
+
+// Direct search setup that works immediately
+function setupEmergencySearch() {
+    console.log('Setting up emergency search...');
+    const searchInput = document.getElementById('emergencySearch');
+    const searchResults = document.getElementById('searchResults');
+    
+    if (!searchInput || !searchResults) {
+        console.error('Search elements not found!');
+        return false;
+    }
+    
+    console.log('Search elements found, setting up event listeners...');
+    
+    // Add Enter key support
+    searchInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            performSearchClick();
+        }
+    });
+    
+    return true;
+}
+
+// Test function to bypass event listener issues
+function testSearch() {
+    console.log('Test search button clicked!');
+    const searchInput = document.getElementById('emergencySearch');
+    const searchResults = document.getElementById('searchResults');
+    
+    if (!searchInput || !searchResults) {
+        console.error('Search elements not found!');
+        alert('Search elements not found!');
+        return;
+    }
+    
+    const query = searchInput.value.trim() || 'difficulty breathing';
+    console.log('Testing with query:', query);
+    
+    // Show loading state
+    searchResults.innerHTML = `
+        <div class="p-4 text-center text-zinc-400">
+            <div class="inline-block animate-spin w-6 h-6 border-2 border-zinc-600 border-t-red-400 rounded-full mb-2"></div>
+            <p>Getting AI recommendations...</p>
+        </div>
+    `;
+    searchResults.classList.remove('hidden');
+    
+    // Direct API call
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    
+    fetch('/emergency-ai/recommendations', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': csrfToken,
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({ query: query })
+    })
+    .then(response => {
+        console.log('Response status:', response.status);
+        return response.json();
+    })
+    .then(data => {
+        console.log('Response data:', data);
+        if (data.success && data.data) {
+            displayAIRecommendations(data.data, query);
+        } else {
+            performFallbackSearch(query);
+        }
+    })
+    .catch(error => {
+        console.error('API error:', error);
+        performFallbackSearch(query);
+    });
+}
+
 // Additional safeguard - ensure goTo is always available
 if (typeof window.goTo === 'undefined') {
     window.goTo = function(pg) {
@@ -127,6 +287,267 @@ if (typeof window.goTo === 'undefined') {
 }
 
 console.log('goTo function loaded and available globally:', typeof goTo);
+
+// Make display functions globally available
+window.displayAIRecommendations = function(aiData, query) {
+    const searchResults = document.getElementById('searchResults');
+    if (!searchResults) return;
+    
+    const recommendations = aiData.recommendations || [];
+    
+    if (recommendations.length === 0) {
+        searchResults.innerHTML = `
+            <div class="p-4 text-center text-zinc-400">
+                <i class="fa-solid fa-search mb-2 text-2xl"></i>
+                <p>No AI recommendations found for "${query}".</p>
+            </div>
+        `;
+        return;
+    }
+    
+    let html = '';
+    
+    // Add AI badge if powered by AI
+    if (aiData.aiPowered) {
+        html += `
+            <div class="p-3 bg-green-600/10 border-b border-zinc-800">
+                <div class="flex items-center gap-2 text-green-400 text-sm">
+                    <i class="fa-solid fa-brain"></i>
+                    <span>AI-Powered Recommendations</span>
+                </div>
+            </div>
+        `;
+    }
+    
+    // Display each recommendation
+    recommendations.forEach(rec => {
+        const severityColor = rec.severity === 'critical' ? 'red' : 
+                             rec.severity === 'urgent' ? 'orange' : 
+                             rec.severity === 'moderate' ? 'yellow' : 'green';
+        
+        html += `
+            <div class="p-4 border-b border-zinc-800 hover:bg-zinc-800/50 cursor-pointer transition-colors" onclick="showAIRecommendationDetails(this)" data-rec='${JSON.stringify(rec).replace(/'/g, "&apos;")}' data-ai='${JSON.stringify(aiData).replace(/'/g, "&apos;")}'>
+                <div class="flex items-start gap-3">
+                    <div class="w-10 h-10 rounded-lg bg-zinc-800 flex items-center justify-center flex-shrink-0">
+                        <i class="fa-solid fa-heart-pulse text-${severityColor}-400"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2 mb-1">
+                            <h4 class="font-semibold text-white">${rec.condition}</h4>
+                            <span class="sev-${rec.severity} text-xs px-2 py-1 rounded-full font-semibold uppercase">
+                                ${rec.severity}
+                            </span>
+                            ${rec.callEmergency ? '<span class="text-xs px-2 py-1 bg-red-600/20 border border-red-600/30 rounded-full font-semibold text-red-300">CALL ' + aiData.emergencyNumber + '</span>' : ''}
+                        </div>
+                        <p class="text-sm text-zinc-400 mb-2">${rec.summary}</p>
+                        <div class="flex items-center gap-4 text-xs text-zinc-500">
+                            <span><i class="fa-solid fa-list-ol mr-1"></i>${rec.immediateActions.length} immediate actions</span>
+                            ${rec.callEmergency ? '<span><i class="fa-solid fa-phone-volume mr-1"></i>Emergency call required</span>' : ''}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    // Add disclaimer
+    if (aiData.disclaimer) {
+        html += `
+            <div class="p-3 bg-zinc-800/50 border-t border-zinc-800">
+                <p class="text-xs text-zinc-500 text-center">
+                    <i class="fa-solid fa-info-circle mr-1"></i>
+                    ${aiData.disclaimer}
+                </p>
+            </div>
+        `;
+    }
+    
+    // Add close button at the bottom
+    html += `
+        <div class="p-3 border-t border-zinc-800">
+            <button onclick="closeSearchResults()" class="w-full px-4 py-2 bg-zinc-700 hover:bg-zinc-600 rounded-lg font-semibold text-white transition-colors flex items-center justify-center gap-2">
+                <i class="fa-solid fa-times"></i>
+                Close Results
+            </button>
+        </div>
+    `;
+    
+    searchResults.innerHTML = html;
+    searchResults.classList.remove('hidden');
+};
+
+// Close search results
+function closeSearchResults() {
+    const searchResults = document.getElementById('searchResults');
+    const searchInput = document.getElementById('emergencySearch');
+    searchResults.innerHTML = '';
+    searchResults.classList.add('hidden');
+    searchInput.value = '';
+}
+
+window.performFallbackSearch = function(query) {
+    const searchResults = document.getElementById('searchResults');
+    if (!searchResults) return;
+    
+    console.log('Using fallback search for:', query);
+    
+    // Filter conditions based on query
+    const results = window.CONDITIONS ? window.CONDITIONS.filter(condition => {
+        const searchText = query.toLowerCase();
+        return (
+            condition.name.toLowerCase().includes(searchText) ||
+            condition.summary.toLowerCase().includes(searchText) ||
+            condition.category.toLowerCase().includes(searchText) ||
+            (condition.steps && condition.steps.some(step => step.toLowerCase().includes(searchText)))
+        );
+    }) : [];
+    
+    window.displayEmergencySearchResults(results, query);
+};
+
+window.displayEmergencySearchResults = function(results, query) {
+    const searchResults = document.getElementById('searchResults');
+    if (!searchResults) return;
+    
+    if (results.length === 0) {
+        searchResults.innerHTML = `
+            <div class="p-4 text-center text-zinc-400">
+                <i class="fa-solid fa-search mb-2 text-2xl"></i>
+                <p>No emergencies found for "${query}". Try different keywords.</p>
+            </div>
+        `;
+    } else {
+      searchResults.innerHTML = results.slice(0, 5).map(condition => `
+        <div class="p-4 border-b border-zinc-800 hover:bg-zinc-800/50 cursor-pointer transition-colors" onclick="goTo('guide')">
+          <div class="flex items-start gap-3">
+            <div class="w-10 h-10 rounded-lg bg-zinc-800 flex items-center justify-center flex-shrink-0">
+              <i class="fa-solid ${condition.icon} text-red-400"></i>
+            </div>
+            <div class="flex-1">
+              <div class="flex items-center gap-2 mb-1">
+                <h4 class="font-semibold text-white">${condition.name}</h4>
+                <span class="sev-${condition.severity} text-xs px-2 py-1 rounded-full font-semibold uppercase">
+                  ${condition.severity}
+                </span>
+              </div>
+              <p class="text-sm text-zinc-400 mb-2">${condition.summary}</p>
+              <div class="flex items-center gap-4 text-xs text-zinc-500">
+                <span><i class="fa-solid fa-list-ol mr-1"></i>${condition.steps.length} steps</span>
+                ${condition.call912 ? '<span><i class="fa-solid fa-phone-volume mr-1"></i>Call 912</span>' : ''}
+              </div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+    
+    searchResults.classList.remove('hidden');
+};
+
+// Show AI recommendation details in modal
+window.showAIRecommendationDetails = function(element) {
+    try {
+        const recommendation = JSON.parse(element.getAttribute('data-rec').replace(/&apos;/g, "'"));
+        const aiInfo = JSON.parse(element.getAttribute('data-ai').replace(/&apos;/g, "'"));
+        
+        const severityColor = recommendation.severity === 'critical' ? 'red' : 
+                             recommendation.severity === 'urgent' ? 'orange' : 
+                             recommendation.severity === 'moderate' ? 'yellow' : 'green';
+        
+        const actionsHtml = recommendation.immediateActions.map((action, index) => 
+            `<li class="flex gap-3 text-sm">
+                <span class="w-6 h-6 rounded-full bg-${severityColor}-600/20 text-${severityColor}-400 flex items-center justify-center flex-shrink-0 text-xs font-bold">${index + 1}</span>
+                <span class="text-zinc-300">${action}</span>
+            </li>`
+        ).join('');
+        
+        const emergencySignsHtml = recommendation.emergencySigns ? 
+            recommendation.emergencySigns.map(sign => 
+                `<li class="text-xs text-zinc-300 flex items-center gap-2">
+                    <i class="fa-solid fa-exclamation-triangle text-${severityColor}-400"></i>
+                    ${sign}
+                </li>`
+            ).join('') : '';
+        
+        const modalHTML = `
+            <div class="flex items-center justify-between p-5 border-b border-zinc-800">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-lg bg-green-600/20 flex items-center justify-center">
+                        <i class="fa-solid fa-brain text-green-400"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-lg">AI Emergency Recommendation</h3>
+                        <span class="text-xs text-green-300">${aiInfo.aiPowered ? 'Powered by Google AI' : 'Fallback System'}</span>
+                    </div>
+                </div>
+                <button onclick="closeModal()" class="w-8 h-8 rounded-lg hover:bg-zinc-800 flex items-center justify-center">
+                    <i class="fa-solid fa-xmark text-zinc-400"></i>
+                </button>
+            </div>
+            <div class="p-6">
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="sev-${recommendation.severity} text-xs px-3 py-1 rounded-full font-semibold uppercase">
+                        ${recommendation.severity}
+                    </span>
+                    ${recommendation.callEmergency ? `<span class="text-xs px-3 py-1 bg-red-600/20 border border-red-600/30 rounded-full font-semibold text-red-300">CALL ${aiInfo.emergencyNumber}</span>` : ''}
+                </div>
+                
+                <h4 class="font-semibold text-white mb-2">${recommendation.condition}</h4>
+                <p class="text-zinc-300 text-sm mb-5">${recommendation.summary}</p>
+                
+                <h4 class="font-semibold text-sm text-${severityColor}-400 mb-3">
+                    <i class="fa-solid fa-list-ol mr-2"></i>Immediate Actions
+                </h4>
+                <ol class="space-y-2 mb-6">${actionsHtml}</ol>
+                
+                ${emergencySignsHtml ? `
+                    <h4 class="font-semibold text-sm text-orange-400 mb-3">
+                        <i class="fa-solid fa-exclamation-triangle mr-2"></i>Emergency Signs
+                    </h4>
+                    <ul class="space-y-1.5 mb-6">${emergencySignsHtml}</ul>
+                ` : ''}
+                
+                <div class="p-4 rounded-lg bg-yellow-600/10 border border-yellow-600/20">
+                    <p class="text-xs text-yellow-300">
+                        <i class="fa-solid fa-info-circle mr-1"></i>
+                        ${aiInfo.disclaimer}
+                    </p>
+                </div>
+            </div>
+        `;
+        
+        openModal(modalHTML);
+    } catch (error) {
+        console.error('Error showing AI recommendation details:', error);
+    }
+};
+
+// Modal functionality
+function openModal(content) {
+    const modalBg = document.getElementById('modalBg');
+    const modalBox = document.getElementById('modalBox');
+    
+    if (!modalBg || !modalBox) {
+        console.error('Modal elements not found');
+        return;
+    }
+    
+    modalBox.innerHTML = content;
+    modalBg.classList.add('open');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+    const modalBg = document.getElementById('modalBg');
+    
+    if (!modalBg) {
+        console.error('Modal background not found');
+        return;
+    }
+    
+    modalBg.classList.remove('open');
+    document.body.style.overflow = 'auto';
+}
 
 // Body zone click handler - simplified version
 function showZone(zone) {
@@ -2002,13 +2423,18 @@ console.log('closeModal function loaded inline:', typeof closeModal);
         autocomplete="off"
       >
       <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500"></i>
+      <button onclick="performSearchClick()" class="absolute right-2 top-1/2 -translate-y-1/2 bg-red-600 hover:bg-red-500 text-white px-3 py-1 rounded-lg text-sm font-medium transition-colors">
+        Search
+      </button>
       <div id="searchResults" class="absolute top-full left-0 right-0 mt-2 bg-[#18181B]/95 backdrop-blur-xl border border-zinc-800 rounded-xl shadow-2xl hidden z-50 max-h-96 overflow-y-auto">
       </div>
     </div>
+    
+        </div>
     <div class="flex items-center justify-between mt-3">
       <p id="searchModeInfo" class="text-zinc-500 text-xs">
-        <i class="fa-solid fa-search text-green-400 mr-1"></i>
-        Search emergency conditions and first aid guides
+        <i class="fa-solid fa-brain text-green-400 mr-1"></i>
+        AI-powered emergency recommendations with fallback guides
       </p>
     </div>
   </div>
@@ -2513,12 +2939,62 @@ function showCM(id){var c=CONDITIONS.find(function(x){return x.id===id});if(!c)r
 
 // checkerQ1 will be initialized when DOM is ready
 function renderContacts(){var h='';CONTACTS.forEach(function(c){h+='<div class="card p-5"><div class="flex items-center gap-4"><div class="w-12 h-12 rounded-full bg-zinc-800 flex items-center justify-center"><i class="fa-solid '+c.icon+' text-teal-400"></i></div><div class="flex-1"><h4 class="font-semibold text-sm">'+c.name+'</h4><p class="text-zinc-400 text-xs">'+c.type+'</p></div><a href="tel:'+c.phone+'" class="px-4 py-2 bg-teal-600 hover:bg-teal-500 rounded-lg text-sm font-semibold text-white transition-colors"><i class="fa-solid fa-phone mr-2"></i>Call</a></div></div>'});document.getElementById('contactsGrid').innerHTML=h}
-// Emergency Search Functionality
+// Emergency Search Functionality with AI Recommendations
 function performSearch(query) {
     const searchResults = document.getElementById('searchResults');
     if (!searchResults) return;
     
     console.log('Searching for:', query);
+    
+    // Show loading state
+    searchResults.innerHTML = `
+        <div class="p-4 text-center text-zinc-400">
+            <div class="inline-block animate-spin w-6 h-6 border-2 border-zinc-600 border-t-red-400 rounded-full mb-2"></div>
+            <p>Getting AI recommendations...</p>
+        </div>
+    `;
+    searchResults.classList.remove('hidden');
+    
+    // Get AI recommendations
+    console.log('performSearch called with query:', query);
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    console.log('CSRF Token found:', csrfToken ? 'Yes' : 'No');
+    
+    fetch('/emergency-ai/recommendations', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': csrfToken,
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({ query: query })
+    })
+    .then(response => {
+        console.log('Response received, status:', response.status);
+        return response.json();
+    })
+    .then(data => {
+        console.log('Response data:', data);
+        if (data.success && data.data) {
+            displayAIRecommendations(data.data, query);
+        } else {
+            console.log('AI failed, using fallback search');
+            // Fallback to local search if AI fails
+            performFallbackSearch(query);
+        }
+    })
+    .catch(error => {
+        console.error('AI search error:', error);
+        console.log('Error caught, using fallback search');
+        // Fallback to local search
+        performFallbackSearch(query);
+    });
+}
+
+// Fallback search using local conditions
+function performFallbackSearch(query) {
+    const searchResults = document.getElementById('searchResults');
+    if (!searchResults) return;
     
     // Filter conditions based on query
     const results = CONDITIONS.filter(condition => {
@@ -2532,6 +3008,162 @@ function performSearch(query) {
     });
     
     displayEmergencySearchResults(results, query);
+}
+
+// Display AI-powered recommendations
+function displayAIRecommendations(aiData, query) {
+    const searchResults = document.getElementById('searchResults');
+    if (!searchResults) return;
+    
+    const recommendations = aiData.recommendations || [];
+    
+    if (recommendations.length === 0) {
+        searchResults.innerHTML = `
+            <div class="p-4 text-center text-zinc-400">
+                <i class="fa-solid fa-search mb-2 text-2xl"></i>
+                <p>No AI recommendations found for "${query}".</p>
+            </div>
+        `;
+        return;
+    }
+    
+    let html = '';
+    
+    // Add AI badge if powered by AI
+    if (aiData.aiPowered) {
+        html += `
+            <div class="p-3 bg-green-600/10 border-b border-zinc-800">
+                <div class="flex items-center gap-2 text-green-400 text-sm">
+                    <i class="fa-solid fa-brain"></i>
+                    <span>AI-Powered Recommendations</span>
+                </div>
+            </div>
+        `;
+    }
+    
+    // Display each recommendation
+    recommendations.forEach(rec => {
+        const severityColor = rec.severity === 'critical' ? 'red' : 
+                             rec.severity === 'urgent' ? 'orange' : 
+                             rec.severity === 'moderate' ? 'yellow' : 'green';
+        
+        html += `
+            <div class="p-4 border-b border-zinc-800 hover:bg-zinc-800/50 cursor-pointer transition-colors" onclick="showAIRecommendationDetails(this)" data-rec='${JSON.stringify(rec).replace(/'/g, "&apos;")}' data-ai='${JSON.stringify(aiData).replace(/'/g, "&apos;")}'>
+                <div class="flex items-start gap-3">
+                    <div class="w-10 h-10 rounded-lg bg-zinc-800 flex items-center justify-center flex-shrink-0">
+                        <i class="fa-solid fa-heart-pulse text-${severityColor}-400"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2 mb-1">
+                            <h4 class="font-semibold text-white">${rec.condition}</h4>
+                            <span class="sev-${rec.severity} text-xs px-2 py-1 rounded-full font-semibold uppercase">
+                                ${rec.severity}
+                            </span>
+                            ${rec.callEmergency ? '<span class="text-xs px-2 py-1 bg-red-600/20 border border-red-600/30 rounded-full font-semibold text-red-300">CALL ' + aiData.emergencyNumber + '</span>' : ''}
+                        </div>
+                        <p class="text-sm text-zinc-400 mb-2">${rec.summary}</p>
+                        <div class="flex items-center gap-4 text-xs text-zinc-500">
+                            <span><i class="fa-solid fa-list-ol mr-1"></i>${rec.immediateActions.length} immediate actions</span>
+                            ${rec.callEmergency ? '<span><i class="fa-solid fa-phone-volume mr-1"></i>Emergency call required</span>' : ''}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    // Add disclaimer
+    if (aiData.disclaimer) {
+        html += `
+            <div class="p-3 bg-zinc-800/50 border-t border-zinc-800">
+                <p class="text-xs text-zinc-500 text-center">
+                    <i class="fa-solid fa-info-circle mr-1"></i>
+                    ${aiData.disclaimer}
+                </p>
+            </div>
+        `;
+    }
+    
+    searchResults.innerHTML = html;
+    searchResults.classList.remove('hidden');
+}
+
+// Show AI recommendation details in modal
+function showAIRecommendationDetails(element) {
+    try {
+        const recommendation = JSON.parse(element.getAttribute('data-rec').replace(/&apos;/g, "'"));
+        const aiInfo = JSON.parse(element.getAttribute('data-ai').replace(/&apos;/g, "'"));
+        
+        const severityColor = recommendation.severity === 'critical' ? 'red' : 
+                             recommendation.severity === 'urgent' ? 'orange' : 
+                             recommendation.severity === 'moderate' ? 'yellow' : 'green';
+        
+        const actionsHtml = recommendation.immediateActions.map((action, index) => 
+            `<li class="flex gap-3 text-sm">
+                <span class="w-6 h-6 rounded-full bg-${severityColor}-600/20 text-${severityColor}-400 flex items-center justify-center flex-shrink-0 text-xs font-bold">${index + 1}</span>
+                <span class="text-zinc-300">${action}</span>
+            </li>`
+        ).join('');
+        
+        const emergencySignsHtml = recommendation.emergencySigns ? 
+            recommendation.emergencySigns.map(sign => 
+                `<li class="text-xs text-zinc-300 flex items-center gap-2">
+                    <i class="fa-solid fa-exclamation-triangle text-${severityColor}-400"></i>
+                    ${sign}
+                </li>`
+            ).join('') : '';
+        
+        const modalHTML = `
+            <div class="flex items-center justify-between p-5 border-b border-zinc-800">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-lg bg-green-600/20 flex items-center justify-center">
+                        <i class="fa-solid fa-brain text-green-400"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-lg">AI Emergency Recommendation</h3>
+                        <span class="text-xs text-green-300">${aiInfo.aiPowered ? 'Powered by Google AI' : 'Fallback System'}</span>
+                    </div>
+                </div>
+                <button onclick="closeModal()" class="w-8 h-8 rounded-lg hover:bg-zinc-800 flex items-center justify-center">
+                    <i class="fa-solid fa-xmark text-zinc-400"></i>
+                </button>
+            </div>
+            <div class="p-6">
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="sev-${recommendation.severity} text-xs px-3 py-1 rounded-full font-semibold uppercase">
+                        ${recommendation.severity}
+                    </span>
+                    ${recommendation.callEmergency ? `<span class="text-xs px-3 py-1 bg-red-600/20 border border-red-600/30 rounded-full font-semibold text-red-300">CALL ${aiInfo.emergencyNumber}</span>` : ''}
+                </div>
+                
+                <h4 class="font-semibold text-white mb-2">${recommendation.condition}</h4>
+                <p class="text-zinc-300 text-sm mb-5">${recommendation.summary}</p>
+                
+                <h4 class="font-semibold text-sm text-${severityColor}-400 mb-3">
+                    <i class="fa-solid fa-list-ol mr-2"></i>Immediate Actions
+                </h4>
+                <ol class="space-y-2 mb-6">${actionsHtml}</ol>
+                
+                ${emergencySignsHtml ? `
+                    <h4 class="font-semibold text-sm text-orange-400 mb-3">
+                        <i class="fa-solid fa-exclamation-triangle mr-2"></i>Emergency Signs
+                    </h4>
+                    <ul class="space-y-1.5 mb-6">${emergencySignsHtml}</ul>
+                ` : ''}
+                
+                <div class="p-4 rounded-lg bg-yellow-600/10 border border-yellow-600/20">
+                    <p class="text-xs text-yellow-300">
+                        <i class="fa-solid fa-info-circle mr-1"></i>
+                        ${aiInfo.disclaimer}
+                    </p>
+                </div>
+            </div>
+        `;
+        
+        openModal(modalHTML);
+    } catch (error) {
+        console.error('Error showing AI recommendation details:', error);
+    }
 }
 
 function displayEmergencySearchResults(results, query) {
@@ -2724,6 +3356,12 @@ if (typeof window.goTo === 'undefined') {
 document.addEventListener('DOMContentLoaded', function() {
   console.log('Dashboard loaded successfully');
   
+  // Setup emergency search immediately
+  if (!setupEmergencySearch()) {
+    console.log('Emergency search setup failed, retrying...');
+    setTimeout(setupEmergencySearch, 500);
+  }
+  
   // Initialize checkerQ1 with multiple attempts
   function initializeCheckerQ1() {
     const checkerElement = document.getElementById('pg-checker');
@@ -2743,9 +3381,16 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(initializeCheckerQ1, 100);
   }
   
+  // Test that JavaScript is running
+  console.log('Emergency search JavaScript is loading...');
+  
   // Setup search input event listener
   const searchInput = document.getElementById('emergencySearch');
   const searchResults = document.getElementById('searchResults');
+  
+  console.log('Setting up search functionality...');
+  console.log('Search input found:', searchInput ? 'Yes' : 'No');
+  console.log('Search results found:', searchResults ? 'Yes' : 'No');
   
   if (searchInput && searchResults) {
     let searchTimeout;

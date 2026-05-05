@@ -7,6 +7,7 @@
 <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
 <link rel="alternate icon" href="{{ asset('favicon.ico') }}">
 <link rel="apple-touch-icon" href="{{ asset('favicon.svg') }}">
+<meta name="csrf-token" content="{{ csrf_token() }}">
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -73,7 +74,7 @@ h1,h2,h3,h4,h5,h6{font-family:'Space Grotesk',sans-serif}
 <!-- Hero Section -->
 <section class="min-h-screen flex items-center justify-center px-4 pt-16 relative">
   
-  <div class="max-w-7xl mx-auto text-center relative z-10">
+  <div class="max-w-7xl mx-auto text-center relative z-10 w-full">
     <div class="mb-8">
             <h1 class="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-white to-zinc-300 bg-clip-text text-transparent">
         Your Lifeline in
@@ -84,8 +85,79 @@ h1,h2,h3,h4,h5,h6{font-family:'Space Grotesk',sans-serif}
         and real-time emergency guidance when every second counts.
       </p>
     </div>
-    
-        
+
+    <!-- Emergency Search Section -->
+    <div class="bg-red-600/10 border border-red-600/30 rounded-2xl p-8 max-w-4xl mx-auto mb-12">
+      <div class="text-center mb-6">
+        <div class="inline-flex items-center gap-2 bg-red-600/20 px-4 py-2 rounded-full mb-4">
+          <i class="fa-solid fa-exclamation-triangle text-red-400 pulse-glow"></i>
+          <span class="text-red-300 font-semibold">EMERGENCY ASSISTANCE</span>
+        </div>
+        <h2 class="text-3xl font-bold text-white mb-4">
+          Need <span class="text-red-500">Immediate Help?</span>
+        </h2>
+        <p class="text-zinc-300 mb-6">
+          Get instant first aid guidance for medical emergencies. No login required - available to everyone in critical moments.
+        </p>
+      </div>
+
+      <!-- Emergency Search Bar -->
+      <div class="relative mb-6">
+        <input 
+          type="text" 
+          id="publicEmergencySearch" 
+          placeholder="Describe your emergency (e.g., 'chest pain', 'bleeding', 'choking', 'burn')..."
+          class="w-full px-4 py-4 bg-[#18181B] border border-zinc-700 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent text-base md:text-lg"
+          onkeypress="if(event.key === 'Enter') performPublicEmergencySearch()"
+        >
+        <button 
+          onclick="performPublicEmergencySearch()"
+          class="absolute right-2 top-1/2 transform -translate-y-1/2 px-4 py-2 md:px-6 md:py-3 bg-red-600 hover:bg-red-500 rounded-lg font-semibold transition-colors flex items-center gap-2 text-sm md:text-base"
+        >
+          <i class="fa-solid fa-search"></i>
+          <span class="hidden md:inline">Get Help Now</span>
+          <span class="md:hidden">Help</span>
+        </button>
+      </div>
+
+      <!-- Quick Emergency Buttons -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+        <button onclick="quickEmergencySearch('chest pain')" class="px-4 py-3 bg-[#18181B] hover:bg-red-600/20 border border-zinc-700 rounded-lg text-sm font-medium text-zinc-300 hover:text-white transition-all">
+          <i class="fa-solid fa-heart-pulse text-red-400 mr-2"></i>Chest Pain
+        </button>
+        <button onclick="quickEmergencySearch('bleeding')" class="px-4 py-3 bg-[#18181B] hover:bg-red-600/20 border border-zinc-700 rounded-lg text-sm font-medium text-zinc-300 hover:text-white transition-all">
+          <i class="fa-solid fa-droplet text-red-400 mr-2"></i>Bleeding
+        </button>
+        <button onclick="quickEmergencySearch('choking')" class="px-4 py-3 bg-[#18181B] hover:bg-red-600/20 border border-zinc-700 rounded-lg text-sm font-medium text-zinc-300 hover:text-white transition-all">
+          <i class="fa-solid fa-wind text-red-400 mr-2"></i>Choking
+        </button>
+        <button onclick="quickEmergencySearch('burns')" class="px-4 py-3 bg-[#18181B] hover:bg-red-600/20 border border-zinc-700 rounded-lg text-sm font-medium text-zinc-300 hover:text-white transition-all">
+          <i class="fa-solid fa-fire text-red-400 mr-2"></i>Burns
+        </button>
+      </div>
+
+      <!-- Emergency Hotline -->
+      <div class="bg-[#18181B]/50 rounded-lg p-4 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center pulse-glow flex-shrink-0">
+            <i class="fa-solid fa-phone text-white text-xl"></i>
+          </div>
+          <div>
+            <div class="text-white font-semibold">Emergency Hotline</div>
+            <div class="text-zinc-400 text-sm">Call for immediate medical assistance</div>
+          </div>
+        </div>
+        <a href="tel:912" class="w-full md:w-auto px-6 py-3 bg-red-600 hover:bg-red-500 rounded-lg font-bold text-white transition-colors flex items-center justify-center gap-2">
+          <i class="fa-solid fa-phone-volume"></i>
+          Call 912
+        </a>
+      </div>
+    </div>
+
+    <!-- Emergency Results Container -->
+    <div id="publicEmergencyResults" class="hidden mt-8 max-w-4xl mx-auto">
+      <!-- Results will be displayed here -->
+    </div>
 
     <div class="flex flex-col sm:flex-row gap-4 justify-center mb-12">
       <a href="{{ route('register') }}" class="px-8 py-4 bg-red-600 hover:bg-red-500 rounded-xl font-semibold transition-all transform hover:scale-105 flex items-center justify-center gap-2">
@@ -872,6 +944,254 @@ document.addEventListener('click', function(e) {
     searchResults.classList.add('hidden');
   }
 });
+
+// Public Emergency Search Functions
+function performPublicEmergencySearch() {
+  const searchInput = document.getElementById('publicEmergencySearch');
+  const resultsContainer = document.getElementById('publicEmergencyResults');
+  const query = searchInput.value.trim();
+  
+  if (!query) {
+    alert('Please describe your emergency');
+    return;
+  }
+  
+  console.log('Public emergency search:', query);
+  
+  // Show loading state
+  resultsContainer.innerHTML = `
+    <div class="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-8">
+      <div class="text-center">
+        <div class="inline-block animate-spin w-8 h-8 border-2 border-white/30 border-t-green-400 rounded-full mb-4"></div>
+        <div class="flex items-center justify-center gap-2 mb-2">
+          <i class="fa-solid fa-brain text-green-400"></i>
+          <h3 class="text-xl font-semibold text-white">AI Analyzing Emergency...</h3>
+        </div>
+        <p class="text-zinc-300">Using artificial intelligence to provide precise medical guidance</p>
+      </div>
+    </div>
+  `;
+  resultsContainer.classList.remove('hidden');
+  
+  // Call public emergency API
+  fetch('/public/emergency/recommendations', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+    },
+    body: JSON.stringify({ query: query })
+  })
+  .then(response => response.json())
+  .then(data => {
+    console.log('Public emergency response:', data);
+    if (data.success && data.data) {
+      displayPublicEmergencyResults(data.data);
+    } else {
+      displayPublicEmergencyError('Unable to get emergency assistance. Please call emergency services directly.');
+    }
+  })
+  .catch(error => {
+    console.error('Public emergency search error:', error);
+    displayPublicEmergencyError('Connection error. Please call emergency services at 912 immediately.');
+  });
+}
+
+function quickEmergencySearch(query) {
+  document.getElementById('publicEmergencySearch').value = query;
+  performPublicEmergencySearch();
+}
+
+function displayPublicEmergencyResults(data) {
+  const resultsContainer = document.getElementById('publicEmergencyResults');
+  const recommendations = data.recommendations || [];
+  
+  // Show AI badge if AI powered
+  let aiBadge = '';
+  if (data.aiPowered) {
+    aiBadge = `
+      <div class="flex items-center gap-2 bg-green-600/10 border border-green-600/30 rounded-xl p-3 mb-4">
+        <div class="flex items-center gap-2">
+          <i class="fa-solid fa-brain text-green-400"></i>
+          <span class="text-green-300 font-semibold">AI-Powered Emergency Assessment</span>
+          ${data.aiConfidence ? `<span class="text-green-400 text-sm ml-2">${Math.round(data.aiConfidence * 100)}% confidence</span>` : ''}
+        </div>
+      </div>
+    `;
+  }
+  
+  if (recommendations.length === 0) {
+    resultsContainer.innerHTML = `
+      ${aiBadge}
+      <div class="bg-yellow-600/10 border border-yellow-600/30 rounded-2xl p-6">
+        <div class="flex items-center gap-3 mb-4">
+          <i class="fa-solid fa-exclamation-triangle text-yellow-400 text-xl"></i>
+          <h3 class="text-lg font-semibold text-yellow-300">Emergency Assessment Required</h3>
+        </div>
+        <p class="text-zinc-300 mb-4">Your situation requires immediate medical attention. Please call emergency services.</p>
+        <div class="flex gap-3">
+          <a href="tel:912" class="px-6 py-3 bg-red-600 hover:bg-red-500 rounded-lg font-bold text-white transition-colors flex items-center gap-2">
+            <i class="fa-solid fa-phone"></i>
+            Call 912 Now
+          </a>
+          <button onclick="clearPublicEmergencyResults()" class="px-6 py-3 bg-zinc-700 hover:bg-zinc-600 rounded-lg font-semibold text-white transition-colors">
+            Clear
+          </button>
+        </div>
+      </div>
+    `;
+    return;
+  }
+  
+  let html = aiBadge;
+  
+  recommendations.forEach(rec => {
+    const severityColor = rec.severity === 'critical' ? 'red' : 
+                         rec.severity === 'urgent' ? 'orange' : 
+                         rec.severity === 'moderate' ? 'yellow' : 'green';
+    
+    html += `
+      <div class="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6 mb-4">
+        <div class="flex items-start gap-4 mb-4">
+          <div class="w-12 h-12 rounded-xl bg-${severityColor}-600/20 flex items-center justify-center flex-shrink-0">
+            <i class="fa-solid fa-heart-pulse text-${severityColor}-400 text-xl"></i>
+          </div>
+          <div class="flex-1">
+            <div class="flex items-center gap-3 mb-2 flex-wrap">
+              <h3 class="text-xl font-bold text-white">${rec.condition}</h3>
+              <span class="px-3 py-1 bg-${severityColor}-600/20 border border-${severityColor}-600/30 rounded-full text-${severityColor}-300 text-sm font-semibold uppercase">
+                ${rec.severity}
+              </span>
+              ${rec.callEmergency ? '<span class="px-3 py-1 bg-red-600/20 border border-red-600/30 rounded-full text-red-300 text-sm font-semibold">CALL 912</span>' : ''}
+            </div>
+            <p class="text-zinc-300 mb-4">${rec.summary}</p>
+            
+            ${rec.immediateActions && rec.immediateActions.length > 0 ? `
+              <div class="mb-4">
+                <h4 class="font-semibold text-white mb-3 flex items-center gap-2">
+                  <i class="fa-solid fa-list-ol text-${severityColor}-400"></i>
+                  Immediate Actions
+                </h4>
+                <div class="space-y-2">
+                  ${rec.immediateActions.map((action, index) => `
+                    <div class="flex gap-3">
+                      <span class="w-6 h-6 rounded-full bg-${severityColor}-600/20 text-${severityColor}-400 flex items-center justify-center flex-shrink-0 text-xs font-bold">${index + 1}</span>
+                      <span class="text-zinc-300 text-sm">${action}</span>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            ` : ''}
+            
+            ${rec.emergencySigns && rec.emergencySigns.length > 0 ? `
+              <div class="mb-4">
+                <h4 class="font-semibold text-white mb-3 flex items-center gap-2">
+                  <i class="fa-solid fa-exclamation-triangle text-${severityColor}-400"></i>
+                  Emergency Signs
+                </h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                  ${rec.emergencySigns.map(sign => `
+                    <div class="flex items-center gap-2 text-sm text-zinc-300">
+                      <i class="fa-solid fa-circle text-${severityColor}-400 text-xs"></i>
+                      ${sign}
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            ` : ''}
+          </div>
+        </div>
+        
+        ${rec.callEmergency ? `
+          <div class="bg-red-600/10 border border-red-600/30 rounded-xl p-4">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <i class="fa-solid fa-phone-volume text-red-400 text-xl"></i>
+                <div>
+                  <h4 class="font-semibold text-red-300">CALL EMERGENCY SERVICES IMMEDIATELY</h4>
+                  <p class="text-zinc-300 text-sm">Dial 912 or your local emergency number</p>
+                </div>
+              </div>
+              <a href="tel:912" class="px-6 py-3 bg-red-600 hover:bg-red-500 rounded-xl font-bold text-white transition-all transform hover:scale-105 flex items-center gap-2">
+                <i class="fa-solid fa-phone"></i>
+                Call 912
+              </a>
+            </div>
+          </div>
+        ` : ''}
+        
+        <div class="mt-4 flex gap-3">
+          <button onclick="clearPublicEmergencyResults()" class="px-6 py-3 bg-white/10 hover:bg-white/20 border border-white/30 rounded-xl font-semibold text-white transition-all backdrop-blur-sm">
+            Clear Results
+          </button>
+          <a href="{{ route('register') }}" class="px-6 py-3 bg-red-600 hover:bg-red-500 rounded-xl text-center font-semibold text-white transition-all transform hover:scale-105">
+            Get Full Access
+          </a>
+        </div>
+      </div>
+    `;
+  });
+  
+  // Add disclaimer
+  if (data.disclaimer) {
+    html += `
+      <div class="bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl p-4">
+        <div class="flex items-start gap-3">
+          <i class="fa-solid fa-info-circle text-white/70 mt-1"></i>
+          <div>
+            <h4 class="font-semibold text-white mb-1">Important Notice</h4>
+            <p class="text-zinc-300 text-sm">${data.disclaimer}</p>
+            ${data.timestamp ? `<p class="text-zinc-400 text-xs mt-2">Provided: ${new Date(data.timestamp).toLocaleString()}</p>` : ''}
+          </div>
+        </div>
+        
+        <div class="mt-4 flex gap-3">
+          <button onclick="clearPublicEmergencyResults()" class="px-6 py-3 bg-white/10 hover:bg-white/20 border border-white/30 rounded-xl font-semibold text-white/90 hover:text-white transition-all backdrop-blur-sm">
+            <i class="fa-solid fa-times mr-2"></i>
+            Clear Results
+          </button>
+          <a href="{{ route('register') }}" class="px-6 py-3 bg-red-600 hover:bg-red-500 rounded-xl text-center font-semibold text-white transition-all transform hover:scale-105">
+            <i class="fa-solid fa-rocket mr-2"></i>
+            Get Full Access
+          </a>
+        </div>
+      </div>
+    `;
+  }
+  
+  resultsContainer.innerHTML = html;
+}
+
+function displayPublicEmergencyError(message) {
+  const resultsContainer = document.getElementById('publicEmergencyResults');
+  resultsContainer.innerHTML = `
+    <div class="bg-red-600/10 border border-red-600/30 rounded-2xl p-6">
+      <div class="flex items-center gap-3 mb-4">
+        <i class="fa-solid fa-exclamation-triangle text-red-400 text-xl"></i>
+        <h3 class="text-lg font-semibold text-red-300">Emergency Assistance Error</h3>
+      </div>
+      <p class="text-zinc-300 mb-4">${message}</p>
+      <div class="flex gap-3">
+        <a href="tel:912" class="px-6 py-3 bg-red-600 hover:bg-red-500 rounded-lg font-bold text-white transition-colors flex items-center gap-2">
+          <i class="fa-solid fa-phone"></i>
+          Call 912 Now
+        </a>
+        <button onclick="clearPublicEmergencyResults()" class="px-6 py-3 bg-zinc-700 hover:bg-zinc-600 rounded-lg font-semibold text-white transition-colors">
+          Clear
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function clearPublicEmergencyResults() {
+  const resultsContainer = document.getElementById('publicEmergencyResults');
+  const searchInput = document.getElementById('publicEmergencySearch');
+  resultsContainer.innerHTML = '';
+  resultsContainer.classList.add('hidden');
+  searchInput.value = '';
+}
 
 // Smooth scrolling for anchor links
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {

@@ -115,6 +115,7 @@ h1,h2,h3,h4,h5,h6{font-family:'Space Grotesk',sans-serif}
 
         <div class="mt-6 text-center">
           <p class="text-zinc-500 text-sm">Don't have an account? <a href="{{ route('register') }}" class="text-red-400 hover:text-red-300 font-semibold transition-colors">Create Account</a></p>
+          <p class="text-zinc-500 text-sm mt-2">or <a href="/" class="text-red-400 hover:text-red-300 font-semibold transition-colors">Go back to landing page</a></p>
         </div>
 
         

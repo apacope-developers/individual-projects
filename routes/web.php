@@ -3,11 +3,12 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\EmergencyAIController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    if (auth()->check()) {
-        return auth()->user()->is_admin ? redirect('/admin') : redirect('/dashboard');
+    if (Auth::check()) {
+        return Auth::user()->is_admin ? redirect('/admin') : redirect('/dashboard');
     }
     return view('landing');
 });
@@ -17,16 +18,23 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
 Route::post('/register', [AuthController::class, 'register']);
 
+// Logout routes
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
 // Doctor Registration
 Route::get('/doctors/register', function() {
     return view('doctors-register');
 })->name('doctors.register');
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 Route::post('/dashboard/contacts/add', [DashboardController::class, 'addContact'])->name('dashboard.add-contact');
 Route::delete('/dashboard/contacts/{id}', [DashboardController::class, 'deleteContact'])->name('dashboard.delete-contact');
 Route::get('/first-aid-guide/{id}', [DashboardController::class, 'getGuideDetails'])->name('first-aid-guide.details');
+Route::post('/emergency-ai/recommendations', [EmergencyAIController::class, 'getRecommendations'])->name('emergency-ai.recommendations');
+
+// Public Emergency Routes (No Authentication Required - Life-Saving Access)
+Route::post('/public/emergency/recommendations', [\App\Http\Controllers\PublicEmergencyController::class, 'getEmergencyRecommendations']);
+Route::get('/public/emergency/hotline', [\App\Http\Controllers\PublicEmergencyController::class, 'getEmergencyHotline']);
 Route::get('/admin', [AdminController::class, 'index'])->name('admin');
 Route::delete('/admin/users/{user}', [AdminController::class, 'deleteUser'])->name('admin.delete-user');
 Route::post('/admin/users/{user}', [AdminController::class, 'deleteUser'])->name('admin.delete-user.post');
