@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>@yield('title', 'LifeLine Admin') - Admin Panel</title>
     <link rel="icon" type="image/svg+xml" href="{{ asset('lifeline-logo.svg') }}">
     <link rel="alternate icon" href="{{ asset('favicon.ico') }}">
@@ -30,7 +30,22 @@
         .toast{position:fixed;bottom:24px;right:24px;z-index:9999;padding:12px 20px;border-radius:10px;background:#27272A;border:1px solid #3F3F46;font-size:13px;animation:toastIn .3s ease,toastOut .3s ease 2.7s forwards}
         @keyframes toastIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
         @keyframes toastOut{from{opacity:1}to{opacity:0;transform:translateY(20px)}}
-        @media(max-width:768px){.admin-sidebar{display:none}.admin-main{margin-left:0}}
+        @media(max-width:768px){
+            .admin-sidebar{display:none!important;transform:translateX(-100%);transition:transform 0.3s ease}
+            .admin-sidebar.mobile-open{display:flex!important;transform:translateX(0)}
+            .mobile-menu-overlay{display:block;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:45}
+            .admin-main{margin-left:0!important;padding:1rem!important}
+            .modal-box{margin:1rem;max-width:none;border-radius:1rem}
+            .stats-grid{grid-template-columns:1fr}
+            .users-table{font-size:14px}
+            .btn{padding:6px 12px;font-size:12px}
+        }
+        @media(max-width:640px){
+            .modal-box{margin:0.5rem}
+            .users-table{font-size:12px}
+            .table-row{padding:0.5rem}
+            .stat-card{padding:1rem}
+        }
     </style>
 </head>
 <body class="bg-grid">

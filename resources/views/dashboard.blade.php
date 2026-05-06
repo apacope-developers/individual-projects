@@ -2,16 +2,26 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <title>Dashboard - LifeLine</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  .rotate-180 {
-    transform: rotate(180deg);
-  }
+/* Responsive Design System */
+:root {
+  --breakpoint-xs: 320px;
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
+  
+  --container-padding: 1rem;
+  --sidebar-width: 220px;
+  --mobile-bar-height: 60px;
+}
   
   .transition-transform {
     transition: transform 0.3s ease;
@@ -37,7 +47,10 @@ h1,h2,h3,h4,h5,h6{font-family:'Space Grotesk',sans-serif}
 .quick-card{cursor:pointer;position:relative;overflow:hidden}
 .quick-card::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(239,68,68,.08),transparent);opacity:0;transition:opacity .3s}
 .quick-card:hover::after{opacity:1}
-.sidebar{width:220px}.nav-item{transition:all .2s;position:relative;cursor:pointer}
+.sidebar{width:var(--sidebar-width);position:fixed;left:0;top:0;height:100vh;z-index:40;transform:translateX(0);transition:transform 0.3s ease}
+.sidebar.mobile-hidden{transform:translateX(-100%)}
+.mobile-menu-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:35}
+.mobile-menu-overlay.show{display:block}
 .nav-item::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:0;background:#EF4444;border-radius:0 4px 4px 0;transition:height .2s}
 .nav-item.active::before{height:60%}.nav-item.active{background:rgba(239,68,68,.1);color:#EF4444}
 .sos-fab{position:fixed;bottom:24px;right:24px;z-index:5000;width:56px;height:56px;border-radius:50%;background:#EF4444;color:white;border:none;font-size:18px;cursor:pointer;box-shadow:0 4px 20px rgba(239,68,68,.4);transition:all .3s}
@@ -76,7 +89,29 @@ h1,h2,h3,h4,h5,h6{font-family:'Space Grotesk',sans-serif}
 .body-zone{fill:rgba(45,212,191,.08);stroke:rgba(45,212,191,.25);stroke-width:1;cursor:pointer;transition:all .3s}
 .body-zone:hover{fill:rgba(239,68,68,.2);stroke:#EF4444;stroke-width:1.5}
 .body-outline{fill:none;stroke:#3F3F46;stroke-width:1.5}
-@media(max-width:768px){.sidebar{display:none!important}.mob-bar{display:flex!important}.main-c{padding-bottom:80px!important}}
+@media(max-width:768px){
+  .sidebar{display:none!important}
+  .mob-bar{display:flex!important}
+  .main-c{padding-bottom:80px!important;margin-left:0!important}
+  .admin-main{margin-left:0!important;padding:1rem!important}
+  .page{padding:1rem}
+  .modal-box{margin:1rem;max-width:none}
+  .sos-fab{bottom:80px!important}
+}
+
+@media(max-width:640px){
+  .quick-grid{grid-template-columns:1fr}
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .search-input{font-size:16px}
+  .modal-box{margin:0.5rem;border-radius:1rem}
+}
+
+@media(max-width:480px){
+  .feature-grid{grid-template-columns:1fr}
+  .emergency-grid{grid-template-columns:1fr}
+  .body-map{max-width:100%}
+  .cpr-controls{flex-direction:column}
+}
 </style>
 </head>
 <body class="bg-grid">

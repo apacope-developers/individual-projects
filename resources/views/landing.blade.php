@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
 <title>LifeLine - Emergency First Aid System</title>
 <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
 <link rel="alternate icon" href="{{ asset('favicon.ico') }}">
@@ -44,10 +44,10 @@ h1,h2,h3,h4,h5,h6{font-family:'Space Grotesk',sans-serif}
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex justify-between items-center h-16">
       <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-red-600 flex items-center justify-center pulse-ring">
-          <i class="fa-solid fa-heart-pulse text-white"></i>
+        <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-red-600 flex items-center justify-center pulse-ring">
+          <i class="fa-solid fa-heart-pulse text-white text-sm sm:text-base"></i>
         </div>
-        <span class="text-xl font-bold">LifeLine</span>
+        <span class="text-lg sm:text-xl font-bold">LifeLine</span>
       </div>
       <div class="hidden md:flex items-center gap-8">
         <a href="#features" class="text-zinc-300 hover:text-white transition-colors">Features</a>
@@ -55,39 +55,39 @@ h1,h2,h3,h4,h5,h6{font-family:'Space Grotesk',sans-serif}
         <a href="#emergency" class="text-zinc-300 hover:text-white transition-colors">Emergency Guide</a>
         <a href="{{ route('login') }}" class="px-4 py-2 bg-red-600 hover:bg-red-500 rounded-lg font-medium transition-colors">Sign In</a>
       </div>
-      <button class="md:hidden text-zinc-300" onclick="toggleMobileMenu()">
+      <button class="md:hidden text-zinc-300 p-2 rounded-lg hover:bg-zinc-800 transition-colors" onclick="toggleMobileMenu()" aria-label="Toggle mobile menu">
         <i class="fa-solid fa-bars text-xl"></i>
       </button>
     </div>
   </div>
   <!-- Mobile Menu -->
-  <div id="mobileMenu" class="hidden md:hidden bg-[#09090B]/95 backdrop-blur-lg border-t border-zinc-800">
-    <div class="px-4 py-3 space-y-2">
-      <a href="#features" class="block py-2 text-zinc-300">Features</a>
-      <a href="#how-it-works" class="block py-2 text-zinc-300">How It Works</a>
-      <a href="#emergency" class="block py-2 text-zinc-300">Emergency Guide</a>
-      <a href="{{ route('login') }}" class="block py-2 text-red-400">Sign In</a>
+  <div id="mobileMenu" class="hidden md:hidden bg-[#09090B]/95 backdrop-blur-lg border-t border-zinc-800 fixed top-16 left-0 right-0 z-40">
+    <div class="px-4 py-4 space-y-1">
+      <a href="#features" class="block py-3 px-4 text-zinc-300 hover:bg-zinc-800 rounded-lg transition-colors" onclick="closeMobileMenu()">Features</a>
+      <a href="#how-it-works" class="block py-3 px-4 text-zinc-300 hover:bg-zinc-800 rounded-lg transition-colors" onclick="closeMobileMenu()">How It Works</a>
+      <a href="#emergency" class="block py-3 px-4 text-zinc-300 hover:bg-zinc-800 rounded-lg transition-colors" onclick="closeMobileMenu()">Emergency Guide</a>
+      <a href="{{ route('login') }}" class="block py-3 px-4 text-red-400 hover:bg-red-600/10 rounded-lg transition-colors font-medium">Sign In</a>
     </div>
   </div>
 </nav>
 
 <!-- Hero Section -->
-<section class="min-h-screen flex items-center justify-center px-4 pt-16 relative">
+<section class="min-h-screen flex items-center justify-center px-4 sm:px-6 pt-16 relative hero-section">
   
   <div class="max-w-7xl mx-auto text-center relative z-10 w-full">
     <div class="mb-8">
-            <h1 class="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-white to-zinc-300 bg-clip-text text-transparent">
+            <h1 class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-white to-zinc-300 bg-clip-text text-transparent leading-tight">
         Your Lifeline in
         <span class="text-red-500">Critical Moments</span>
       </h1>
-      <p class="text-xl text-zinc-300 max-w-3xl mx-auto mb-8 leading-relaxed">
+      <p class="text-lg sm:text-xl text-zinc-300 max-w-3xl mx-auto mb-6 sm:mb-8 leading-relaxed px-2">
         Get instant access to life-saving first aid instructions, AI-powered symptom assessment, 
         and real-time emergency guidance when every second counts.
       </p>
     </div>
 
     <!-- Emergency Search Section -->
-    <div class="bg-red-600/10 border border-red-600/30 rounded-2xl p-8 max-w-4xl mx-auto mb-12">
+    <div class="bg-red-600/10 border border-red-600/30 rounded-2xl p-6 sm:p-8 max-w-4xl mx-auto mb-8 sm:mb-12 emergency-search-container">
       <div class="text-center mb-6">
         <div class="inline-flex items-center gap-2 bg-red-600/20 px-4 py-2 rounded-full mb-4">
           <i class="fa-solid fa-exclamation-triangle text-red-400 pulse-glow"></i>
@@ -106,57 +106,56 @@ h1,h2,h3,h4,h5,h6{font-family:'Space Grotesk',sans-serif}
         <input 
           type="text" 
           id="publicEmergencySearch" 
-          placeholder="Describe your emergency (e.g., 'chest pain', 'bleeding', 'choking', 'burn')..."
-          class="w-full px-4 py-4 pr-64 bg-[#18181B] border border-zinc-700 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent text-base md:text-lg"
+          placeholder="Describe your emergency..."
+          class="w-full px-4 py-3 sm:py-4 pr-32 sm:pr-64 bg-[#18181B] border border-zinc-700 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent text-base"
           onkeypress="if(event.key === 'Enter') performPublicEmergencySearch()"
         >
         <button 
           id="publicVoiceSearchBtn" 
           onclick="togglePublicVoiceSearch()" 
-          class="absolute right-52 top-1/2 transform -translate-y-1/2 w-10 h-10 bg-zinc-700 hover:bg-zinc-600 text-zinc-300 rounded-lg flex items-center justify-center transition-all z-10"
+          class="absolute right-20 sm:right-52 top-1/2 transform -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 bg-zinc-700 hover:bg-zinc-600 text-zinc-300 rounded-lg flex items-center justify-center transition-all z-10"
           title="Voice Search (Click to start)"
           style="display: flex !important;"
         >
-          <i id="publicVoiceIcon" class="fa-solid fa-microphone"></i>
+          <i id="publicVoiceIcon" class="fa-solid fa-microphone text-sm sm:text-base"></i>
         </button>
         <button 
           onclick="performPublicEmergencySearch()"
-          class="absolute right-2 top-1/2 transform -translate-y-1/2 px-4 py-2 md:px-6 md:py-3 bg-red-600 hover:bg-red-500 rounded-lg font-semibold transition-colors flex items-center gap-2 text-sm md:text-base"
+          class="absolute right-2 top-1/2 transform -translate-y-1/2 px-3 py-2 sm:px-4 sm:py-3 bg-red-600 hover:bg-red-500 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 text-sm sm:text-base whitespace-nowrap"
         >
           <i class="fa-solid fa-search"></i>
-          <span class="hidden md:inline">Get Help Now</span>
-          <span class="md:hidden">Help</span>
+          <span>Get Help</span>
         </button>
       </div>
 
       <!-- Quick Emergency Buttons -->
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-        <button onclick="quickEmergencySearch('chest pain')" class="px-4 py-3 bg-[#18181B] hover:bg-red-600/20 border border-zinc-700 rounded-lg text-sm font-medium text-zinc-300 hover:text-white transition-all">
-          <i class="fa-solid fa-heart-pulse text-red-400 mr-2"></i>Chest Pain
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-6 quick-emergency-grid">
+        <button onclick="quickEmergencySearch('chest pain')" class="px-3 py-2 sm:px-4 sm:py-3 bg-[#18181B] hover:bg-red-600/20 border border-zinc-700 rounded-lg text-xs sm:text-sm font-medium text-zinc-300 hover:text-white transition-all">
+          <i class="fa-solid fa-heart-pulse text-red-400 mr-1 sm:mr-2"></i><span class="hidden sm:inline">Chest Pain</span><span class="sm:hidden">Chest</span>
         </button>
-        <button onclick="quickEmergencySearch('bleeding')" class="px-4 py-3 bg-[#18181B] hover:bg-red-600/20 border border-zinc-700 rounded-lg text-sm font-medium text-zinc-300 hover:text-white transition-all">
-          <i class="fa-solid fa-droplet text-red-400 mr-2"></i>Bleeding
+        <button onclick="quickEmergencySearch('bleeding')" class="px-3 py-2 sm:px-4 sm:py-3 bg-[#18181B] hover:bg-red-600/20 border border-zinc-700 rounded-lg text-xs sm:text-sm font-medium text-zinc-300 hover:text-white transition-all">
+          <i class="fa-solid fa-droplet text-red-400 mr-1 sm:mr-2"></i><span class="hidden sm:inline">Bleeding</span><span class="sm:hidden">Bleed</span>
         </button>
-        <button onclick="quickEmergencySearch('choking')" class="px-4 py-3 bg-[#18181B] hover:bg-red-600/20 border border-zinc-700 rounded-lg text-sm font-medium text-zinc-300 hover:text-white transition-all">
-          <i class="fa-solid fa-wind text-red-400 mr-2"></i>Choking
+        <button onclick="quickEmergencySearch('choking')" class="px-3 py-2 sm:px-4 sm:py-3 bg-[#18181B] hover:bg-red-600/20 border border-zinc-700 rounded-lg text-xs sm:text-sm font-medium text-zinc-300 hover:text-white transition-all">
+          <i class="fa-solid fa-wind text-red-400 mr-1 sm:mr-2"></i><span class="hidden sm:inline">Choking</span><span class="sm:hidden">Choke</span>
         </button>
-        <button onclick="quickEmergencySearch('burns')" class="px-4 py-3 bg-[#18181B] hover:bg-red-600/20 border border-zinc-700 rounded-lg text-sm font-medium text-zinc-300 hover:text-white transition-all">
-          <i class="fa-solid fa-fire text-red-400 mr-2"></i>Burns
+        <button onclick="quickEmergencySearch('burns')" class="px-3 py-2 sm:px-4 sm:py-3 bg-[#18181B] hover:bg-red-600/20 border border-zinc-700 rounded-lg text-xs sm:text-sm font-medium text-zinc-300 hover:text-white transition-all">
+          <i class="fa-solid fa-fire text-red-400 mr-1 sm:mr-2"></i><span class="hidden sm:inline">Burns</span><span class="sm:hidden">Burn</span>
         </button>
       </div>
 
       <!-- Emergency Hotline -->
-      <div class="bg-[#18181B]/50 rounded-lg p-4 flex items-center justify-between">
+      <div class="bg-[#18181B]/50 rounded-lg p-3 sm:p-4 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-0">
         <div class="flex items-center gap-3">
-          <div class="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center pulse-glow flex-shrink-0">
-            <i class="fa-solid fa-phone text-white text-xl"></i>
+          <div class="w-10 h-10 sm:w-12 sm:h-12 bg-red-600 rounded-full flex items-center justify-center pulse-glow flex-shrink-0">
+            <i class="fa-solid fa-phone text-white text-lg sm:text-xl"></i>
           </div>
           <div>
-            <div class="text-white font-semibold">Emergency Hotline</div>
-            <div class="text-zinc-400 text-sm">Call for immediate medical assistance</div>
+            <div class="text-white font-semibold text-sm sm:text-base">Emergency Hotline</div>
+            <div class="text-zinc-400 text-xs sm:text-sm">Call for immediate medical assistance</div>
           </div>
         </div>
-        <a href="tel:912" class="w-full md:w-auto px-6 py-3 bg-red-600 hover:bg-red-500 rounded-lg font-bold text-white transition-colors flex items-center justify-center gap-2">
+        <a href="tel:912" class="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 bg-red-600 hover:bg-red-500 rounded-lg font-bold text-white transition-colors flex items-center justify-center gap-2 text-sm sm:text-base">
           <i class="fa-solid fa-phone-volume"></i>
           Call 912
         </a>
@@ -168,31 +167,31 @@ h1,h2,h3,h4,h5,h6{font-family:'Space Grotesk',sans-serif}
       <!-- Results will be displayed here -->
     </div>
 
-    <div class="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-      <a href="{{ route('register') }}" class="px-8 py-4 bg-red-600 hover:bg-red-500 rounded-xl font-semibold transition-all transform hover:scale-105 flex items-center justify-center gap-2">
+    <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mb-8 sm:mb-12 px-4">
+      <a href="{{ route('register') }}" class="px-6 sm:px-8 py-3 sm:py-4 bg-red-600 hover:bg-red-500 rounded-xl font-semibold transition-all transform hover:scale-105 flex items-center justify-center gap-2 text-sm sm:text-base">
         <i class="fa-solid fa-rocket"></i> Get Started Free
       </a>
     </div>
 
-    <div class="relative">
+    <div class="relative px-4">
       <div class="absolute inset-0 bg-red-600/20 blur-3xl rounded-full"></div>
-      <div class="relative bg-[#18181B]/80 backdrop-blur-xl border border-zinc-800 rounded-2xl p-8 max-w-4xl mx-auto">
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+      <div class="relative bg-[#18181B]/80 backdrop-blur-xl border border-zinc-800 rounded-2xl p-6 sm:p-8 max-w-4xl mx-auto">
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 stats-grid">
           <div class="text-center">
-            <div class="text-3xl font-bold text-red-400 mb-1">50+</div>
-            <div class="text-sm text-zinc-500">Emergency Guides</div>
+            <div class="text-2xl sm:text-3xl font-bold text-red-400 mb-1">50+</div>
+            <div class="text-xs sm:text-sm text-zinc-500">Emergency Guides</div>
           </div>
           <div class="text-center">
-            <div class="text-3xl font-bold text-teal-400 mb-1">24/7</div>
-            <div class="text-sm text-zinc-500">Available</div>
+            <div class="text-2xl sm:text-3xl font-bold text-teal-400 mb-1">24/7</div>
+            <div class="text-xs sm:text-sm text-zinc-500">Available</div>
           </div>
           <div class="text-center">
-            <div class="text-3xl font-bold text-blue-400 mb-1">100%</div>
-            <div class="text-sm text-zinc-500">Free</div>
+            <div class="text-2xl sm:text-3xl font-bold text-blue-400 mb-1">100%</div>
+            <div class="text-xs sm:text-sm text-zinc-500">Free</div>
           </div>
           <div class="text-center">
-            <div class="text-3xl font-bold text-green-400 mb-1">13</div>
-            <div class="text-sm text-zinc-500">Categories</div>
+            <div class="text-2xl sm:text-3xl font-bold text-green-400 mb-1">13</div>
+            <div class="text-xs sm:text-sm text-zinc-500">Categories</div>
           </div>
         </div>
       </div>
@@ -599,6 +598,37 @@ h1,h2,h3,h4,h5,h6{font-family:'Space Grotesk',sans-serif}
 </div>
 
 <script>
+// Mobile menu functionality
+function toggleMobileMenu() {
+    const mobileMenu = document.getElementById('mobileMenu');
+    const body = document.body;
+    
+    if (mobileMenu.classList.contains('hidden')) {
+        mobileMenu.classList.remove('hidden');
+        body.style.overflow = 'hidden';
+    } else {
+        closeMobileMenu();
+    }
+}
+
+function closeMobileMenu() {
+    const mobileMenu = document.getElementById('mobileMenu');
+    const body = document.body;
+    
+    mobileMenu.classList.add('hidden');
+    body.style.overflow = '';
+}
+
+// Close mobile menu when clicking outside
+document.addEventListener('click', function(event) {
+    const mobileMenu = document.getElementById('mobileMenu');
+    const menuButton = event.target.closest('button[onclick="toggleMobileMenu()"]');
+    
+    if (!mobileMenu.contains(event.target) && !menuButton && !mobileMenu.classList.contains('hidden')) {
+        closeMobileMenu();
+    }
+});
+
 // Voice Search global variables and functions for landing page
 let publicRecognition = null;
 let isPublicListening = false;

@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>LifeLine - Responsive Design Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'DM Sans',sans-serif;background:#09090B;color:#fafafa;min-height:100vh}
+        h1,h2,h3,h4,h5,h6{font-family:'Space Grotesk',sans-serif}
+        .bg-grid{background-image:radial-gradient(ellipse 80% 50% at 50% 0%,rgba(239,68,68,.06) 0%,transparent 60%),radial-gradient(ellipse 60% 40% at 80% 100%,rgba(45,212,191,.04) 0%,transparent 60%),linear-gradient(rgba(63,63,70,.15) 1px,transparent 1px),linear-gradient(90deg,rgba(63,63,70,.15) 1px,transparent 1px);background-size:100% 100%,100% 100%,40px 40px,40px 40px}
+        .card{background:#18181B;border:1px solid #27272A;border-radius:12px;transition:all .25s}
+        .card:hover{border-color:#3F3F46;transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.3)}
+        .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;transition:all .2s}
+        .btn-danger{background:#DC2626;color:white;border:none}.btn-danger:hover{background:#B91C1C}
+        .btn-ghost{background:transparent;color:#A1A1AA;border:1px solid #27272A}.btn-ghost:hover{background:#18181B;border-color:#3F3F46;color:#FAFAFA}
+        
+        /* Responsive Design System */
+        :root {
+          --breakpoint-xs: 320px;
+          --breakpoint-sm: 640px;
+          --breakpoint-md: 768px;
+          --breakpoint-lg: 1024px;
+          --breakpoint-xl: 1280px;
+          --breakpoint-2xl: 1536px;
+          
+          --container-padding: 1rem;
+          --sidebar-width: 220px;
+          --mobile-bar-height: 60px;
+        }
+        
+        /* Responsive utilities */
+        .container-responsive {
+          max-width: 1400px;
+          margin: 0 auto;
+          padding: 0 var(--container-padding);
+        }
+        
+        .text-responsive {
+          font-size: clamp(0.875rem, 2vw, 1rem);
+        }
+        
+        .heading-responsive {
+          font-size: clamp(1.5rem, 4vw, 3rem);
+        }
+        
+        .grid-responsive {
+          display: grid;
+          gap: 1rem;
+          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        }
+        
+        @media (max-width: 640px) {
+          .grid-responsive {
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+          }
+        }
+        
+        /* Touch-friendly targets */
+        @media (pointer: coarse) {
+          .btn, button {
+            min-height: 44px;
+            min-width: 44px;
+          }
+        }
+        
+        /* High contrast mode support */
+        @media (prefers-contrast: high) {
+          .card {
+            border-width: 2px;
+          }
+          
+          .btn {
+            border-width: 2px;
+          }
+        }
+        
+        /* Reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+        }
+    </style>
+</head>
+<body class="bg-grid">
+    <div class="container-responsive py-8">
+        <header class="text-center mb-12">
+            <h1 class="heading-responsive font-bold mb-4 bg-gradient-to-r from-white to-zinc-300 bg-clip-text text-transparent">
+                LifeLine Responsive Design Test
+            </h1>
+            <p class="text-responsive text-zinc-400 max-w-2xl mx-auto">
+                Test your responsive design by resizing your browser window or using developer tools to simulate different devices.
+            </p>
+        </header>
+
+        <!-- Viewport Info -->
+        <section class="mb-12">
+            <div class="card p-6">
+                <h2 class="text-xl font-semibold mb-4 text-red-400">
+                    <i class="fa-solid fa-mobile-alt mr-2"></i>Current Viewport Information
+                </h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-teal-400" id="viewport-width">-</div>
+                        <div class="text-sm text-zinc-500">Width (px)</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-blue-400" id="viewport-height">-</div>
+                        <div class="text-sm text-zinc-500">Height (px)</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-green-400" id="device-type">-</div>
+                        <div class="text-sm text-zinc-500">Device Type</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-purple-400" id="orientation">-</div>
+                        <div class="text-sm text-zinc-500">Orientation</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Responsive Grid Test -->
+        <section class="mb-12">
+            <h2 class="text-2xl font-bold mb-6 text-center">Responsive Grid Layout</h2>
+            <div class="grid-responsive">
+                <div class="card p-6 text-center">
+                    <i class="fa-solid fa-heart-pulse text-3xl text-red-400 mb-4"></i>
+                    <h3 class="font-semibold mb-2">Emergency First Aid</h3>
+                    <p class="text-sm text-zinc-400">Step-by-step instructions for critical situations</p>
+                </div>
+                <div class="card p-6 text-center">
+                    <i class="fa-solid fa-person text-3xl text-teal-400 mb-4"></i>
+                    <h3 class="font-semibold mb-2">Interactive Body Map</h3>
+                    <p class="text-sm text-zinc-400">Click on body parts for targeted guidance</p>
+                </div>
+                <div class="card p-6 text-center">
+                    <i class="fa-solid fa-stethoscope text-3xl text-orange-400 mb-4"></i>
+                    <h3 class="font-semibold mb-2">AI Symptom Checker</h3>
+                    <p class="text-sm text-zinc-400">Smart triage system with prioritized care</p>
+                </div>
+                <div class="card p-6 text-center">
+                    <i class="fa-solid fa-kit-medical text-3xl text-purple-400 mb-4"></i>
+                    <h3 class="font-semibold mb-2">First Aid Kit Manager</h3>
+                    <p class="text-sm text-zinc-400">Track supplies and expiration dates</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Button Responsiveness Test -->
+        <section class="mb-12">
+            <h2 class="text-2xl font-bold mb-6 text-center">Touch-Friendly Buttons</h2>
+            <div class="flex flex-wrap gap-4 justify-center">
+                <button class="btn btn-danger">
+                    <i class="fa-solid fa-phone-volume"></i> Emergency Call
+                </button>
+                <button class="btn btn-ghost">
+                    <i class="fa-solid fa-book-medical"></i> First Aid Guide
+                </button>
+                <button class="bg-teal-600 hover:bg-teal-500 text-white px-4 py-2 rounded-lg transition-colors">
+                    <i class="fa-solid fa-user-plus"></i> Register
+                </button>
+                <button class="bg-zinc-700 hover:bg-zinc-600 text-white px-4 py-2 rounded-lg transition-colors">
+                    <i class="fa-solid fa-sign-in-alt"></i> Sign In
+                </button>
+            </div>
+        </section>
+
+        <!-- Typography Test -->
+        <section class="mb-12">
+            <h2 class="text-2xl font-bold mb-6 text-center">Responsive Typography</h2>
+            <div class="card p-6 text-center">
+                <h3 class="heading-responsive font-bold mb-4">This Heading Scales Smoothly</h3>
+                <p class="text-responsive mb-4">This paragraph text also adapts to different screen sizes for optimal readability.</p>
+                <div class="text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl text-zinc-400">
+                    Multi-size text that changes at breakpoints
+                </div>
+            </div>
+        </section>
+
+        <!-- Feature Detection -->
+        <section class="mb-12">
+            <h2 class="text-2xl font-bold mb-6 text-center">Device Capabilities</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="card p-4">
+                    <h4 class="font-semibold mb-2 text-green-400">Touch Support</h4>
+                    <div id="touch-support" class="text-sm text-zinc-400">-</div>
+                </div>
+                <div class="card p-4">
+                    <h4 class="font-semibold mb-2 text-blue-400">Reduced Motion</h4>
+                    <div id="reduced-motion" class="text-sm text-zinc-400">-</div>
+                </div>
+                <div class="card p-4">
+                    <h4 class="font-semibold mb-2 text-purple-400">High Contrast</h4>
+                    <div id="high-contrast" class="text-sm text-zinc-400">-</div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Update viewport information
+        function updateViewportInfo() {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            
+            document.getElementById('viewport-width').textContent = width;
+            document.getElementById('viewport-height').textContent = height;
+            
+            // Determine device type
+            let deviceType = 'Desktop';
+            if (width <= 480) deviceType = 'Mobile';
+            else if (width <= 768) deviceType = 'Tablet';
+            else if (width <= 1024) deviceType = 'Small Desktop';
+            
+            document.getElementById('device-type').textContent = deviceType;
+            
+            // Determine orientation
+            const orientation = width > height ? 'Landscape' : 'Portrait';
+            document.getElementById('orientation').textContent = orientation;
+        }
+        
+        // Feature detection
+        function detectFeatures() {
+            // Touch support
+            const touchSupport = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+            document.getElementById('touch-support').textContent = touchSupport ? 'Yes' : 'No';
+            
+            // Reduced motion preference
+            const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            document.getElementById('reduced-motion').textContent = reducedMotion ? 'Yes' : 'No';
+            
+            // High contrast preference
+            const highContrast = window.matchMedia('(prefers-contrast: high)').matches;
+            document.getElementById('high-contrast').textContent = highContrast ? 'Yes' : 'No';
+        }
+        
+        // Initialize
+        updateViewportInfo();
+        detectFeatures();
+        
+        // Update on resize
+        window.addEventListener('resize', updateViewportInfo);
+        
+        // Listen for preference changes
+        window.matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', detectFeatures);
+        window.matchMedia('(prefers-contrast: high)').addEventListener('change', detectFeatures);
+    </script>
+</body>
+</html>

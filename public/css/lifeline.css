@@ -2,6 +2,20 @@
    LifeLine — Custom Styles
    =========================== */
 
+/* Responsive Design System */
+:root {
+  --breakpoint-xs: 320px;
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
+  
+  --container-padding: 1rem;
+  --sidebar-width: 220px;
+  --mobile-bar-height: 60px;
+}
+
 * { scrollbar-width: thin; scrollbar-color: #3F3F46 transparent; }
 *::-webkit-scrollbar { width: 6px; }
 *::-webkit-scrollbar-track { background: transparent; }
@@ -18,18 +32,107 @@
 }
 
 /* Sidebar */
-.sidebar { width: 220px; transition: width 0.3s; }
+.sidebar { 
+  width: var(--sidebar-width); 
+  transition: width 0.3s; 
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 100vh;
+  z-index: 40;
+}
 .sidebar .nav-label { opacity: 1; transition: opacity 0.2s; }
 .nav-item { transition: all 0.2s; position: relative; }
 .nav-item::before { content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 3px; height: 0; background: #EF4444; border-radius: 0 4px 4px 0; transition: height 0.2s; }
 .nav-item.active::before { height: 60%; }
 
 /* Bottom bar (mobile) */
-.bottom-bar { display: none; }
+.bottom-bar { 
+  display: none; 
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: var(--mobile-bar-height);
+  background: #09090B;
+  border-top: 1px solid #27272A;
+  z-index: 50;
+  padding: 0.5rem;
+}
+
+/* Mobile menu overlay */
+.mobile-menu-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  z-index: 45;
+}
+
+/* Responsive breakpoints */
 @media (max-width: 768px) {
-    .sidebar { display: none !important; }
-    .bottom-bar { display: flex; }
-    .main-content { padding-bottom: 80px !important; }
+  :root {
+    --container-padding: 0.75rem;
+  }
+  
+  .sidebar { 
+    display: none !important;
+    transform: translateX(-100%);
+  }
+  
+  .sidebar.mobile-open {
+    display: flex !important;
+    transform: translateX(0);
+  }
+  
+  .mobile-menu-overlay.show {
+    display: block;
+  }
+  
+  .bottom-bar { 
+    display: flex; 
+    justify-content: space-around;
+    align-items: center;
+  }
+  
+  .main-content { 
+    padding-bottom: calc(var(--mobile-bar-height) + 1rem) !important;
+    margin-left: 0 !important;
+  }
+  
+  .admin-main {
+    margin-left: 0 !important;
+    padding: 1rem !important;
+  }
+}
+
+@media (max-width: 640px) {
+  :root {
+    --container-padding: 0.5rem;
+  }
+  
+  .hero-section {
+    padding: 2rem 0.75rem;
+  }
+  
+  .emergency-search-container {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .quick-emergency-grid {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+  
+  .stats-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .feature-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* Fade-in animation for pages */
@@ -67,9 +170,43 @@
 .glow-red { text-shadow: 0 0 20px rgba(239,68,68,0.3); }
 
 /* SOS Floating button */
-.sos-fab { position: fixed; bottom: 24px; left: 24px; z-index: 5000; width: 60px; height: 60px; border-radius: 50%; background: #EF4444; color: white; border: none; font-size: 20px; cursor: pointer; box-shadow: 0 4px 20px rgba(239,68,68,0.4); transition: all 0.3s; }
+.sos-fab { 
+  position: fixed; 
+  bottom: 24px; 
+  right: 24px; 
+  z-index: 5000; 
+  width: 60px; 
+  height: 60px; 
+  border-radius: 50%; 
+  background: #EF4444; 
+  color: white; 
+  border: none; 
+  font-size: 20px; 
+  cursor: pointer; 
+  box-shadow: 0 4px 20px rgba(239,68,68,0.4); 
+  transition: all 0.3s; 
+}
 .sos-fab:hover { transform: scale(1.1); box-shadow: 0 6px 30px rgba(239,68,68,0.6); }
-@media (max-width: 768px) { .sos-fab { bottom: 90px; left: 16px; width: 52px; height: 52px; font-size: 18px; } }
+
+@media (max-width: 768px) { 
+  .sos-fab { 
+    bottom: calc(var(--mobile-bar-height) + 16px); 
+    right: 16px; 
+    width: 52px; 
+    height: 52px; 
+    font-size: 18px; 
+  } 
+}
+
+@media (max-width: 480px) {
+  .sos-fab {
+    bottom: calc(var(--mobile-bar-height) + 12px);
+    right: 12px;
+    width: 48px;
+    height: 48px;
+    font-size: 16px;
+  }
+}
 
 /* Search input */
 .search-input { background: #18181B; border: 1px solid #27272A; color: #FAFAFA; border-radius: 10px; padding: 10px 16px 10px 42px; width: 100%; outline: none; transition: border-color 0.2s; }
@@ -86,11 +223,81 @@
 .step-dot.done { background: #2DD4BF; }
 
 /* Toast notifications */
-#toastContainer > div { padding: 12px 20px; border-radius: 10px; background: #27272A; border: 1px solid #3F3F46; color: #FAFAFA; font-size: 14px; animation: toastIn 0.3s ease, toastOut 0.3s ease 2.7s forwards; max-width: 340px; }
+#toastContainer > div { 
+  padding: 12px 20px; 
+  border-radius: 10px; 
+  background: #27272A; 
+  border: 1px solid #3F3F46; 
+  color: #FAFAFA; 
+  font-size: 14px; 
+  animation: toastIn 0.3s ease, toastOut 0.3s ease 2.7s forwards; 
+  max-width: 340px; 
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+}
+
+@media (max-width: 768px) {
+  #toastContainer > div {
+    max-width: calc(100vw - 2rem);
+    left: 1rem;
+    right: 1rem;
+    bottom: calc(var(--mobile-bar-height) + 1rem);
+  }
+}
+
 @keyframes toastIn { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
 @keyframes toastOut { from { opacity: 1; } to { opacity: 0; transform: translateX(40px); } }
 
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+/* Responsive utilities */
+.container-responsive {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 var(--container-padding);
+}
+
+.text-responsive {
+  font-size: clamp(0.875rem, 2vw, 1rem);
+}
+
+.heading-responsive {
+  font-size: clamp(1.5rem, 4vw, 3rem);
+}
+
+.grid-responsive {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+@media (max-width: 640px) {
+  .grid-responsive {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+}
+
+/* Touch-friendly targets */
+@media (pointer: coarse) {
+  .btn, button, .nav-item, .quick-card {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .card, .sidebar, .bottom-bar {
+    border-width: 2px;
+  }
+  
+  .btn {
+    border-width: 2px;
+  }
 }
