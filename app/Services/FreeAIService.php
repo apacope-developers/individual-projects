@@ -232,96 +232,185 @@ Keep responses concise, medically accurate, and focused on immediate first aid a
     }
 
     /**
-     * Fallback recommendations when AI is unavailable
+     * Fallback recommendations when AI is unavailable - uses internet APIs
      */
     private function getFallbackRecommendation(string $symptoms): array
     {
-        $symptoms = strtolower($symptoms);
-        
-        // Basic keyword matching for common emergencies
-        if (str_contains($symptoms, 'chest') && str_contains($symptoms, 'pain')) {
-            return [
-                'emergency_level' => 'critical',
-                'condition_name' => 'Possible Heart Attack',
-                'immediate_action' => 'Call emergency services immediately',
-                'steps' => [
-                    'Call 912 or local emergency number',
-                    'Have the person sit down and rest',
-                    'Give aspirin if available and person is not allergic',
-                    'Loosen tight clothing',
-                    'Monitor breathing and consciousness',
-                    'Be prepared to perform CPR if needed'
-                ],
-                'emergency_call' => true,
-                'warning_signs' => ['Chest pain spreading to arm/jaw', 'Shortness of breath', 'Sweating', 'Nausea'],
-                'important_notes' => ['Do not delay calling emergency services', 'Do not give food or drink']
-            ];
-        }
-        
-        if (str_contains($symptoms, 'bleed') || str_contains($symptoms, 'blood')) {
-            return [
-                'emergency_level' => 'urgent',
-                'condition_name' => 'Severe Bleeding',
-                'immediate_action' => 'Apply direct pressure',
-                'steps' => [
-                    'Apply firm pressure with clean cloth',
-                    'Elevate injured area above heart',
-                    'Maintain pressure until bleeding stops',
-                    'Apply pressure bandage if available',
-                    'Seek medical attention if bleeding continues'
-                ],
-                'emergency_call' => false,
-                'warning_signs' => ['Bleeding doesn\'t stop after 10 minutes', 'Large amount of blood loss', 'Signs of shock'],
-                'important_notes' => ['Do not remove objects from wound', 'Keep person warm']
-            ];
+        try {
+            // Try using OpenAI API as fallback
+            $openaiKey = env('OPENAI_API_KEY');
+            if ($openaiKey) {
+                return $this->tryOpenAIRecommendation($symptoms, $openaiKey);
+            }
+            
+            // Try using Gemini API as fallback
+            $geminiKey = env('GEMINI_API_KEY');
+            if ($geminiKey) {
+                return $this->tryGeminiRecommendation($symptoms, $geminiKey);
+            }
+            
+        } catch (\Exception $e) {
+            Log::error('All AI fallback services failed: ' . $e->getMessage());
         }
 
-        // Default fallback
+        // Last resort - minimal emergency guidance
         return [
-            'emergency_level' => 'moderate',
-            'condition_name' => 'Medical Emergency',
-            'immediate_action' => 'Monitor and seek medical advice',
+            'emergency_level' => 'unknown',
+            'condition_name' => 'AI Services Unavailable',
+            'immediate_action' => 'Seek professional medical help immediately',
             'steps' => [
-                'Stay calm and assess the situation',
-                'Ensure person is comfortable',
-                'Monitor vital signs',
-                'Call 912 if condition worsens',
-                'Provide basic first aid if trained'
+                'Call emergency services (912) for serious conditions',
+                'Go to nearest emergency room',
+                'Contact local medical professionals',
+                'Do not rely on AI when services are unavailable'
             ],
-            'emergency_call' => false,
-            'warning_signs' => ['Condition worsens', 'Person becomes unconscious', 'Difficulty breathing'],
-            'important_notes' => ['This is basic guidance - seek professional medical help']
+            'emergency_call' => true,
+            'warning_signs' => ['Any severe symptoms', 'AI services unavailable'],
+            'important_notes' => ['Professional medical assessment required', 'This is not medical advice']
         ];
     }
 
     /**
-     * Fallback suggestions when AI is unavailable
+     * Try OpenAI API for recommendations
+     */
+    private function tryOpenAIRecommendation(string $symptoms, string $apiKey): array
+    {
+        $prompt = $this->buildFirstAidPrompt($symptoms);
+        
+        $response = Http::withHeaders([
+            'Authorization' => 'Bearer ' . $apiKey,
+            'Content-Type' => 'application/json'
+        ])->post('https://api.openai.com/v1/chat/completions', [
+            'model' => 'gpt-3.5-turbo',
+            'messages' => [
+                [
+                    'role' => 'system',
+                    'content' => 'You are a professional first aid and emergency medical assistant. Provide structured responses in the exact format requested.'
+                ],
+                [
+                    'role' => 'user',
+                    'content' => $prompt
+                ]
+            ],
+            'max_tokens' => 600,
+            'temperature' => 0.3
+        ]);
+
+        if ($response->successful()) {
+            $data = $response->json();
+            $text = $data['choices'][0]['message']['content'] ?? '';
+            return $this->parseFirstAidResponse($text);
+        }
+        
+        throw new \Exception('OpenAI fallback failed');
+    }
+
+    /**
+     * Try Gemini API for recommendations
+     */
+    private function tryGeminiRecommendation(string $symptoms, string $apiKey): array
+    {
+        $prompt = $this->buildFirstAidPrompt($symptoms);
+        
+        $response = Http::timeout(15)
+            ->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key={$apiKey}", [
+                'contents' => [
+                    [
+                        'parts' => [
+                            [
+                                'text' => $prompt
+                            ]
+                        ]
+                    ]
+                ],
+                'generationConfig' => [
+                    'temperature' => 0.3,
+                    'maxOutputTokens' => 600
+                ]
+            ]);
+
+        if ($response->successful()) {
+            $data = $response->json();
+            $text = $data['candidates'][0]['content']['parts'][0]['text'] ?? '';
+            return $this->parseFirstAidResponse($text);
+        }
+        
+        throw new \Exception('Gemini fallback failed');
+    }
+
+    /**
+     * Fallback suggestions when AI is unavailable - uses internet APIs
      */
     private function getFallbackSuggestions(string $query): array
     {
-        $query = strtolower($query);
-        $suggestions = [];
+        try {
+            // Try OpenAI API for suggestions
+            $openaiKey = env('OPENAI_API_KEY');
+            if ($openaiKey) {
+                $response = Http::withHeaders([
+                    'Authorization' => 'Bearer ' . $openaiKey,
+                    'Content-Type' => 'application/json'
+                ])->post('https://api.openai.com/v1/chat/completions', [
+                    'model' => 'gpt-3.5-turbo',
+                    'messages' => [
+                        [
+                            'role' => 'system',
+                            'content' => 'You are an emergency medical assistant. Based on emergency queries, suggest 3-5 possible emergency conditions. Return only condition names, one per line, no numbering.'
+                        ],
+                        [
+                            'role' => 'user',
+                            'content' => "Based on this emergency query: '{$query}', suggest possible emergency conditions."
+                        ]
+                    ],
+                    'max_tokens' => 200,
+                    'temperature' => 0.3
+                ]);
 
-        if (str_contains($query, 'chest') || str_contains($query, 'heart')) {
-            $suggestions[] = 'Heart Attack';
-            $suggestions[] = 'Cardiac Arrest';
-        }
-        if (str_contains($query, 'bleed') || str_contains($query, 'blood')) {
-            $suggestions[] = 'Severe Bleeding';
-            $suggestions[] = 'Wound Care';
-        }
-        if (str_contains($query, 'choke') || str_contains($query, 'breath')) {
-            $suggestions[] = 'Choking';
-            $suggestions[] = 'Breathing Difficulty';
-        }
-        if (str_contains($query, 'burn')) {
-            $suggestions[] = 'Burns';
-        }
-        if (str_contains($query, 'break') || str_contains($query, 'fracture')) {
-            $suggestions[] = 'Fractures';
+                if ($response->successful()) {
+                    $data = $response->json();
+                    $text = $data['choices'][0]['message']['content'] ?? '';
+                    $suggestions = array_filter(array_map('trim', explode("\n", $text)));
+                    return array_slice($suggestions, 0, 5);
+                }
+            }
+            
+            // Try Gemini API for suggestions
+            $geminiKey = env('GEMINI_API_KEY');
+            if ($geminiKey) {
+                $response = Http::timeout(15)
+                    ->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key={$geminiKey}", [
+                        'contents' => [
+                            [
+                                'parts' => [
+                                    [
+                                        'text' => "Based on this emergency query: '{$query}', suggest 3-5 possible emergency conditions. Return only condition names, one per line, no numbering."
+                                    ]
+                                ]
+                            ]
+                        ],
+                        'generationConfig' => [
+                            'temperature' => 0.3,
+                            'maxOutputTokens' => 200
+                        ]
+                    ]);
+
+                if ($response->successful()) {
+                    $data = $response->json();
+                    $text = $data['candidates'][0]['content']['parts'][0]['text'] ?? '';
+                    $suggestions = array_filter(array_map('trim', explode("\n", $text)));
+                    return array_slice($suggestions, 0, 5);
+                }
+            }
+        } catch (\Exception $e) {
+            Log::error('AI suggestions fallback failed: ' . $e->getMessage());
         }
 
-        return empty($suggestions) ? ['General Emergency'] : $suggestions;
+        // Last resort - generic emergency suggestions
+        return [
+            'Emergency Medical Assessment',
+            'Seek Professional Medical Help',
+            'Call Emergency Services if Serious'
+        ];
     }
 
     /**

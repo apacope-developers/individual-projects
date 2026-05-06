@@ -136,149 +136,120 @@ class EmergencyAIRecommendationService
     }
 
     /**
-     * Fallback recommendations when AI service fails - uses real-time data
+     * Fallback recommendations when AI service fails - uses alternative internet APIs
      */
     private function getFallbackRecommendations(string $query): array
     {
         try {
-            // Try to use a free AI API as fallback for real-time data
-            $fallbackPrompt = "Analyze the user's specific medical emergency query: '{$query}' and provide targeted immediate first aid recommendations.
-            
-            IMPORTANT: Focus specifically on what the user described. If they mention 'chest pain', address chest pain. If they mention 'bleeding', focus on bleeding.
-            
-            Format as JSON with: condition (matching user's specific query), severity (critical/urgent/moderate), summary (related to user's symptoms), immediateActions (array of specific actions), callEmergency (boolean), emergencySigns (array of specific signs).
-            Include disclaimer that this is not medical advice and emergency services should be called for serious conditions.
-            
-            Rules:
-            1. Address the specific symptoms/condition the user mentioned
-            2. Provide relevant, actionable steps for their situation
-            3. Be concise and focused on user's specific needs";
-            
-            $response = Http::timeout(10)
-                ->post('https://api.openai.com/v1/chat/completions', [
-                    'headers' => [
-                        'Authorization' => 'Bearer ' . $this->apiKey,
-                        'Content-Type' => 'application/json'
-                    ],
-                    'json' => [
-                        'model' => 'gpt-3.5-turbo',
-                        'messages' => [
-                            [
-                                'role' => 'system',
-                                'content' => 'You are an emergency medical assistant providing real-time recommendations based on current medical knowledge.'
-                            ],
-                            [
-                                'role' => 'user',
-                                'content' => $fallbackPrompt
-                            ]
-                        ],
-                        'max_tokens' => 500,
-                        'temperature' => 0.3
-                    ]
-                ]);
-
-            if ($response->successful()) {
-                $data = $response->json();
-                $text = $data['choices'][0]['message']['content'] ?? '';
-                return $this->parseAIResponse($text, $query);
+            // Try Gemini API as fallback
+            $geminiApiKey = env('GEMINI_API_KEY');
+            if ($geminiApiKey) {
+                return $this->tryGeminiAPI($query, $geminiApiKey);
             }
+            
+            // Try a different OpenAI endpoint or model
+            if ($this->apiKey) {
+                return $this->tryAlternativeOpenAI($query);
+            }
+            
         } catch (\Exception $e) {
             Log::error('Fallback AI service error: ' . $e->getMessage());
         }
 
-        // Final fallback - provides specific recommendations based on query
-        $queryLower = strtolower($query);
-        
-        if (strpos($queryLower, 'chest') !== false || strpos($queryLower, 'heart') !== false) {
-            $condition = 'Chest Pain / Possible Heart Attack';
-            $severity = 'critical';
-            $summary = 'Based on your symptoms of chest pain, immediate medical attention may be required.';
-            $actions = [
-                'Call emergency services immediately (912)',
-                'Have person sit down and rest',
-                'Give aspirin if available and not allergic',
-                'Monitor breathing and consciousness'
-            ];
-            $signs = ['Chest pressure or tightness', 'Pain radiating to arm/jaw', 'Shortness of breath', 'Cold sweat'];
-            $callEmergency = true;
-        } elseif (strpos($queryLower, 'bleeding') !== false || strpos($queryLower, 'bleed') !== false || strpos($queryLower, 'blood') !== false) {
-            $condition = 'Severe Bleeding';
-            $severity = 'critical';
-            $summary = 'Based on your symptoms of bleeding, immediate action is required to stop blood loss.';
-            $actions = [
-                'Apply direct pressure with clean cloth',
-                'Elevate injured area if possible',
-                'Apply tourniquet if severe bleeding',
-                'Call emergency services (912)'
-            ];
-            $signs = ['Heavy bleeding', 'Weakness or dizziness', 'Pale skin', 'Rapid heartbeat'];
-            $callEmergency = true;
-        } elseif (strpos($queryLower, 'choke') !== false || strpos($queryLower, 'choking') !== false || strpos($queryLower, 'chocking') !== false || strpos($queryLower, 'breath') !== false) {
-            $condition = (strpos($queryLower, 'choke') !== false || strpos($queryLower, 'choking') !== false || strpos($queryLower, 'chocking') !== false) ? 'Choking / Airway Obstruction' : 'Difficulty Breathing';
-            $severity = 'critical';
-            $summary = 'Based on your symptoms, immediate intervention may be required for breathing.';
-            $actions = [
-                'Call emergency services immediately (912)',
-                'Help person sit upright',
-                'Perform Heimlich maneuver if choking',
-                'Monitor breathing continuously'
-            ];
-            $signs = ['Cannot speak or breathe', 'Blue lips', 'Hands to throat', 'No coughing'];
-            $callEmergency = true;
-        } elseif (strpos($queryLower, 'burn') !== false) {
-            $condition = 'Burns';
-            $severity = 'urgent';
-            $summary = 'Based on your symptoms of burns, immediate first aid is needed.';
-            $actions = [
-                'Cool burn with cool running water',
-                'Remove jewelry or tight clothing',
-                'Cover burn with sterile dressing',
-                'Seek medical attention for severe burns'
-            ];
-            $signs = ['Large burn area', 'Deep burns', 'Burns on face/hands/genitals'];
-            $callEmergency = false;
-        } elseif (strpos($queryLower, 'head') !== false || strpos($queryLower, 'fall') !== false) {
-            $condition = 'Head Injury';
-            $severity = 'urgent';
-            $summary = 'Based on your symptoms of head injury, careful assessment and medical evaluation needed.';
-            $actions = [
-                'Apply ice to reduce swelling',
-                'Monitor for consciousness changes',
-                'Avoid moving person unnecessarily',
-                'Seek medical evaluation'
-            ];
-            $signs = ['Headache', 'Dizziness', 'Nausea', 'Vision changes', 'Confusion'];
-            $callEmergency = false;
-        } else {
-            $condition = 'Medical Assessment Needed';
-            $severity = 'moderate';
-            $summary = "Based on your symptoms: '{$query}', professional medical assessment is recommended.";
-            $actions = [
-                'Stay calm and assess the situation',
-                'Call emergency services (912) if life-threatening',
-                'Provide basic first aid if trained',
-                'Monitor symptoms closely'
-            ];
-            $signs = ['Any concerning symptoms that worry you'];
-            $callEmergency = false;
-        }
-        
+        // Last resort - minimal generic response directing to emergency services
         return [
-            'success' => true,
+            'success' => false,
             'query' => $query,
             'aiPowered' => false,
+            'error' => 'AI services temporarily unavailable',
             'recommendations' => [
                 [
-                    'condition' => $condition,
-                    'severity' => $severity,
-                    'summary' => $summary,
-                    'immediateActions' => $actions,
-                    'callEmergency' => $callEmergency,
-                    'emergencySigns' => $signs
+                    'condition' => 'Emergency Assessment Required',
+                    'severity' => 'unknown',
+                    'summary' => 'AI services are temporarily unavailable. Please seek professional medical help.',
+                    'immediateActions' => [
+                        'Call emergency services (912) for life-threatening conditions',
+                        'Contact local medical professionals',
+                        'Go to nearest emergency room if serious'
+                    ],
+                    'callEmergency' => true,
+                    'emergencySigns' => ['Any severe symptoms', 'Difficulty breathing', 'Unconsciousness', 'Severe pain']
                 ]
             ],
-            'disclaimer' => 'This is not medical advice. Always consult with healthcare professionals for medical concerns. Call emergency services for life-threatening conditions.',
+            'disclaimer' => 'AI services unavailable. This is not medical advice. Always consult with healthcare professionals.',
             'emergencyNumber' => '912'
         ];
+    }
+
+    /**
+     * Try Gemini API as fallback
+     */
+    private function tryGeminiAPI(string $query, string $apiKey): array
+    {
+        $prompt = $this->buildEmergencyPrompt($query);
+        
+        $response = Http::timeout(15)
+            ->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key={$apiKey}", [
+                'contents' => [
+                    [
+                        'parts' => [
+                            [
+                                'text' => $prompt
+                            ]
+                        ]
+                    ]
+                ],
+                'generationConfig' => [
+                    'temperature' => 0.3,
+                    'maxOutputTokens' => 800
+                ]
+            ]);
+
+        if ($response->successful()) {
+            $data = $response->json();
+            $text = $data['candidates'][0]['content']['parts'][0]['text'] ?? '';
+            return $this->parseAIResponse($text, $query);
+        }
+        
+        throw new \Exception('Gemini API failed');
+    }
+
+    /**
+     * Try alternative OpenAI configuration
+     */
+    private function tryAlternativeOpenAI(string $query): array
+    {
+        $prompt = $this->buildEmergencyPrompt($query);
+        
+        $response = Http::timeout(15)
+            ->post('https://api.openai.com/v1/chat/completions', [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $this->apiKey,
+                    'Content-Type' => 'application/json'
+                ],
+                'json' => [
+                    'model' => 'gpt-4o-mini',  // Try different model
+                    'messages' => [
+                        [
+                            'role' => 'system',
+                            'content' => 'You are an emergency medical assistant. Based on user symptoms, provide immediate, actionable emergency recommendations. Format as JSON with: condition, severity, summary, immediateActions, callEmergency, emergencySigns, disclaimer, emergencyNumber.'
+                        ],
+                        [
+                            'role' => 'user',
+                            'content' => $prompt
+                        ]
+                    ],
+                    'max_tokens' => 800,
+                    'temperature' => 0.3
+                ]
+            ]);
+
+        if ($response->successful()) {
+            $data = $response->json();
+            $text = $data['choices'][0]['message']['content'] ?? '';
+            return $this->parseAIResponse($text, $query);
+        }
+        
+        throw new \Exception('Alternative OpenAI API failed');
     }
 }

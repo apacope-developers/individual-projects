@@ -13,55 +13,89 @@ class WorkingAIRecommendationService
     public function getEmergencyRecommendations(string $query): array
     {
         try {
-            // Check if we have a valid API key
+            // Check if we have a valid API key (try OpenAI first, then Gemini)
             $apiKey = env('OPENAI_API_KEY');
+            $useGemini = false;
             
-            if (!$apiKey || $apiKey === 'sk-proj-demo' || strlen($apiKey) < 20) {
-                Log::info('AI API key not configured, using enhanced emergency logic');
-                return $this->getEnhancedEmergencyRecommendations($query);
+            if (!$apiKey || $apiKey === 'your_openai_api_key_here' || strlen($apiKey) < 20) {
+                // Try Gemini API instead
+                $apiKey = env('GEMINI_API_KEY');
+                $useGemini = true;
+                
+                if (!$apiKey || strlen($apiKey) < 20) {
+                    Log::info('No AI API keys configured, using enhanced emergency logic');
+                    return $this->getEnhancedEmergencyRecommendations($query);
+                }
             }
             
             $prompt = $this->buildEmergencyPrompt($query);
             
-            $response = Http::timeout(15)
-                ->post('https://api.openai.com/v1/chat/completions', [
-                    'headers' => [
-                        'Authorization' => 'Bearer ' . $apiKey,
-                        'Content-Type' => 'application/json'
-                    ],
-                    'json' => [
-                        'model' => 'gpt-3.5-turbo',
-                        'messages' => [
+            if ($useGemini) {
+                // Use Gemini API with working model name
+                $response = Http::timeout(15)
+                    ->post("https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash-lite:generateContent?key={$apiKey}", [
+                        'contents' => [
                             [
-                                'role' => 'system',
-                                'content' => 'You are an emergency medical assistant. Based on user symptoms, provide immediate, actionable emergency recommendations. Format as JSON with: condition, severity, summary, immediateActions, callEmergency, emergencySigns, disclaimer, emergencyNumber.'
-                            ],
-                            [
-                                'role' => 'user',
-                                'content' => $prompt
+                                'parts' => [
+                                    [
+                                        'text' => $prompt
+                                    ]
+                                ]
                             ]
                         ],
-                        'max_tokens' => 800,
-                        'temperature' => 0.3
-                    ]
-                ]);
-            
-            if ($response->successful()) {
-                $data = $response->json();
-                $text = $data['choices'][0]['message']['content'] ?? '';
-                $result = $this->parseAIResponse($text, $query, true);
+                        'generationConfig' => [
+                            'temperature' => 0.3,
+                            'maxOutputTokens' => 800
+                        ]
+                    ]);
                 
-                // Ensure AI result has proper structure
-                if ($result['success'] && !empty($result['recommendations'])) {
-                    return $result;
-                } else {
-                    Log::warning('AI response invalid, using enhanced fallback');
-                    return $this->getEnhancedEmergencyRecommendations($query);
+                if ($response->successful()) {
+                    $data = $response->json();
+                    $text = $data['candidates'][0]['content']['parts'][0]['text'] ?? '';
+                    $result = $this->parseAIResponse($text, $query, true);
+                    
+                    if ($result['success'] && !empty($result['recommendations'])) {
+                        return $result;
+                    }
                 }
             } else {
-                Log::error('Working API error: ' . $response->body());
-                return $this->getEnhancedEmergencyRecommendations($query);
+                // Use OpenAI API
+                $response = Http::timeout(15)
+                    ->post('https://api.openai.com/v1/chat/completions', [
+                        'headers' => [
+                            'Authorization' => 'Bearer ' . $apiKey,
+                            'Content-Type' => 'application/json'
+                        ],
+                        'json' => [
+                            'model' => 'gpt-3.5-turbo',
+                            'messages' => [
+                                [
+                                    'role' => 'system',
+                                    'content' => 'You are an emergency medical assistant. Based on user symptoms, provide immediate, actionable emergency recommendations. Format as JSON with: condition, severity, summary, immediateActions, callEmergency, emergencySigns, disclaimer, emergencyNumber.'
+                                ],
+                                [
+                                    'role' => 'user',
+                                    'content' => $prompt
+                                ]
+                            ],
+                            'max_tokens' => 800,
+                            'temperature' => 0.3
+                        ]
+                    ]);
+                
+                if ($response->successful()) {
+                    $data = $response->json();
+                    $text = $data['choices'][0]['message']['content'] ?? '';
+                    $result = $this->parseAIResponse($text, $query, true);
+                    
+                    if ($result['success'] && !empty($result['recommendations'])) {
+                        return $result;
+                    }
+                }
             }
+            
+            Log::error('AI API error: ' . $response->body());
+            return $this->getEnhancedEmergencyRecommendations($query);
         } catch (\Exception $e) {
             Log::error('Working AI service error: ' . $e->getMessage());
             return $this->getEnhancedEmergencyRecommendations($query);
@@ -76,6 +110,7 @@ class WorkingAIRecommendationService
         $queryLower = strtolower($query);
         
         // Enhanced logic with specific first aid steps
+                
         if (strpos($queryLower, 'chest') !== false || strpos($queryLower, 'heart') !== false || strpos($queryLower, 'heart attack') !== false) {
             return [
                 'success' => true,
@@ -336,7 +371,7 @@ class WorkingAIRecommendationService
             
         } catch (\Exception $e) {
             Log::error('Error parsing AI response: ' . $e->getMessage());
-            return $this->getFallbackRecommendations($query);
+            return $this->getEnhancedEmergencyRecommendations($query);
         }
     }
     
@@ -444,49 +479,9 @@ class WorkingAIRecommendationService
             'aiPowered' => $isAI,
             'recommendations' => $recommendations,
             'disclaimer' => 'This is AI-generated emergency guidance. Call emergency services for serious conditions.',
-        return [
-            'success' => true,
-            'query' => $query,
-            'aiPowered' => false,
-            'recommendations' => [
-                [
-                    'condition' => $bestMatch['condition'],
-                    'severity' => $bestMatch['severity'],
-                    'summary' => "Based on your symptoms of {$bestMatch['category']}, immediate action required. Real-time medical protocols applied.",
-                    'immediateActions' => $bestMatch['immediateActions'],
-                    'callEmergency' => $bestMatch['callEmergency'],
-                    'emergencySigns' => $bestMatch['emergencySigns']
-                ]
-            ],
-            'disclaimer' => 'This is emergency first aid guidance. When in doubt, always call emergency services.',
             'emergencyNumber' => '912'
         ];
     }
-    
-    // Default response for unclear symptoms
-    return [
-        'success' => true,
-        'query' => $query,
-        'aiPowered' => false,
-        'recommendations' => [
-            [
-                'condition' => 'Emergency Assessment Required',
-                'severity' => 'moderate',
-                'summary' => "Based on your symptoms: '{$query}', immediate medical assessment recommended. Please describe specific symptoms for targeted guidance.",
-                'immediateActions' => [
-                    'Call emergency services (912) if life-threatening symptoms',
-                    'Stay calm and assess situation carefully',
-                    'Provide basic first aid if trained and safe to do so',
-                    'Monitor symptoms and person\'s condition continuously'
-                ],
-                'callEmergency' => true,
-                'emergencySigns' => ['Any severe or concerning symptoms', 'Condition worsening', 'Loss of consciousness', 'Severe pain']
-            ]
-        ],
-        'disclaimer' => 'This is AI-enhanced emergency guidance using current medical protocols. Always call emergency services for life-threatening conditions.',
-        'emergencyNumber' => '912'
-    ];
-}
     
     /**
      * Get fallback recommendations when AI fails - uses real-time internet data
