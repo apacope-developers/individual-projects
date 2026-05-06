@@ -292,6 +292,9 @@ function performSearchClick() {
             </div>
         `;
         searchResults.classList.remove('hidden');
+        
+        // Lock body scroll when search results are shown
+        document.body.style.overflow = 'hidden';
         return;
     }
     
@@ -314,6 +317,9 @@ window.performSearch = function(query) {
         </div>
     `;
     searchResults.classList.remove('hidden');
+    
+    // Lock body scroll when search results are shown
+    document.body.style.overflow = 'hidden';
     
     // Get AI recommendations
     console.log('performSearch called with query:', query);
@@ -398,6 +404,9 @@ function testSearch() {
         </div>
     `;
     searchResults.classList.remove('hidden');
+    
+    // Lock body scroll when search results are shown
+    document.body.style.overflow = 'hidden';
     
     // Direct API call
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
@@ -524,6 +533,9 @@ window.displayAIRecommendations = function(aiData, query) {
     
     searchResults.innerHTML = html;
     searchResults.classList.remove('hidden');
+    
+    // Lock body scroll when search results are shown
+    document.body.style.overflow = 'hidden';
 };
 
 // Close search results
@@ -533,6 +545,9 @@ function closeSearchResults() {
     searchResults.innerHTML = '';
     searchResults.classList.add('hidden');
     searchInput.value = '';
+    
+    // Restore body scrolling
+    document.body.style.overflow = 'auto';
 }
 
 window.performFallbackSearch = function(query) {
@@ -592,6 +607,9 @@ window.displayEmergencySearchResults = function(results, query) {
     }
     
     searchResults.classList.remove('hidden');
+    
+    // Lock body scroll when search results are shown
+    document.body.style.overflow = 'hidden';
 };
 
 // Show AI recommendation details in modal
@@ -687,17 +705,6 @@ function openModal(content) {
     document.body.style.overflow = 'hidden';
 }
 
-function closeModal() {
-    const modalBg = document.getElementById('modalBg');
-    
-    if (!modalBg) {
-        console.error('Modal background not found');
-        return;
-    }
-    
-    modalBg.classList.remove('open');
-    document.body.style.overflow = 'auto';
-}
 
 // Body zone click handler - simplified version
 function showZone(zone) {
@@ -2317,46 +2324,80 @@ function checkerNext(type) {
     console.log('Checker question displayed for type:', type);
 }
 
-// Close modal or guide details
+// Close modal or guide details - handles both emergency modals and guide details
 function closeModal() {
     console.log('closeModal function called');
     try {
-        // Check if we're in the guide page and showing details
+        // First, check if we're in the guide page and showing details
         const guidePage = document.getElementById('pg-guide');
         console.log('Guide page element:', guidePage);
         
-        if (guidePage && guidePage.innerHTML.includes('Close')) {
-            console.log('Detected guide detail view, restoring guide list');
-            // Show toast message before closing
-            if (typeof toast === 'function') {
-                toast('Returning to first aid guide list');
-            }
-            // Restore the original guide content by going back to the guide page
-            setTimeout(() => {
-                goTo('guide');
-            }, 500);
-        } else {
-            console.log('Trying to close modal');
-            // Try to close modal if it exists
-            const modalBg = document.getElementById('modalBg');
-            if (modalBg) {
-                modalBg.classList.remove('open');
-                console.log('Modal closed');
+        // Better detection: check if we're on guide page and it contains guide details (not the list)
+        if (guidePage && guidePage.classList.contains('active')) {
+            // Check if the current content is guide details (has guide-specific structure)
+            const hasGuideDetails = guidePage.innerHTML.includes('Steps to Follow') || 
+                                   guidePage.innerHTML.includes('Symptoms:') || 
+                                   guidePage.innerHTML.includes('Do:') || 
+                                   guidePage.innerHTML.includes('Don\'t:') ||
+                                   guidePage.innerHTML.includes('Required Items:');
+            
+            if (hasGuideDetails) {
+                console.log('Detected guide detail view, restoring guide list');
+                // Show toast message before closing
                 if (typeof toast === 'function') {
-                    toast('Modal closed');
+                    toast('Returning to first aid guide list');
                 }
-            } else {
-                console.log('No modal found to close');
+                // Restore the original guide content
+                setTimeout(() => {
+                    if (originalGuideContent) {
+                        guidePage.innerHTML = originalGuideContent;
+                        console.log('Original guide content restored');
+                    }
+                }, 500);
+                return;
             }
+        }
+        
+        // If not guide details, handle as emergency modal
+        console.log('Closing emergency modal');
+        const modalBg = document.getElementById('modalBg');
+        const modalBox = document.getElementById('modalBox');
+        
+        if (modalBg && modalBox) {
+            // Remove the modal content and hide it
+            modalBox.innerHTML = '';
+            modalBg.classList.remove('open');
+            document.body.style.overflow = 'auto';
+            
+            // Clear the search input
+            const searchInput = document.getElementById('emergencySearch');
+            if (searchInput) {
+                searchInput.value = '';
+                searchInput.blur();
+            }
+            
+            console.log('Emergency modal closed successfully');
+        } else {
+            console.log('No modal found to close');
         }
     } catch (error) {
         console.error('Error in closeModal:', error);
     }
 }
 
+// Store original guide content to restore later
+let originalGuideContent = '';
+
 // Show guide details from database
 function showGuideDetails(guideId) {
     console.log('showGuideDetails called with ID:', guideId);
+    
+    // Store original content before replacing
+    const guidePage = document.getElementById('pg-guide');
+    if (!originalGuideContent) {
+        originalGuideContent = guidePage.innerHTML;
+    }
+    
     fetch('/first-aid-guide/' + guideId)
         .then(response => response.json())
         .then(data => {
@@ -2436,7 +2477,7 @@ function showGuideDetails(guideId) {
                     </div>
                 `;
                 
-                document.getElementById('pg-guide').innerHTML = html;
+                guidePage.innerHTML = html;
             }
         })
         .catch(error => {
@@ -2584,7 +2625,7 @@ console.log('closeModal function loaded inline:', typeof closeModal);
       <button onclick="performSearchClick()" class="absolute right-2 top-1/2 -translate-y-1/2 bg-red-600 hover:bg-red-500 text-white px-3 py-1 rounded-lg text-sm font-medium transition-colors">
         Search
       </button>
-      <div id="searchResults" class="absolute top-full left-0 right-0 mt-2 bg-[#18181B]/95 backdrop-blur-xl border border-zinc-800 rounded-xl shadow-2xl hidden z-50 max-h-96 overflow-y-auto">
+      <div id="searchResults" class="absolute top-full left-0 right-0 mt-2 bg-[#18181B] backdrop-blur-xl border border-zinc-800 rounded-xl shadow-2xl hidden z-[9999] max-h-96 overflow-y-auto">
       </div>
     </div>
     
@@ -3113,6 +3154,9 @@ function performSearch(query) {
     `;
     searchResults.classList.remove('hidden');
     
+    // Lock body scroll when search results are shown
+    document.body.style.overflow = 'hidden';
+    
     // Get AI recommendations
     console.log('performSearch called with query:', query);
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
@@ -3244,6 +3288,9 @@ function displayAIRecommendations(aiData, query) {
     
     searchResults.innerHTML = html;
     searchResults.classList.remove('hidden');
+    
+    // Lock body scroll when search results are shown
+    document.body.style.overflow = 'hidden';
 }
 
 // Show AI recommendation details in modal
@@ -3361,6 +3408,9 @@ function displayEmergencySearchResults(results, query) {
     }
     
     searchResults.classList.remove('hidden');
+    
+    // Lock body scroll when search results are shown
+    document.body.style.overflow = 'hidden';
   }
   
   // Close search results when clicking outside
