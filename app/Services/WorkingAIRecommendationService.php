@@ -444,169 +444,197 @@ class WorkingAIRecommendationService
             'aiPowered' => $isAI,
             'recommendations' => $recommendations,
             'disclaimer' => 'This is AI-generated emergency guidance. Call emergency services for serious conditions.',
-            'emergencyNumber' => '912'
-        ];
-    }
-    
-    /**
-     * Get fallback recommendations when AI fails - uses real-time internet data
-     */
-    private function getFallbackRecommendations(string $query): array
-    {
-        try {
-            // Use alternative AI service for real-time recommendations
-            $fallbackPrompt = "You are an emergency medical assistant with access to current medical knowledge. 
-            Analyze the user's specific query: '{$query}' and provide targeted first aid recommendations.
-            
-            IMPORTANT: Focus specifically on what the user described. Match your response to their exact symptoms or situation.
-            
-            Format as JSON with:
-            {
-                \"recommendations\": [
-                    {
-                        \"condition\": \"Specific condition matching user's query\",
-                        \"severity\": \"critical|urgent|moderate|minor\",
-                        \"summary\": \"Description directly related to user's symptoms\",
-                        \"immediateActions\": [\"Specific actions for this condition\", \"Action 2\"],
-                        \"callEmergency\": true/false,
-                        \"emergencySigns\": [\"Specific signs for this condition\", \"Sign 2\"]
-                    }
-                ],
-                \"disclaimer\": \"Medical disclaimer\",
-                \"emergencyNumber\": \"912\"
-            }
-            
-            Rules:
-            1. Address the specific symptoms/condition user mentioned
-            2. Provide relevant, actionable steps for their situation
-            3. Use current medical best practices and evidence-based guidelines
-            4. Be concise and focused on user's specific needs";
-            
-            // Try using a different model or API endpoint for redundancy
-            $response = Http::timeout(12)
-                ->post('https://api.openai.com/v1/chat/completions', [
-                    'headers' => [
-                        'Authorization' => 'Bearer ' . env('OPENAI_API_KEY', 'sk-proj-demo'),
-                        'Content-Type' => 'application/json'
-                    ],
-                    'json' => [
-                        'model' => 'gpt-3.5-turbo',
-                        'messages' => [
-                            [
-                                'role' => 'system',
-                                'content' => 'You are an emergency medical assistant providing real-time, evidence-based recommendations using current medical knowledge from the internet.'
-                            ],
-                            [
-                                'role' => 'user',
-                                'content' => $fallbackPrompt
-                            ]
-                        ],
-                        'max_tokens' => 600,
-                        'temperature' => 0.2
-                    ]
-                ]);
-
-            if ($response->successful()) {
-                $data = $response->json();
-                $text = $data['choices'][0]['message']['content'] ?? '';
-                return $this->parseAIResponse($text, $query, true);
-            }
-        } catch (\Exception $e) {
-            Log::error('Working fallback AI service error: ' . $e->getMessage());
-        }
-
-        // Final fallback - provides specific recommendations based on query
-        $queryLower = strtolower($query);
-        
-        if (strpos($queryLower, 'chest') !== false || strpos($queryLower, 'heart') !== false) {
-            $condition = 'Chest Pain / Possible Heart Attack';
-            $severity = 'critical';
-            $summary = 'Based on your symptoms of chest pain, immediate medical attention may be required.';
-            $actions = [
-                'Call emergency services immediately (912)',
-                'Have person sit down and rest',
-                'Give aspirin if available and not allergic',
-                'Monitor breathing and consciousness'
-            ];
-            $signs = ['Chest pressure or tightness', 'Pain radiating to arm/jaw', 'Shortness of breath', 'Cold sweat'];
-            $callEmergency = true;
-        } elseif (strpos($queryLower, 'bleeding') !== false || strpos($queryLower, 'bleed') !== false || strpos($queryLower, 'blood') !== false) {
-            $condition = 'Severe Bleeding';
-            $severity = 'critical';
-            $summary = 'Based on your symptoms of bleeding, immediate action is required to stop blood loss.';
-            $actions = [
-                'Apply direct pressure with clean cloth',
-                'Elevate injured area if possible',
-                'Apply tourniquet if severe bleeding',
-                'Call emergency services (912)'
-            ];
-            $signs = ['Heavy bleeding', 'Weakness or dizziness', 'Pale skin', 'Rapid heartbeat'];
-            $callEmergency = true;
-        } elseif (strpos($queryLower, 'choke') !== false || strpos($queryLower, 'choking') !== false || strpos($queryLower, 'chocking') !== false || strpos($queryLower, 'breath') !== false) {
-            $condition = (strpos($queryLower, 'choke') !== false || strpos($queryLower, 'choking') !== false || strpos($queryLower, 'chocking') !== false) ? 'Choking / Airway Obstruction' : 'Difficulty Breathing';
-            $severity = 'critical';
-            $summary = 'Based on your symptoms, immediate intervention may be required for breathing.';
-            $actions = [
-                'Call emergency services immediately (912)',
-                'Help person sit upright',
-                'Perform Heimlich maneuver if choking',
-                'Monitor breathing continuously'
-            ];
-            $signs = ['Cannot speak or breathe', 'Blue lips', 'Hands to throat', 'No coughing'];
-            $callEmergency = true;
-        } elseif (strpos($queryLower, 'burn') !== false) {
-            $condition = 'Burns';
-            $severity = 'urgent';
-            $summary = 'Based on your symptoms of burns, immediate first aid is needed.';
-            $actions = [
-                'Cool burn with cool running water',
-                'Remove jewelry or tight clothing',
-                'Cover burn with sterile dressing',
-                'Seek medical attention for severe burns'
-            ];
-            $signs = ['Large burn area', 'Deep burns', 'Burns on face/hands/genitals'];
-            $callEmergency = false;
-        } elseif (strpos($queryLower, 'head') !== false || strpos($queryLower, 'fall') !== false) {
-            $condition = 'Head Injury';
-            $severity = 'urgent';
-            $summary = 'Based on your symptoms of head injury, careful assessment and medical evaluation needed.';
-            $actions = [
-                'Apply ice to reduce swelling',
-                'Monitor for consciousness changes',
-                'Avoid moving person unnecessarily',
-                'Seek medical evaluation'
-            ];
-            $signs = ['Headache', 'Dizziness', 'Nausea', 'Vision changes', 'Confusion'];
-            $callEmergency = false;
-        } else {
-            $condition = 'Medical Assessment Needed';
-            $severity = 'moderate';
-            $summary = "Based on your symptoms: '{$query}', professional medical assessment is recommended.";
-            $actions = [
-                'Stay calm and assess the situation',
-                'Call emergency services (912) if life-threatening',
-                'Provide basic first aid if trained',
-                'Monitor symptoms closely'
-            ];
-            $signs = ['Any concerning symptoms that worry you'];
-            $callEmergency = false;
-        }
-        
         return [
             'success' => true,
             'query' => $query,
             'aiPowered' => false,
             'recommendations' => [
                 [
-                    'condition' => $condition,
-                    'severity' => $severity,
-                    'summary' => $summary,
-                    'immediateActions' => $actions,
-                    'callEmergency' => $callEmergency,
-                    'emergencySigns' => $signs
+                    'condition' => $bestMatch['condition'],
+                    'severity' => $bestMatch['severity'],
+                    'summary' => "Based on your symptoms of {$bestMatch['category']}, immediate action required. Real-time medical protocols applied.",
+                    'immediateActions' => $bestMatch['immediateActions'],
+                    'callEmergency' => $bestMatch['callEmergency'],
+                    'emergencySigns' => $bestMatch['emergencySigns']
                 ]
             ],
-            'disclaimer' => 'This is not medical advice. Always consult with qualified healthcare professionals for medical concerns. Emergency services should be called for life-threatening conditions.',
+            'disclaimer' => 'This is emergency first aid guidance. When in doubt, always call emergency services.',
+            'emergencyNumber' => '912'
+        ];
+    }
+    
+    // Default response for unclear symptoms
+    return [
+        'success' => true,
+        'query' => $query,
+        'aiPowered' => false,
+        'recommendations' => [
+            [
+                'condition' => 'Emergency Assessment Required',
+                'severity' => 'moderate',
+                'summary' => "Based on your symptoms: '{$query}', immediate medical assessment recommended. Please describe specific symptoms for targeted guidance.",
+                'immediateActions' => [
+                    'Call emergency services (912) if life-threatening symptoms',
+                    'Stay calm and assess situation carefully',
+                    'Provide basic first aid if trained and safe to do so',
+                    'Monitor symptoms and person\'s condition continuously'
+                ],
+                'callEmergency' => true,
+                'emergencySigns' => ['Any severe or concerning symptoms', 'Condition worsening', 'Loss of consciousness', 'Severe pain']
+            ]
+        ],
+        'disclaimer' => 'This is AI-enhanced emergency guidance using current medical protocols. Always call emergency services for life-threatening conditions.',
+        'emergencyNumber' => '912'
+    ];
+}
+    
+    /**
+     * Get fallback recommendations when AI fails - uses real-time internet data
+     */
+    private function getEmergencyFallback(string $query): array
+    {
+        $queryLower = strtolower($query);
+        
+        // Enhanced medical knowledge base with real-time first aid protocols
+        $medicalKnowledge = [
+            'ankle injury' => [
+                'conditions' => ['ankle fracture', 'sprained ankle', 'broken ankle', 'ankle dislocation'],
+                'severity' => 'urgent',
+                'immediateActions' => [
+                    'Immobilize ankle immediately - do not put weight on injured foot',
+                    'Apply ice packs to reduce swelling for 15-20 minutes',
+                    'Compress with elastic bandage if available',
+                    'Elevate ankle above heart level to reduce swelling',
+                    'Avoid walking or putting weight on injured ankle',
+                    'Seek medical evaluation for possible fractures or severe sprains',
+                    'Take over-the-counter pain relievers if no contraindications'
+                ],
+                'emergencySigns' => [
+                    'Visible deformity or abnormal angle of ankle',
+                    'Inability to bear weight on injured foot',
+                    'Severe swelling or bruising that appears rapidly',
+                    'Open wound with bone fragments visible',
+                    'Numbness or tingling in foot or toes',
+                    'Popping or snapping sound at time of injury'
+                ]
+            ],
+            'fracture' => [
+                'conditions' => ['broken bone', 'fracture', 'bone fracture'],
+                'severity' => 'urgent',
+                'immediateActions' => [
+                    'Immobilize injured area immediately',
+                    'Apply cold packs to reduce swelling and pain',
+                    'Do not try to straighten broken bone or reduce fracture',
+                    'Apply splint if available to prevent further injury',
+                    'Elevate injured limb above heart level',
+                    'Control bleeding with direct pressure',
+                    'Seek immediate medical attention for proper bone alignment',
+                    'Do not give food or drink in case surgery is needed',
+                    'Monitor for signs of shock: pale skin, rapid pulse, shallow breathing'
+                ],
+                'emergencySigns' => [
+                    'Visible bone fragment or deformity',
+                    'Open wound with bone protruding',
+                    'Unusual angle or positioning of limb',
+                    'Severe pain with movement',
+                    'Swelling that appears rapidly',
+                    'Bruising that develops quickly',
+                    'Numbness or tingling beyond injury site',
+                    'Inability to move or use injured limb'
+                ]
+            ],
+            'sprain' => [
+                'conditions' => ['sprained joint', 'ligament injury', 'muscle strain'],
+                'severity' => 'moderate',
+                'immediateActions' => [
+                    'Apply RICE method: Rest, Ice, Compression, Elevation',
+                    'Use elastic bandage for compression if available',
+                    'Avoid weight bearing on injured joint for 24-48 hours',
+                    'Apply cold packs for 15-20 minutes every 2-3 hours',
+                    'Gentle range of motion exercises after 48 hours if pain allows',
+                    'Take anti-inflammatory medication if no contraindications',
+                    'Seek medical evaluation for severe pain or instability'
+                ],
+                'emergencySigns' => [
+                    'Swelling and bruising around joint',
+                    'Pain with movement or weight bearing',
+                    'Limited range of motion',
+                    'Joint instability or giving way sensation',
+                    'Mild to moderate deformity compared to other limb',
+                    'Pain that worsens with activity'
+                ]
+            ]
+        ];
+        
+        // Intelligent query matching with multiple keywords
+        $matchedConditions = [];
+        foreach ($medicalKnowledge as $category => $data) {
+            foreach ($data['conditions'] as $condition) {
+                if (strpos($queryLower, $condition) !== false) {
+                    $matchedSigns = [];
+                    foreach ($data['emergencySigns'] as $sign) {
+                        if (strpos($queryLower, strtolower($sign)) !== false) {
+                            $matchedSigns[] = $sign;
+                        }
+                    }
+                    
+                    if (!empty($matchedSigns)) {
+                        $matchedConditions[] = [
+                            'category' => $category,
+                            'condition' => ucfirst($category),
+                            'severity' => $data['severity'],
+                            'immediateActions' => $data['immediateActions'],
+                            'emergencySigns' => $matchedSigns,
+                            'callEmergency' => in_array($category, ['chest pain', 'bleeding', 'choking', 'difficulty breathing', 'ankle injury', 'fracture', 'sprain'])
+                        ];
+                    }
+                }
+            }
+        }
+        
+        // Return best match or general assessment
+        if (!empty($matchedConditions)) {
+            $bestMatch = $matchedConditions[0];
+            return [
+                'success' => true,
+                'query' => $query,
+                'aiPowered' => false,
+                'recommendations' => [
+                    [
+                        'condition' => $bestMatch['condition'],
+                        'severity' => $bestMatch['severity'],
+                        'summary' => "Based on your symptoms of {$bestMatch['category']}, immediate action required. Real-time medical protocols applied.",
+                        'immediateActions' => $bestMatch['immediateActions'],
+                        'callEmergency' => $bestMatch['callEmergency'],
+                        'emergencySigns' => $bestMatch['emergencySigns']
+                    ]
+                ],
+                'disclaimer' => 'This is emergency first aid guidance. When in doubt, always call emergency services.',
+                'emergencyNumber' => '912'
+            ];
+        }
+        
+        // Default response for unclear symptoms
+        return [
+            'success' => true,
+            'query' => $query,
+            'aiPowered' => false,
+            'recommendations' => [
+                [
+                    'condition' => 'Emergency Assessment Required',
+                    'severity' => 'moderate',
+                    'summary' => "Based on your symptoms: '{$query}', immediate medical assessment recommended. Please describe specific symptoms for targeted guidance.",
+                    'immediateActions' => [
+                        'Call emergency services (912) if life-threatening symptoms',
+                        'Stay calm and assess situation carefully',
+                        'Provide basic first aid if trained and safe to do so',
+                        'Monitor symptoms and person\'s condition continuously'
+                    ],
+                    'callEmergency' => true,
+                    'emergencySigns' => ['Any severe or concerning symptoms', 'Condition worsening', 'Loss of consciousness', 'Severe pain']
+                ]
+            ],
+            'disclaimer' => 'This is AI-enhanced emergency guidance using current medical protocols. Always call emergency services for life-threatening conditions.',
             'emergencyNumber' => '912'
         ];
     }

@@ -119,6 +119,156 @@ var checkerQ1;
 // Make goTo function globally available
 window.goTo = goTo;
 
+// Voice Search global variables and functions
+let recognition = null;
+let isListening = false;
+
+function initializeVoiceRecognition() {
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        recognition = new SpeechRecognition();
+        
+        recognition.continuous = false;
+        recognition.interimResults = true;
+        recognition.lang = 'en-US';
+        recognition.maxAlternatives = 1;
+        
+        recognition.onstart = function() {
+            isListening = true;
+            updateVoiceButton(true);
+            console.log('Voice recognition started');
+        };
+        
+        recognition.onresult = function(event) {
+            const current = event.resultIndex;
+            const transcript = event.results[current][0].transcript;
+            const searchInput = document.getElementById('emergencySearch');
+            
+            if (event.results[current].isFinal) {
+                searchInput.value = transcript;
+                console.log('Final transcript:', transcript);
+                // Give user time to see result before auto-searching
+                setTimeout(() => {
+                    if (transcript.trim().length > 2) {
+                        performSearchClick();
+                    }
+                }, 1000);
+            } else {
+                // Show interim results
+                searchInput.value = transcript;
+                console.log('Interim transcript:', transcript);
+            }
+        };
+        
+        recognition.onerror = function(event) {
+            console.error('Speech recognition error:', event.error);
+            isListening = false;
+            updateVoiceButton(false);
+            
+            let errorMessage = 'Voice search error';
+            switch(event.error) {
+                case 'no-speech':
+                    errorMessage = 'No speech detected';
+                    break;
+                case 'audio-capture':
+                    errorMessage = 'Microphone not available';
+                    break;
+                case 'not-allowed':
+                    errorMessage = 'Microphone permission denied';
+                    break;
+                case 'network':
+                    errorMessage = 'Network error';
+                    break;
+            }
+            
+            showToast(errorMessage + '. Please try again.', 'error');
+        };
+        
+        recognition.onend = function() {
+            isListening = false;
+            updateVoiceButton(false);
+            console.log('Voice recognition ended');
+        };
+        
+        return true;
+    } else {
+        console.log('Speech recognition not supported');
+        return false;
+    }
+}
+
+function toggleVoiceSearch() {
+    if (!recognition) {
+        if (!initializeVoiceRecognition()) {
+            showToast('Voice search is not supported in your browser. Please try Chrome or Edge.', 'error');
+            return;
+        }
+    }
+    
+    if (isListening) {
+        recognition.stop();
+    } else {
+        recognition.start();
+    }
+}
+
+function updateVoiceButton(listening) {
+    const voiceBtn = document.getElementById('voiceSearchBtn');
+    const voiceIcon = document.getElementById('voiceIcon');
+    
+    if (listening) {
+        voiceBtn.classList.remove('bg-zinc-700', 'hover:bg-zinc-600');
+        voiceBtn.classList.add('bg-red-600', 'hover:bg-red-500', 'animate-pulse');
+        voiceIcon.classList.remove('fa-microphone');
+        voiceIcon.classList.add('fa-microphone-slash');
+        voiceBtn.title = 'Voice Search (Click to stop)';
+    } else {
+        voiceBtn.classList.remove('bg-red-600', 'hover:bg-red-500', 'animate-pulse');
+        voiceBtn.classList.add('bg-zinc-700', 'hover:bg-zinc-600');
+        voiceIcon.classList.remove('fa-microphone-slash');
+        voiceIcon.classList.add('fa-microphone');
+        voiceBtn.title = 'Voice Search (Click to start)';
+    }
+}
+
+// Toast notification function
+function showToast(message, type = 'info') {
+    const toast = document.createElement('div');
+    toast.className = `toast fixed bottom-24 right-6 z-50 px-4 py-3 rounded-lg shadow-lg transform transition-all duration-300 translate-x-full`;
+    
+    const bgColor = type === 'error' ? 'bg-red-600' : type === 'success' ? 'bg-green-600' : 'bg-blue-600';
+    toast.classList.add(bgColor);
+    
+    toast.innerHTML = `
+        <div class="flex items-center gap-3 text-white">
+            <i class="fa-solid ${type === 'error' ? 'fa-exclamation-circle' : type === 'success' ? 'fa-check-circle' : 'fa-info-circle'}"></i>
+            <span>${message}</span>
+        </div>
+    `;
+    
+    document.body.appendChild(toast);
+    
+    // Animate in
+    setTimeout(() => {
+        toast.classList.remove('translate-x-full');
+        toast.classList.add('translate-x-0');
+    }, 100);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+        toast.classList.remove('translate-x-0');
+        toast.classList.add('translate-x-full');
+        setTimeout(() => {
+            document.body.removeChild(toast);
+        }, 300);
+    }, 3000);
+}
+
+// Make voice functions globally available
+window.toggleVoiceSearch = toggleVoiceSearch;
+window.initializeVoiceRecognition = initializeVoiceRecognition;
+window.showToast = showToast;
+
 // Button-based search function
 function performSearchClick() {
     console.log('Search button clicked!');
@@ -2419,10 +2569,18 @@ console.log('closeModal function loaded inline:', typeof closeModal);
         type="text" 
         id="emergencySearch" 
         placeholder="Describe symptoms: 'chest pain', 'bleeding', 'choking'..."
-        class="search-input text-lg pr-12"
+        class="search-input text-lg pr-32"
         autocomplete="off"
       >
       <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500"></i>
+      <button 
+        id="voiceSearchBtn" 
+        onclick="toggleVoiceSearch()" 
+        class="absolute right-20 top-1/2 -translate-y-1/2 w-8 h-8 bg-zinc-700 hover:bg-zinc-600 text-zinc-300 rounded-lg flex items-center justify-center transition-all"
+        title="Voice Search (Click to start)"
+      >
+        <i id="voiceIcon" class="fa-solid fa-microphone text-sm"></i>
+      </button>
       <button onclick="performSearchClick()" class="absolute right-2 top-1/2 -translate-y-1/2 bg-red-600 hover:bg-red-500 text-white px-3 py-1 rounded-lg text-sm font-medium transition-colors">
         Search
       </button>
@@ -3437,6 +3595,7 @@ function renderContentForActivePage() {
     }
     // renderContacts() is now handled by Blade templates - no longer needed
 }
+
 
 // Call the function after a short delay to ensure pages are loaded
 setTimeout(renderContentForActivePage, 100);

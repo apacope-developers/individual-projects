@@ -107,9 +107,18 @@ h1,h2,h3,h4,h5,h6{font-family:'Space Grotesk',sans-serif}
           type="text" 
           id="publicEmergencySearch" 
           placeholder="Describe your emergency (e.g., 'chest pain', 'bleeding', 'choking', 'burn')..."
-          class="w-full px-4 py-4 bg-[#18181B] border border-zinc-700 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent text-base md:text-lg"
+          class="w-full px-4 py-4 pr-64 bg-[#18181B] border border-zinc-700 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent text-base md:text-lg"
           onkeypress="if(event.key === 'Enter') performPublicEmergencySearch()"
         >
+        <button 
+          id="publicVoiceSearchBtn" 
+          onclick="togglePublicVoiceSearch()" 
+          class="absolute right-52 top-1/2 transform -translate-y-1/2 w-10 h-10 bg-zinc-700 hover:bg-zinc-600 text-zinc-300 rounded-lg flex items-center justify-center transition-all z-10"
+          title="Voice Search (Click to start)"
+          style="display: flex !important;"
+        >
+          <i id="publicVoiceIcon" class="fa-solid fa-microphone"></i>
+        </button>
         <button 
           onclick="performPublicEmergencySearch()"
           class="absolute right-2 top-1/2 transform -translate-y-1/2 px-4 py-2 md:px-6 md:py-3 bg-red-600 hover:bg-red-500 rounded-lg font-semibold transition-colors flex items-center gap-2 text-sm md:text-base"
@@ -590,6 +599,156 @@ h1,h2,h3,h4,h5,h6{font-family:'Space Grotesk',sans-serif}
 </div>
 
 <script>
+// Voice Search global variables and functions for landing page
+let publicRecognition = null;
+let isPublicListening = false;
+
+function initializePublicVoiceRecognition() {
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        publicRecognition = new SpeechRecognition();
+        
+        publicRecognition.continuous = false;
+        publicRecognition.interimResults = true;
+        publicRecognition.lang = 'en-US';
+        publicRecognition.maxAlternatives = 1;
+        
+        publicRecognition.onstart = function() {
+            isPublicListening = true;
+            updatePublicVoiceButton(true);
+            console.log('Public voice recognition started');
+        };
+        
+        publicRecognition.onresult = function(event) {
+            const current = event.resultIndex;
+            const transcript = event.results[current][0].transcript;
+            const searchInput = document.getElementById('publicEmergencySearch');
+            
+            if (event.results[current].isFinal) {
+                searchInput.value = transcript;
+                console.log('Final transcript:', transcript);
+                // Give user time to see result before auto-searching
+                setTimeout(() => {
+                    if (transcript.trim().length > 2) {
+                        performPublicEmergencySearch();
+                    }
+                }, 1000);
+            } else {
+                // Show interim results
+                searchInput.value = transcript;
+                console.log('Interim transcript:', transcript);
+            }
+        };
+        
+        publicRecognition.onerror = function(event) {
+            console.error('Public speech recognition error:', event.error);
+            isPublicListening = false;
+            updatePublicVoiceButton(false);
+            
+            let errorMessage = 'Voice search error';
+            switch(event.error) {
+                case 'no-speech':
+                    errorMessage = 'No speech detected';
+                    break;
+                case 'audio-capture':
+                    errorMessage = 'Microphone not available';
+                    break;
+                case 'not-allowed':
+                    errorMessage = 'Microphone permission denied';
+                    break;
+                case 'network':
+                    errorMessage = 'Network error';
+                    break;
+            }
+            
+            showPublicToast(errorMessage + '. Please try again.', 'error');
+        };
+        
+        publicRecognition.onend = function() {
+            isPublicListening = false;
+            updatePublicVoiceButton(false);
+            console.log('Public voice recognition ended');
+        };
+        
+        return true;
+    } else {
+        console.log('Speech recognition not supported');
+        return false;
+    }
+}
+
+function togglePublicVoiceSearch() {
+    if (!publicRecognition) {
+        if (!initializePublicVoiceRecognition()) {
+            showPublicToast('Voice search is not supported in your browser. Please try Chrome or Edge.', 'error');
+            return;
+        }
+    }
+    
+    if (isPublicListening) {
+        publicRecognition.stop();
+    } else {
+        publicRecognition.start();
+    }
+}
+
+function updatePublicVoiceButton(listening) {
+    const voiceBtn = document.getElementById('publicVoiceSearchBtn');
+    const voiceIcon = document.getElementById('publicVoiceIcon');
+    
+    if (listening) {
+        voiceBtn.classList.remove('bg-zinc-700', 'hover:bg-zinc-600');
+        voiceBtn.classList.add('bg-red-600', 'hover:bg-red-500', 'animate-pulse');
+        voiceIcon.classList.remove('fa-microphone');
+        voiceIcon.classList.add('fa-microphone-slash');
+        voiceBtn.title = 'Voice Search (Click to stop)';
+    } else {
+        voiceBtn.classList.remove('bg-red-600', 'hover:bg-red-500', 'animate-pulse');
+        voiceBtn.classList.add('bg-zinc-700', 'hover:bg-zinc-600');
+        voiceIcon.classList.remove('fa-microphone-slash');
+        voiceIcon.classList.add('fa-microphone');
+        voiceBtn.title = 'Voice Search (Click to start)';
+    }
+}
+
+// Toast notification function for landing page
+function showPublicToast(message, type = 'info') {
+    const toast = document.createElement('div');
+    toast.className = `toast fixed bottom-24 right-6 z-50 px-4 py-3 rounded-lg shadow-lg transform transition-all duration-300 translate-x-full`;
+    
+    const bgColor = type === 'error' ? 'bg-red-600' : type === 'success' ? 'bg-green-600' : 'bg-blue-600';
+    toast.classList.add(bgColor);
+    
+    toast.innerHTML = `
+        <div class="flex items-center gap-3 text-white">
+            <i class="fa-solid ${type === 'error' ? 'fa-exclamation-circle' : type === 'success' ? 'fa-check-circle' : 'fa-info-circle'}"></i>
+            <span>${message}</span>
+        </div>
+    `;
+    
+    document.body.appendChild(toast);
+    
+    // Animate in
+    setTimeout(() => {
+        toast.classList.remove('translate-x-full');
+        toast.classList.add('translate-x-0');
+    }, 100);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+        toast.classList.remove('translate-x-0');
+        toast.classList.add('translate-x-full');
+        setTimeout(() => {
+            document.body.removeChild(toast);
+        }, 300);
+    }, 3000);
+}
+
+// Make voice functions globally available
+window.togglePublicVoiceSearch = togglePublicVoiceSearch;
+window.initializePublicVoiceRecognition = initializePublicVoiceRecognition;
+window.showPublicToast = showPublicToast;
+
 // Emergency Database
 const emergencyDatabase = [
   {
@@ -1212,6 +1371,18 @@ window.addEventListener('scroll', function() {
   } else {
     nav.classList.remove('bg-[#09090B]');
   }
+});
+
+
+// Initialize public voice recognition on page load
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(() => {
+        if (initializePublicVoiceRecognition()) {
+            console.log('Public voice recognition initialized successfully');
+        } else {
+            console.log('Public voice recognition not available');
+        }
+    }, 1000);
 });
 
 // Video Modal functionality
