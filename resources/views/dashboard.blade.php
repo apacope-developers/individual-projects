@@ -119,13 +119,14 @@ h1,h2,h3,h4,h5,h6{font-family:'Space Grotesk',sans-serif}
 
 <!-- Inline script to ensure goTo function is available immediately -->
 <script>
-function goTo(pg) {
+// Store checker initial state
+var checkerQ1;
+
+// Define goTo function immediately and ensure global availability
+window.goTo = function(pg) {
     console.log('goTo called with:', pg);
     try {
-        document.querySelectorAll('.page').forEach(function(e) {
-            e.classList.remove('active')
-        });
-        document.getElementById('pg-' + pg).classList.add('active');
+        // Update navigation active state
         document.querySelectorAll('#sideNav .nav-item').forEach(function(e) {
             e.classList.remove('active');
             e.classList.add('text-zinc-400')
@@ -143,17 +144,723 @@ function goTo(pg) {
             b.classList.add('active');
             b.classList.remove('text-zinc-400')
         }
-        console.log('Navigation successful to:', pg);
+
+        // Load content dynamically into dashboard
+        const dynamicContentArea = document.getElementById('dynamicContentArea');
+        if (!dynamicContentArea) {
+            console.error('Dynamic content area not found');
+            return;
+        }
+
+        // Load appropriate content based on page with defensive checks
+        switch(pg) {
+            case 'dashboard':
+                if (typeof loadDashboardContent === 'function') {
+                    loadDashboardContent();
+                } else {
+                    console.error('loadDashboardContent function not found');
+                }
+                break;
+            case 'bodymap':
+                if (typeof loadBodyMapContent === 'function') {
+                    loadBodyMapContent();
+                } else {
+                    console.error('loadBodyMapContent function not found');
+                }
+                break;
+            case 'checker':
+                if (typeof loadSymptomCheckerContent === 'function') {
+                    loadSymptomCheckerContent();
+                } else {
+                    console.error('loadSymptomCheckerContent function not found');
+                }
+                break;
+            case 'guide':
+                if (typeof loadFirstAidGuideContent === 'function') {
+                    loadFirstAidGuideContent();
+                } else {
+                    console.error('loadFirstAidGuideContent function not found');
+                }
+                break;
+            case 'cpr':
+                if (typeof loadCPRContent === 'function') {
+                    loadCPRContent();
+                } else {
+                    console.error('loadCPRContent function not found');
+                }
+                break;
+            case 'contacts':
+                if (typeof loadContactsContent === 'function') {
+                    loadContactsContent();
+                } else {
+                    console.error('loadContactsContent function not found');
+                }
+                break;
+            default:
+                if (typeof loadDashboardContent === 'function') {
+                    loadDashboardContent();
+                } else {
+                    console.error('loadDashboardContent function not found');
+                }
+        }
+
+        console.log('Dynamic content loaded for:', pg);
     } catch (error) {
         console.error('Error in goTo function:', error);
     }
+};
+
+// Also create a local reference for compatibility
+var goTo = window.goTo;
+
+// Defensive check - ensure goTo is always available
+window.addEventListener('DOMContentLoaded', function() {
+    if (!window.goTo) {
+        console.error('goTo function not found, redefining...');
+        window.goTo = function(pg) {
+            console.log('goTo fallback called with:', pg);
+            // Basic implementation
+            console.log('Navigation to:', pg);
+        };
+    }
+});
+
+// Immediate fallback check
+if (typeof window.goTo !== 'function') {
+    console.warn('goTo function not immediately available, adding fallback');
+    window.goTo = function(pg) {
+        console.log('goTo immediate fallback called with:', pg);
+        console.log('Navigation to:', pg);
+    };
 }
 
-// Store checker initial state
-var checkerQ1;
+// Ensure CPR functions are always available
+if (typeof window.toggleCPR !== 'function') {
+    console.warn('toggleCPR function not immediately available, adding fallback');
+    window.toggleCPR = function() {
+        console.log('toggleCPR fallback called');
+    };
+}
 
-// Make goTo function globally available
-window.goTo = goTo;
+if (typeof window.adjBPM !== 'function') {
+    console.warn('adjBPM function not immediately available, adding fallback');
+    window.adjBPM = function(delta) {
+        console.log('adjBPM fallback called with:', delta);
+    };
+}
+
+if (typeof window.resetCPR !== 'function') {
+    console.warn('resetCPR function not immediately available, adding fallback');
+    window.resetCPR = function() {
+        console.log('resetCPR fallback called');
+    };
+}
+
+// Content loading functions
+function loadDashboardContent() {
+    const dynamicContentArea = document.getElementById('dynamicContentArea');
+    dynamicContentArea.innerHTML = `
+        <div class="card-s p-12 text-center">
+            <i class="fa-solid fa-hand-pointer text-4xl text-zinc-600 mb-4"></i>
+            <h3 class="text-xl font-semibold text-white mb-2">Select a Tool</h3>
+            <p class="text-zinc-400">Click on Body Map, First Aid Guide, Symptom Checker, CPR Assistant, or Contacts to load content here</p>
+        </div>
+    `;
+}
+
+function loadBodyMapContent() {
+    const dynamicContentArea = document.getElementById('dynamicContentArea');
+    dynamicContentArea.innerHTML = `
+        <div>
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h3 class="text-2xl font-bold text-white mb-2">Interactive Body Map</h3>
+                    <p class="text-zinc-400">Click on a body region to see related conditions</p>
+                </div>
+                <button onclick="showZone('body-wide')" class="px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg font-semibold">
+                    <i class="fa-solid fa-exclamation-triangle mr-2"></i>
+                    View Body-Wide Emergency Conditions
+                </button>
+            </div>
+            <div class="flex flex-col lg:flex-row gap-6">
+                <div class="card-s p-6 flex-shrink-0 flex items-center justify-center" style="min-height:440px">
+                    <svg viewBox="0 0 200 440" width="220" height="480">
+                        <g class="body-outline"><ellipse cx="100" cy="42" rx="24" ry="30"/><rect x="92" y="72" width="16" height="16" rx="5"/><path d="M62,88 Q60,88 59,90 L56,192 Q55,196 60,196 L140,196 Q145,196 144,192 L141,90 Q140,88 138,88 Z"/><path d="M59,92 L38,100 L24,172 L36,175 L48,112 L59,106 Z"/><path d="M141,92 L162,100 L176,172 L164,175 L152,112 L141,106 Z"/><path d="M60,196 L52,300 L44,388 L56,390 L66,305 L86,305 L86,196 Z"/><path d="M140,196 L148,300 L156,388 L144,390 L134,305 L114,305 L114,196 Z"/></g>
+                        <ellipse cx="100" cy="42" rx="30" ry="36" class="body-zone" onclick="showZone('head')"/>
+                        <rect x="57" y="86" width="86" height="52" rx="6" class="body-zone" onclick="showZone('chest')"/>
+                        <rect x="57" y="140" width="86" height="56" rx="6" class="body-zone" onclick="showZone('abdomen')"/>
+                        <rect x="22" y="90" width="40" height="88" rx="12" class="body-zone" onclick="showZone('left-arm')" transform="rotate(-8,42,90)"/>
+                        <rect x="138" y="90" width="40" height="88" rx="12" class="body-zone" onclick="showZone('right-arm')" transform="rotate(8,158,90)"/>
+                        <rect x="40" y="196" width="50" height="200" rx="12" class="body-zone" onclick="showZone('left-leg')" transform="rotate(2,65,196)"/>
+                        <rect x="110" y="196" width="50" height="200" rx="12" class="body-zone" onclick="showZone('right-leg')" transform="rotate(-2,135,196)"/>
+                        <!-- Hands -->
+                        <ellipse cx="28" cy="178" rx="12" ry="18" class="body-zone" onclick="showZone('left-hand')" transform="rotate(-15,28,178)"/>
+                        <ellipse cx="172" cy="178" rx="12" ry="18" class="body-zone" onclick="showZone('right-hand')" transform="rotate(15,172,178)"/>
+                        <!-- Feet -->
+                        <ellipse cx="65" cy="390" rx="15" ry="20" class="body-zone" onclick="showZone('left-foot')"/>
+                        <ellipse cx="135" cy="390" rx="15" ry="20" class="body-zone" onclick="showZone('right-foot')"/>
+                    </svg>
+                </div>
+                <div class="flex-1" id="dynamicZonePanel">
+                    <div class="card-s p-8 text-center h-full flex flex-col items-center justify-center">
+                        <i class="fa-solid fa-hand-pointer text-4xl text-zinc-600 mb-4"></i>
+                        <p class="text-zinc-400 text-lg">Select a body region to view related conditions</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Update zone panel function to use dynamic panel
+    window.currentZonePanel = 'dynamicZonePanel';
+}
+
+function loadSymptomCheckerContent() {
+    const dynamicContentArea = document.getElementById('dynamicContentArea');
+    dynamicContentArea.innerHTML = `
+        <div>
+            <div class="mb-6">
+                <h3 class="text-2xl font-bold text-white mb-1">Smart Symptom Checker</h3>
+                <p class="text-zinc-400">Answer a few questions to get a triage assessment</p>
+            </div>
+            <div class="max-w-2xl">
+                <div class="flex items-center gap-2 mb-6">
+                    <div class="step-dot active"></div>
+                    <div class="h-px flex-1 bg-zinc-800"></div>
+                    <div class="step-dot"></div>
+                    <div class="h-px flex-1 bg-zinc-800"></div>
+                    <div class="step-dot"></div>
+                </div>
+                <div class="card-s p-6 mb-4">
+                    <p class="text-xs text-zinc-500 mb-1">Question 1</p>
+                    <h3 class="font-semibold text-lg">What is the main problem?</h3>
+                </div>
+                <div class="space-y-3">
+                    <button onclick="checkerNext('chest')" class="card w-full p-4 flex items-center gap-4 text-left hover:border-red-500/30">
+                        <div class="w-10 h-10 rounded-lg bg-zinc-800 flex items-center justify-center flex-shrink-0">
+                            <i class="fa-solid fa-heart text-zinc-400"></i>
+                        </div>
+                        <span class="text-sm font-medium">Chest pain or discomfort</span>
+                        <i class="fa-solid fa-chevron-right text-zinc-600 ml-auto text-xs"></i>
+                    </button>
+                    <button onclick="checkerNext('breathing')" class="card w-full p-4 flex items-center gap-4 text-left hover:border-red-500/30">
+                        <div class="w-10 h-10 rounded-lg bg-zinc-800 flex items-center justify-center flex-shrink-0">
+                            <i class="fa-solid fa-lungs text-zinc-400"></i>
+                        </div>
+                        <span class="text-sm font-medium">Difficulty breathing</span>
+                        <i class="fa-solid fa-chevron-right text-zinc-600 ml-auto text-xs"></i>
+                    </button>
+                    <button onclick="checkerNext('bleeding')" class="card w-full p-4 flex items-center gap-4 text-left hover:border-red-500/30">
+                        <div class="w-10 h-10 rounded-lg bg-zinc-800 flex items-center justify-center flex-shrink-0">
+                            <i class="fa-solid fa-droplet text-zinc-400"></i>
+                        </div>
+                        <span class="text-sm font-medium">Bleeding or wound</span>
+                        <i class="fa-solid fa-chevron-right text-zinc-600 ml-auto text-xs"></i>
+                    </button>
+                    <button onclick="checkerNext('unconscious')" class="card w-full p-4 flex items-center gap-4 text-left hover:border-red-500/30">
+                        <div class="w-10 h-10 rounded-lg bg-zinc-800 flex items-center justify-center flex-shrink-0">
+                            <i class="fa-solid fa-person-falling text-zinc-400"></i>
+                        </div>
+                        <span class="text-sm font-medium">Person is unconscious</span>
+                        <i class="fa-solid fa-chevron-right text-zinc-600 ml-auto text-xs"></i>
+                    </button>
+                    <button onclick="checkerNext('burn')" class="card w-full p-4 flex items-center gap-4 text-left hover:border-red-500/30">
+                        <div class="w-10 h-10 rounded-lg bg-zinc-800 flex items-center justify-center flex-shrink-0">
+                            <i class="fa-solid fa-fire text-zinc-400"></i>
+                        </div>
+                        <span class="text-sm font-medium">Burn or scald</span>
+                        <i class="fa-solid fa-chevron-right text-zinc-600 ml-auto text-xs"></i>
+                    </button>
+                    <button onclick="checkerNext('seizure')" class="card w-full p-4 flex items-center gap-4 text-left hover:border-red-500/30">
+                        <div class="w-10 h-10 rounded-lg bg-zinc-800 flex items-center justify-center flex-shrink-0">
+                            <i class="fa-solid fa-bolt text-zinc-400"></i>
+                        </div>
+                        <span class="text-sm font-medium">Seizure</span>
+                        <i class="fa-solid fa-chevron-right text-zinc-600 ml-auto text-xs"></i>
+                    </button>
+                    <button onclick="checkerNext('fracture')" class="card w-full p-4 flex items-center gap-4 text-left hover:border-red-500/30">
+                        <div class="w-10 h-10 rounded-lg bg-zinc-800 flex items-center justify-center flex-shrink-0">
+                            <i class="fa-solid fa-bone text-zinc-400"></i>
+                        </div>
+                        <span class="text-sm font-medium">Suspected broken bone</span>
+                        <i class="fa-solid fa-chevron-right text-zinc-600 ml-auto text-xs"></i>
+                    </button>
+                    <button onclick="checkerNext('allergic')" class="card w-full p-4 flex items-center gap-4 text-left hover:border-red-500/30">
+                        <div class="w-10 h-10 rounded-lg bg-zinc-800 flex items-center justify-center flex-shrink-0">
+                            <i class="fa-solid fa-syringe text-zinc-400"></i>
+                        </div>
+                        <span class="text-sm font-medium">Allergic reaction</span>
+                        <i class="fa-solid fa-chevron-right text-zinc-600 ml-auto text-xs"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function loadFirstAidGuideContent() {
+    const dynamicContentArea = document.getElementById('dynamicContentArea');
+    dynamicContentArea.innerHTML = `
+        <div>
+            <div class="mb-6">
+                <h3 class="text-2xl font-bold text-white mb-1">First Aid Guide</h3>
+                <p class="text-zinc-400">Step-by-step emergency procedures</p>
+            </div>
+            <div id="dynamicGuideContainer">
+                <div class="space-y-4">
+                    @if($firstAidGuides->count() > 0)
+                        @foreach($firstAidGuides as $guide)
+                        <div class="card-s p-6 cursor-pointer hover:border-zinc-700" onclick="showGuideDetails({{ $guide->id }})">
+                            <div class="flex items-start justify-between">
+                                <div class="flex items-start gap-4">
+                                    <div class="w-12 h-12 rounded-lg bg-red-600/20 flex items-center justify-center">
+                                        <i class="fa-solid {{ $guide->icon ?? 'fa-book-medical' }} text-red-400 text-lg"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <h3 class="font-semibold text-lg text-white">{{ $guide->title }}</h3>
+                                        <p class="text-zinc-400 text-sm mb-2">{{ $guide->description }}</p>
+                                        <div class="flex items-center gap-3">
+                                            <span class="sev-{{ $guide->severity }} text-xs px-3 py-1 rounded-full font-semibold uppercase">
+                                                {{ $guide->severity }}
+                                            </span>
+                                            <span class="text-xs text-zinc-500 bg-zinc-800 px-2 py-1 rounded-full">
+                                                {{ $guide->category }}
+                                            </span>
+                                            @if($guide->region !== 'global')
+                                            <span class="text-xs text-blue-400 bg-blue-600/20 px-2 py-1 rounded-full">
+                                                {{ $guide->region }}
+                                            </span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @endforeach
+                    @else
+                    <div class="text-center py-12">
+                        <i class="fa-solid fa-book-medical text-4xl text-zinc-600 mb-4"></i>
+                        <p class="text-zinc-400">No first aid guides available</p>
+                    </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function loadCPRContent() {
+    const dynamicContentArea = document.getElementById('dynamicContentArea');
+    dynamicContentArea.innerHTML = `
+        <div>
+            <div class="mb-6">
+                <h3 class="text-2xl font-bold text-white mb-1">CPR Assistant</h3>
+                <p class="text-zinc-400">Real-time metronome and compression counter</p>
+            </div>
+            <div class="flex flex-col lg:flex-row gap-6">
+                <div class="flex-1">
+                    <div class="card-s p-8 flex flex-col items-center">
+                        <div class="relative w-48 h-48 mb-6">
+                            <div class="absolute inset-0 rounded-full border-4 border-zinc-800"></div>
+                            <div class="absolute inset-3 rounded-full border-2 border-zinc-700/50"></div>
+                            <div class="absolute inset-0 rounded-full bg-zinc-800/30 flex items-center justify-center" id="dynamicCprPulse">
+                                <div class="text-center">
+                                    <p class="text-5xl font-bold" id="dynamicCprCount">0</p>
+                                    <p class="text-xs text-zinc-400 mt-1">compressions</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4 mb-4">
+                            <button onclick="window.cprAdjustBPM(-5)" class="w-10 h-10 rounded-lg bg-zinc-800 hover:bg-zinc-700 flex items-center justify-center">
+                                <i class="fa-solid fa-minus text-sm"></i>
+                            </button>
+                            <div class="text-center min-w-[120px]">
+                                <p class="text-3xl font-bold text-red-400" id="dynamicCprBPM">110</p>
+                                <p class="text-xs text-zinc-500">BPM</p>
+                            </div>
+                            <button onclick="window.cprAdjustBPM(5)" class="w-10 h-10 rounded-lg bg-zinc-800 hover:bg-zinc-700 flex items-center justify-center">
+                                <i class="fa-solid fa-plus text-sm"></i>
+                            </button>
+                        </div>
+                        <div class="flex items-center gap-2 mb-4 text-sm">
+                            <span class="px-3 py-1 rounded-full bg-zinc-800 text-zinc-300" id="dynamicCprPhase">Ready</span>
+                            <span class="text-zinc-500">Ratio: 30:2</span>
+                        </div>
+                        <div class="flex gap-3">
+                            <button onclick="window.toggleCPR()" id="dynamicCprBtn" class="px-8 py-3 bg-red-600 hover:bg-red-500 rounded-xl font-semibold">
+                                <i class="fa-solid fa-play mr-2"></i>Start
+                            </button>
+                            <button onclick="window.resetCPRFunc()" class="px-6 py-3 bg-zinc-800 hover:bg-zinc-700 rounded-xl font-semibold">
+                                <i class="fa-solid fa-rotate-right mr-2"></i>Reset
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex-1">
+                    <div class="card-s p-6">
+                        <h3 class="font-semibold text-lg mb-4">CPR Steps</h3>
+                        <ol class="space-y-3 text-sm">
+                            <li class="flex gap-3">
+                                <span class="w-6 h-6 rounded-full bg-red-600/20 text-red-400 flex items-center justify-center flex-shrink-0 text-xs font-bold">1</span>
+                                <span><strong class="text-zinc-200">Check safety</strong></span>
+                            </li>
+                            <li class="flex gap-3">
+                                <span class="w-6 h-6 rounded-full bg-red-600/20 text-red-400 flex items-center justify-center flex-shrink-0 text-xs font-bold">2</span>
+                                <span><strong class="text-zinc-200">Check responsiveness</strong></span>
+                            </li>
+                            <li class="flex gap-3">
+                                <span class="w-6 h-6 rounded-full bg-red-600/20 text-red-400 flex items-center justify-center flex-shrink-0 text-xs font-bold">3</span>
+                                <span><strong class="text-zinc-200">Call 912</strong></span>
+                            </li>
+                            <li class="flex gap-3">
+                                <span class="w-6 h-6 rounded-full bg-red-600/20 text-red-400 flex items-center justify-center flex-shrink-0 text-xs font-bold">4</span>
+                                <span><strong class="text-zinc-200">Hand position</strong></span>
+                            </li>
+                            <li class="flex gap-3">
+                                <span class="w-6 h-6 rounded-full bg-red-600/20 text-red-400 flex items-center justify-center flex-shrink-0 text-xs font-bold">5</span>
+                                <span><strong class="text-zinc-200">Compress</strong> - At least 2 inches, 100-120 BPM.</span>
+                            </li>
+                            <li class="flex gap-3">
+                                <span class="w-6 h-6 rounded-full bg-red-600/20 text-red-400 flex items-center justify-center flex-shrink-0 text-xs font-bold">6</span>
+                                <span><strong class="text-zinc-200">Full recoil</strong></span>
+                            </li>
+                            <li class="flex gap-3">
+                                <span class="w-6 h-6 rounded-full bg-red-600/20 text-red-400 flex items-center justify-center flex-shrink-0 text-xs font-bold">7</span>
+                                <span><strong class="text-zinc-200">Rescue breaths</strong> - 2 breaths after 30 compressions.</span>
+                            </li>
+                            <li class="flex gap-3">
+                                <span class="w-6 h-6 rounded-full bg-red-600/20 text-red-400 flex items-center justify-center flex-shrink-0 text-xs font-bold">8</span>
+                                <span><strong class="text-zinc-200">Continue</strong> - Repeat 30:2 until help arrives.</span>
+                            </li>
+                        </ol>
+                        <div class="mt-6 p-4 rounded-lg bg-red-600/10 border border-red-600/20">
+                            <p class="text-sm text-red-300">
+                                <i class="fa-solid fa-circle-info mr-2"></i>
+                                <strong>Remember:</strong> Push hard, push fast, allow full recoil, minimize interruptions.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Re-initialize CPR variables when loading CPR content
+    cprCount = 0;
+    cprCompressions = 0;
+    cprPhase = 'Ready';
+    cprBPM = 110;
+    
+    // Update displays immediately
+    const countEl = document.getElementById('dynamicCprCount');
+    const bpmEl = document.getElementById('dynamicCprBPM');
+    const phaseEl = document.getElementById('dynamicCprPhase');
+    const btnEl = document.getElementById('dynamicCprBtn');
+    
+    if (countEl) countEl.textContent = '0';
+    if (bpmEl) bpmEl.textContent = '110';
+    if (phaseEl) phaseEl.textContent = 'Ready';
+    if (btnEl) btnEl.innerHTML = '<i class="fa-solid fa-play mr-2"></i>Start';
+    
+    // Add event listeners to CPR buttons
+    setTimeout(function() {
+        console.log('Setting up CPR event listeners...');
+        
+        const startBtn = document.getElementById('dynamicCprBtn');
+        const resetBtn = document.getElementById('cprResetBtn');
+        const minusBtn = document.getElementById('cprMinusBtn');
+        const plusBtn = document.getElementById('cprPlusBtn');
+        const testBtn = document.getElementById('cprTestBtn');
+        
+        if (startBtn) {
+            startBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                console.log('Start button clicked via event listener');
+                toggleCPR();
+            });
+            console.log('Start button event listener added');
+        }
+        
+        if (resetBtn) {
+            resetBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                console.log('Reset button clicked via event listener');
+                resetCPR();
+            });
+            console.log('Reset button event listener added');
+        }
+        
+        if (minusBtn) {
+            minusBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                console.log('Minus button clicked via event listener');
+                adjBPM(-5);
+            });
+            console.log('Minus button event listener added');
+        }
+        
+        if (plusBtn) {
+            plusBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                console.log('Plus button clicked via event listener');
+                adjBPM(5);
+            });
+            console.log('Plus button event listener added');
+        }
+        
+        if (testBtn) {
+            testBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                alert('Test button works via event listener!');
+            });
+            console.log('Test button event listener added');
+        }
+    }, 100);
+}
+
+// CPR State Management
+var cprInterval = null;
+var cprCount = 0;
+var cprBPM = 110;
+var cprPhase = 'Ready';
+var cprCompressions = 0;
+
+// CPR Functions
+window.cprAdjustBPM = function(delta) {
+    const bpmEl = document.getElementById('dynamicCprBPM');
+    if (bpmEl) {
+        const newBPM = Math.max(80, Math.min(140, parseInt(bpmEl.textContent) + delta));
+        bpmEl.textContent = newBPM;
+        cprBPM = newBPM;
+        
+        // Restart CPR if running
+        if (cprInterval) {
+            window.toggleCPR();
+            window.toggleCPR();
+        }
+    }
+};
+
+window.toggleCPR = function() {
+    console.log('=== CPR Toggle Called ===');
+    console.log('Current state:', { cprInterval: !!cprInterval, cprPhase, cprBPM, cprCount });
+    
+    const btnEl = document.getElementById('dynamicCprBtn');
+    const phaseEl = document.getElementById('dynamicCprPhase');
+    
+    if (!btnEl || !phaseEl) {
+        console.error('CPR elements not found');
+        return;
+    }
+    
+    // Prevent rapid double-clicks
+    if (window.cprToggleInProgress) {
+        console.log('CPR toggle already in progress, ignoring');
+        return;
+    }
+    
+    window.cprToggleInProgress = true;
+    setTimeout(() => { window.cprToggleInProgress = false; }, 500);
+    
+    if (cprInterval) {
+        // Stop CPR
+        console.log('Stopping CPR');
+        clearInterval(cprInterval);
+        cprInterval = null;
+        cprPhase = 'Ready';
+        
+        btnEl.innerHTML = '<i class="fa-solid fa-play mr-2"></i>Start';
+        phaseEl.textContent = 'Ready';
+    } else {
+        // Start CPR
+        console.log('Starting CPR with BPM:', cprBPM);
+        cprPhase = 'Compressions';
+        cprCompressions = 0;
+        
+        btnEl.innerHTML = '<i class="fa-solid fa-pause mr-2"></i>Pause';
+        phaseEl.textContent = 'Compressions';
+        
+        // Force immediate first compression
+        cprCount = 1;
+        cprCompressions = 1;
+        const countEl = document.getElementById('dynamicCprCount');
+        if (countEl) {
+            countEl.textContent = cprCount;
+            console.log('Initial compression count set to:', cprCount);
+        }
+        
+        cprInterval = setInterval(function() {
+            console.log('CPR Interval tick - cprCompressions:', cprCompressions, 'cprCount:', cprCount, 'cprPhase:', cprPhase);
+            
+            if (cprCompressions < 30) {
+                // Compression phase
+                cprCompressions++;
+                cprCount++;
+                
+                console.log('Incremented - New cprCount:', cprCount);
+                
+                const countEl = document.getElementById('dynamicCprCount');
+                if (countEl) {
+                    countEl.textContent = cprCount;
+                    console.log('Updated display to:', cprCount);
+                } else {
+                    console.error('Count element not found');
+                }
+                
+                const pulseEl = document.getElementById('dynamicCprPulse');
+                if (pulseEl) {
+                    pulseEl.style.transform = 'scale(1.1)';
+                    setTimeout(function() {
+                        pulseEl.style.transform = 'scale(1)';
+                    }, 100);
+                }
+            } else {
+                // Switch to breaths
+                console.log('Switching to breaths after 30 compressions');
+                cprPhase = 'Breaths';
+                cprCompressions = 0;
+                
+                if (phaseEl) phaseEl.textContent = 'Breaths';
+                
+                // 4 seconds for breaths
+                setTimeout(function() {
+                    console.log('Switching back to compressions');
+                    cprPhase = 'Compressions';
+                    cprCompressions = 0;
+                    if (phaseEl) phaseEl.textContent = 'Compressions';
+                }, 4000);
+            }
+        }, 60000 / cprBPM);
+        
+        console.log('CPR interval started successfully');
+    }
+};
+
+window.resetCPRFunc = function() {
+    // Stop CPR if running
+    if (cprInterval) {
+        clearInterval(cprInterval);
+        cprInterval = null;
+    }
+    
+    // Reset all variables
+    cprCount = 0;
+    cprCompressions = 0;
+    cprPhase = 'Ready';
+    cprBPM = 110;
+    
+    // Update display
+    const countEl = document.getElementById('dynamicCprCount');
+    const bpmEl = document.getElementById('dynamicCprBPM');
+    const phaseEl = document.getElementById('dynamicCprPhase');
+    const btnEl = document.getElementById('dynamicCprBtn');
+    
+    if (countEl) countEl.textContent = '0';
+    if (bpmEl) bpmEl.textContent = '110';
+    if (phaseEl) phaseEl.textContent = 'Ready';
+    if (btnEl) btnEl.innerHTML = '<i class="fa-solid fa-play mr-2"></i>Start';
+};
+
+function loadContactsContent() {
+    const dynamicContentArea = document.getElementById('dynamicContentArea');
+    dynamicContentArea.innerHTML = `
+        <div>
+            <div class="mb-6">
+                <h3 class="text-2xl font-bold text-white mb-1">Emergency Contacts</h3>
+                <p class="text-zinc-400">One-tap access to emergency numbers</p>
+            </div>
+            
+            <!-- Emergency Services -->
+            <div class="space-y-4 mb-8">
+                @if($emergencyContacts->count() > 0)
+                    @foreach($emergencyContacts as $contact)
+                    <div class="bg-[#18181B] border border-zinc-800 rounded-xl p-6 hover:border-red-600/50 cursor-pointer" onclick="if(confirm('Call {{ $contact->name }} at {{ $contact->phone }}?')) { window.location.href='tel:{{ $contact->phone }}'; }">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <div class="w-12 h-12 rounded-xl bg-red-600/20 flex items-center justify-center mr-4">
+                                    <i class="fa-solid {{ $contact->icon ?? 'fa-phone' }} text-red-400 text-lg"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-white text-lg">{{ $contact->name }}</h4>
+                                    <p class="text-zinc-300">
+                                        <i class="fa-solid fa-phone mr-2"></i>{{ $contact->phone }}
+                                    </p>
+                                </div>
+                            </div>
+                            <button onclick="event.stopPropagation(); if(confirm('Call {{ $contact->name }} at {{ $contact->phone }}?')) { window.location.href='tel:{{ $contact->phone }}'; }" class="px-6 py-3 bg-red-600 hover:bg-red-500 text-white rounded-lg font-semibold">
+                                <i class="fa-solid fa-phone mr-2"></i>Call
+                            </button>
+                        </div>
+                    </div>
+                    @endforeach
+                @else
+                <div class="text-center py-12">
+                    <i class="fa-solid fa-phone text-4xl text-zinc-600 mb-4"></i>
+                    <p class="text-zinc-400">No emergency contacts available</p>
+                </div>
+                @endif
+            </div>
+
+            <!-- Rwanda Doctors Network -->
+            @if($doctors->count() > 0)
+            <div>
+                <h3 class="text-lg font-semibold text-white mb-4 flex items-center">
+                    <i class="fa-solid fa-user-doctor text-blue-400 mr-2"></i>
+                    Rwanda Doctors Network
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    @foreach($doctors as $doctor)
+                    <div class="bg-[#18181B] border border-zinc-800 rounded-xl p-6 hover:border-blue-600/50">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex items-center">
+                                <div class="w-12 h-12 rounded-xl bg-blue-600/20 flex items-center justify-center mr-3">
+                                    <i class="fa-solid fa-user-doctor text-blue-400 text-lg"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-white">Dr. {{ $doctor->full_name }}</h4>
+                                    <span class="text-xs text-blue-400 bg-blue-600/20 px-2 py-1 rounded-full">{{ $doctor->specialty }}</span>
+                                    <div class="text-xs text-zinc-500 mt-1">{{ $doctor->hospital_clinic }}</div>
+                                </div>
+                            </div>
+                            @if($doctor->is_available)
+                                <span class="text-xs text-green-400 bg-green-600/20 px-2 py-1 rounded-full">Available</span>
+                            @else
+                                <span class="text-xs text-zinc-500 bg-zinc-600/20 px-2 py-1 rounded-full">Unavailable</span>
+                            @endif
+                        </div>
+                        <div class="space-y-2 mb-4">
+                            <div class="text-sm text-zinc-300">
+                                <i class="fa-solid fa-map-marker-alt mr-2"></i>{{ $doctor->location }}
+                            </div>
+                            <div class="text-sm text-zinc-300">
+                                <i class="fa-solid fa-phone mr-2"></i>{{ $doctor->phone }}
+                            </div>
+                        </div>
+                        <div class="border-t border-zinc-800 pt-4">
+                            <div class="flex gap-2">
+                                <button onclick="if(confirm('Call Dr. {{ $doctor->full_name }} at {{ $doctor->phone }}?')) { window.location.href='tel:{{ $doctor->phone }}'; }" class="flex-1 px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-sm">
+                                    <i class="fa-solid fa-phone mr-1"></i>Call
+                                </button>
+                                @if($doctor->whatsapp)
+                                <button onclick="if(confirm('Call Dr. {{ $doctor->full_name }} (WhatsApp) at {{ $doctor->whatsapp }}?')) { window.location.href='tel:{{ $doctor->whatsapp }}'; }" class="px-3 py-1 bg-green-600 hover:bg-green-500 text-white rounded-lg text-sm">
+                                    <i class="fab fa-whatsapp mr-1"></i>WhatsApp
+                                </button>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+            @else
+            <div class="text-center py-12">
+                <i class="fa-solid fa-user-doctor text-4xl text-zinc-600 mb-4"></i>
+                <p class="text-zinc-400">No doctors available at moment</p>
+            </div>
+            @endif
+        </div>
+    `;
+}
 
 // Voice Search global variables and functions
 let recognition = null;
@@ -1761,7 +2468,8 @@ function getTooltipPosition(zone) {
 }
 
 function updateZonePanel(zone, conditions) {
-    const zonePanel = document.getElementById('zonePanel');
+    // Try dynamic zone panel first, then fallback to dashboard and body map page panels
+    const zonePanel = document.getElementById('dynamicZonePanel') || document.getElementById('dashboardZonePanel') || document.getElementById('zonePanel');
     if (!zonePanel) return;
     
     let conditionsHTML = `
@@ -1903,7 +2611,8 @@ function clearBodyMapTooltips() {
 }
 
 function clearZonePanel() {
-    const zonePanel = document.getElementById('zonePanel');
+    // Try dynamic zone panel first, then fallback to dashboard and body map page panels
+    const zonePanel = document.getElementById('dynamicZonePanel') || document.getElementById('dashboardZonePanel') || document.getElementById('zonePanel');
     if (zonePanel) {
         zonePanel.innerHTML = `
             <div class="card-s p-8 text-center h-full flex flex-col items-center justify-center">
@@ -1966,93 +2675,119 @@ function openSOS() {
 var cprInterval, cprCount = 0, cprBPM = 110, cprPhase = 'Ready', cprCompressions = 0;
 
 function toggleCPR() {
-    console.log('toggleCPR called, current phase:', cprPhase);
+    console.log('=== toggleCPR called ===');
+    console.log('Current phase:', cprPhase);
+    console.log('cprInterval exists:', !!cprInterval);
+    console.log('cprBPM:', cprBPM);
+    console.log('cprCount:', cprCount);
+    console.log('cprCompressions:', cprCompressions);
     
     if (cprInterval) {
         // Stop CPR
         clearInterval(cprInterval);
         cprInterval = null;
-        const cprBtn = document.getElementById('cprBtn');
+        const cprBtn = document.getElementById('cprBtn') || document.getElementById('dynamicCprBtn');
         if (cprBtn) {
             cprBtn.innerHTML = '<i class="fa-solid fa-play mr-2"></i>Start';
         }
         cprPhase = 'Ready';
+        
+        // Update phase display
+        const cprPhaseEl = document.getElementById('cprPhase') || document.getElementById('dynamicCprPhase');
+        if (cprPhaseEl) cprPhaseEl.textContent = cprPhase;
     } else {
         // Start CPR
-        cprInterval = setInterval(function() {
-            if (cprCompressions < 30) {
-                // Compression phase
-                cprCompressions++;
-                cprCount++;
-                
-                const cprCountEl = document.getElementById('cprCount');
-                if (cprCountEl) cprCountEl.textContent = cprCount;
-                
-                const cprPulse = document.getElementById('cprPulse');
-                if (cprPulse) {
-                    cprPulse.style.transform = 'scale(1.1)';
-                    setTimeout(function() {
-                        cprPulse.style.transform = 'scale(1)';
-                    }, 100);
-                }
-            } else {
-                // Switch to breaths
-                cprPhase = 'Breaths';
-                clearInterval(cprInterval);
-                cprInterval = setInterval(function() {
-                    cprCompressions++;
-                    if (cprCompressions >= 32) {
-                        cprCompressions = 0;
-                        cprPhase = 'Compressions';
-                        clearInterval(cprInterval);
-                        toggleCPR();
-                        toggleCPR();
-                    }
-                }, 2000);
-            }
-        }, 60000 / cprBPM);
-        
-        const cprBtn = document.getElementById('cprBtn');
+        cprPhase = 'Compressions';
+        const cprBtn = document.getElementById('cprBtn') || document.getElementById('dynamicCprBtn');
         if (cprBtn) {
             cprBtn.innerHTML = '<i class="fa-solid fa-pause mr-2"></i>Pause';
         }
-        cprPhase = 'Compressions';
+        
+        // Update phase display
+        const cprPhaseEl = document.getElementById('cprPhase') || document.getElementById('dynamicCprPhase');
+        if (cprPhaseEl) cprPhaseEl.textContent = cprPhase;
+        
+        cprInterval = setInterval(function() {
+            if (cprPhase === 'Compressions') {
+                if (cprCompressions < 30) {
+                    // Compression phase
+                    cprCompressions++;
+                    cprCount++;
+                    
+                    const cprCountEl = document.getElementById('cprCount') || document.getElementById('dynamicCprCount');
+                    if (cprCountEl) cprCountEl.textContent = cprCount;
+                    
+                    const cprPulse = document.getElementById('cprPulse') || document.getElementById('dynamicCprPulse');
+                    if (cprPulse) {
+                        cprPulse.style.transform = 'scale(1.1)';
+                        setTimeout(function() {
+                            cprPulse.style.transform = 'scale(1)';
+                        }, 100);
+                    }
+                } else {
+                    // Switch to breaths
+                    cprPhase = 'Breaths';
+                    cprCompressions = 0;
+                    
+                    // Update phase display
+                    const cprPhaseEl = document.getElementById('cprPhase') || document.getElementById('dynamicCprPhase');
+                    if (cprPhaseEl) cprPhaseEl.textContent = cprPhase;
+                    
+                    // Start breath timing (2 breaths over 4 seconds)
+                    setTimeout(function() {
+                        cprPhase = 'Compressions';
+                        cprCompressions = 0;
+                        
+                        // Update phase display
+                        const cprPhaseEl = document.getElementById('cprPhase') || document.getElementById('dynamicCprPhase');
+                        if (cprPhaseEl) cprPhaseEl.textContent = cprPhase;
+                    }, 4000);
+                }
+            }
+        }, 60000 / cprBPM);
     }
-    
-    const cprPhaseEl = document.getElementById('cprPhase');
-    if (cprPhaseEl) cprPhaseEl.textContent = cprPhase;
 }
 
 function adjBPM(delta) {
-    console.log('adjBPM called with delta:', delta);
+    console.log('=== adjBPM called ===');
+    console.log('Delta:', delta);
+    console.log('Current cprBPM:', cprBPM);
     cprBPM = Math.max(80, Math.min(140, cprBPM + delta));
     
-    const cprBPMEl = document.getElementById('cprBPM');
+    const cprBPMEl = document.getElementById('cprBPM') || document.getElementById('dynamicCprBPM');
     if (cprBPMEl) cprBPMEl.textContent = cprBPM;
     
     if (cprInterval) {
+        // Restart CPR with new BPM
         clearInterval(cprInterval);
         cprInterval = null;
-        toggleCPR();
-        toggleCPR();
+        // Don't call toggleCPR twice - just restart once
+        const wasRunning = true;
+        cprPhase = 'Ready'; // Reset phase first
+        toggleCPR(); // This will start it again
     }
 }
 
 function resetCPR() {
-    console.log('resetCPR called');
+    console.log('=== resetCPR called ===');
+    console.log('Current state before reset:');
+    console.log('cprInterval exists:', !!cprInterval);
+    console.log('cprCount:', cprCount);
+    console.log('cprCompressions:', cprCompressions);
+    console.log('cprPhase:', cprPhase);
     clearInterval(cprInterval);
     cprInterval = null;
     cprCount = 0;
     cprCompressions = 0;
     cprPhase = 'Ready';
     
-    const cprCountEl = document.getElementById('cprCount');
+    const cprCountEl = document.getElementById('cprCount') || document.getElementById('dynamicCprCount');
     if (cprCountEl) cprCountEl.textContent = '0';
     
-    const cprPhaseEl = document.getElementById('cprPhase');
+    const cprPhaseEl = document.getElementById('cprPhase') || document.getElementById('dynamicCprPhase');
     if (cprPhaseEl) cprPhaseEl.textContent = 'Ready';
     
-    const cprBtn = document.getElementById('cprBtn');
+    const cprBtn = document.getElementById('cprBtn') || document.getElementById('dynamicCprBtn');
     if (cprBtn) {
         cprBtn.innerHTML = '<i class="fa-solid fa-play mr-2"></i>Start';
     }
@@ -2062,126 +2797,48 @@ function resetCPR() {
 function showResult(severity, condition, action) {
     console.log('showResult called with:', severity, condition, action);
     const html = `
-        <div class="flex items-center gap-2 mb-6">
-            <div class="step-dot"></div>
-            <div class="h-px flex-1 bg-zinc-800"></div>
-            <div class="step-dot"></div>
-            <div class="h-px flex-1 bg-zinc-800"></div>
-            <div class="step-dot active"></div>
-        </div>
-        <div class="card-s p-6 mb-4">
-            <div class="flex items-start justify-between mb-4">
-                <div>
-                    <h3 class="font-semibold text-lg">${condition}</h3>
-                    <span class="sev-${severity} text-xs px-3 py-1 rounded-full font-semibold uppercase mt-2 inline-block">${severity}</span>
+        <div>
+            <div class="flex items-center gap-2 mb-6">
+                <div class="step-dot"></div>
+                <div class="h-px flex-1 bg-zinc-800"></div>
+                <div class="step-dot"></div>
+                <div class="h-px flex-1 bg-zinc-800"></div>
+                <div class="step-dot active"></div>
+            </div>
+            <div class="card-s p-6 mb-4">
+                <div class="flex items-start justify-between mb-4">
+                    <div>
+                        <h3 class="font-semibold text-lg">${condition}</h3>
+                        <span class="sev-${severity} text-xs px-3 py-1 rounded-full font-semibold uppercase mt-2 inline-block">${severity}</span>
+                    </div>
+                </div>
+                <p class="text-zinc-300 text-sm mb-6">${action}</p>
+                <div class="flex gap-3">
+                    <button onclick="resetChecker()" class="px-6 py-3 bg-zinc-800 hover:bg-zinc-700 rounded-xl font-semibold">
+                        <i class="fa-solid fa-arrow-left mr-2"></i>Start Over
+                    </button>
+                    <!-- Emergency button removed for critical conditions -->
                 </div>
             </div>
-            <p class="text-zinc-300 text-sm mb-6">${action}</p>
-            <div class="flex gap-3">
-                <button onclick="resetChecker()" class="px-6 py-3 bg-zinc-800 hover:bg-zinc-700 rounded-xl font-semibold">
-                    <i class="fa-solid fa-arrow-left mr-2"></i>Start Over
+            <div class="mt-4">
+                <button onclick="loadSymptomCheckerContent()" class="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-semibold">
+                    <i class="fa-solid fa-arrow-left mr-2"></i>Back to Questions
                 </button>
-                <!-- Emergency button removed for critical conditions -->
             </div>
         </div>
     `;
-    document.getElementById('pg-checker').innerHTML = html;
+    
+    // Load into dynamic content area
+    const dynamicContentArea = document.getElementById('dynamicContentArea');
+    if (dynamicContentArea) {
+        dynamicContentArea.innerHTML = html;
+    }
 }
 
 // Reset checker function
 function resetChecker() {
     console.log('resetChecker called');
-    if (typeof window.checkerQ1 !== 'undefined' && window.checkerQ1) {
-        document.getElementById('pg-checker').innerHTML = window.checkerQ1;
-        console.log('resetChecker completed using stored checkerQ1');
-    } else {
-        console.error('checkerQ1 is not defined - using hardcoded fallback');
-        // Fallback: create the initial checker HTML structure
-        const fallbackHTML = `
-            <div class="mb-6"><h2 class="text-3xl font-bold mb-1">Smart Symptom Checker</h2><p class="text-zinc-400">Answer a few questions to get a triage assessment</p></div>
-            <div class="max-w-2xl">
-                <div class="flex items-center gap-2 mb-6">
-                    <div class="step-dot active"></div>
-                    <div class="h-px flex-1 bg-zinc-800"></div>
-                    <div class="step-dot"></div>
-                    <div class="h-px flex-1 bg-zinc-800"></div>
-                    <div class="step-dot"></div>
-                </div>
-                <div class="card-s p-6 mb-4">
-                    <p class="text-xs text-zinc-500 mb-1">Question 1</p>
-                    <h3 class="font-semibold text-lg">What is the main problem?</h3>
-                </div>
-                <div class="space-y-3">
-                    <button onclick="checkerNext('chest')" class="card w-full p-4 flex items-center gap-4 text-left hover:border-red-500/30">
-                        <div class="w-10 h-10 rounded-lg bg-zinc-800 flex items-center justify-center flex-shrink-0">
-                            <i class="fa-solid fa-heart text-zinc-400"></i>
-                        </div>
-                        <span class="text-sm font-medium">Chest pain or discomfort</span>
-                        <i class="fa-solid fa-chevron-right text-zinc-600 ml-auto text-xs"></i>
-                    </button>
-                    <button onclick="checkerNext('breathing')" class="card w-full p-4 flex items-center gap-4 text-left hover:border-red-500/30">
-                        <div class="w-10 h-10 rounded-lg bg-zinc-800 flex items-center justify-center flex-shrink-0">
-                            <i class="fa-solid fa-lungs text-zinc-400"></i>
-                        </div>
-                        <span class="text-sm font-medium">Difficulty breathing</span>
-                        <i class="fa-solid fa-chevron-right text-zinc-600 ml-auto text-xs"></i>
-                    </button>
-                    <button onclick="checkerNext('bleeding')" class="card w-full p-4 flex items-center gap-4 text-left hover:border-red-500/30">
-                        <div class="w-10 h-10 rounded-lg bg-zinc-800 flex items-center justify-center flex-shrink-0">
-                            <i class="fa-solid fa-droplet text-zinc-400"></i>
-                        </div>
-                        <span class="text-sm font-medium">Bleeding or wound</span>
-                        <i class="fa-solid fa-chevron-right text-zinc-600 ml-auto text-xs"></i>
-                    </button>
-                    <button onclick="checkerNext('unconscious')" class="card w-full p-4 flex items-center gap-4 text-left hover:border-red-500/30">
-                        <div class="w-10 h-10 rounded-lg bg-zinc-800 flex items-center justify-center flex-shrink-0">
-                            <i class="fa-solid fa-person-falling text-zinc-400"></i>
-                        </div>
-                        <span class="text-sm font-medium">Person is unconscious</span>
-                        <i class="fa-solid fa-chevron-right text-zinc-600 ml-auto text-xs"></i>
-                    </button>
-                    <button onclick="checkerNext('burn')" class="card w-full p-4 flex items-center gap-4 text-left hover:border-red-500/30">
-                        <div class="w-10 h-10 rounded-lg bg-zinc-800 flex items-center justify-center flex-shrink-0">
-                            <i class="fa-solid fa-fire text-zinc-400"></i>
-                        </div>
-                        <span class="text-sm font-medium">Burn or scald</span>
-                        <i class="fa-solid fa-chevron-right text-zinc-600 ml-auto text-xs"></i>
-                    </button>
-                    <button onclick="checkerNext('seizure')" class="card w-full p-4 flex items-center gap-4 text-left hover:border-red-500/30">
-                        <div class="w-10 h-10 rounded-lg bg-zinc-800 flex items-center justify-center flex-shrink-0">
-                            <i class="fa-solid fa-bolt text-zinc-400"></i>
-                        </div>
-                        <span class="text-sm font-medium">Seizure</span>
-                        <i class="fa-solid fa-chevron-right text-zinc-600 ml-auto text-xs"></i>
-                    </button>
-                    <button onclick="checkerNext('fracture')" class="card w-full p-4 flex items-center gap-4 text-left hover:border-red-500/30">
-                        <div class="w-10 h-10 rounded-lg bg-zinc-800 flex items-center justify-center flex-shrink-0">
-                            <i class="fa-solid fa-bone text-zinc-400"></i>
-                        </div>
-                        <span class="text-sm font-medium">Suspected broken bone</span>
-                        <i class="fa-solid fa-chevron-right text-zinc-600 ml-auto text-xs"></i>
-                    </button>
-                    <button onclick="checkerNext('allergic')" class="card w-full p-4 flex items-center gap-4 text-left hover:border-red-500/30">
-                        <div class="w-10 h-10 rounded-lg bg-zinc-800 flex items-center justify-center flex-shrink-0">
-                            <i class="fa-solid fa-syringe text-zinc-400"></i>
-                        </div>
-                        <span class="text-sm font-medium">Allergic reaction</span>
-                        <i class="fa-solid fa-chevron-right text-zinc-600 ml-auto text-xs"></i>
-                    </button>
-                </div>
-            </div>
-        `;
-        
-        const checkerElement = document.getElementById('pg-checker');
-        if (checkerElement) {
-            checkerElement.innerHTML = fallbackHTML;
-            // Store this as the new checkerQ1
-            window.checkerQ1 = fallbackHTML;
-            console.log('resetChecker completed using hardcoded fallback');
-        } else {
-            console.error('pg-checker element not found');
-        }
-    }
+    loadSymptomCheckerContent();
 }
 
 // Symptom checker function
@@ -2356,8 +3013,13 @@ function checkerNext(type) {
         </button>
     `;
     
-    document.getElementById('pg-checker').innerHTML = html;
-    console.log('Checker question displayed for type:', type);
+    const dynamicContentArea = document.getElementById('dynamicContentArea');
+    if (dynamicContentArea) {
+        dynamicContentArea.innerHTML = html;
+        console.log('Checker question displayed for type:', type);
+    } else {
+        console.error('Dynamic content area not found for symptom checker');
+    }
 }
 
 // Close modal or guide details - handles both emergency modals and guide details
@@ -2428,12 +3090,6 @@ let originalGuideContent = '';
 function showGuideDetails(guideId) {
     console.log('showGuideDetails called with ID:', guideId);
     
-    // Store original content before replacing
-    const guidePage = document.getElementById('pg-guide');
-    if (!originalGuideContent) {
-        originalGuideContent = guidePage.innerHTML;
-    }
-    
     fetch('/first-aid-guide/' + guideId)
         .then(response => response.json())
         .then(data => {
@@ -2448,8 +3104,8 @@ function showGuideDetails(guideId) {
                 let html = `
                     <div class="flex items-center justify-between p-5 border-b border-zinc-800">
                         <h3 class="font-semibold text-lg">${guide.title}</h3>
-                        <button onclick="closeModal()" class="w-8 h-8 rounded-lg hover:bg-zinc-800 flex items-center justify-center">
-                            <i class="fa-solid fa-xmark text-zinc-400"></i>
+                        <button onclick="loadFirstAidGuideContent()" class="w-8 h-8 rounded-lg hover:bg-zinc-800 flex items-center justify-center">
+                            <i class="fa-solid fa-arrow-left text-zinc-400"></i>
                         </button>
                     </div>
                     <div class="p-6">
@@ -2505,15 +3161,19 @@ function showGuideDetails(guideId) {
                         ` : ''}
                         
                         <div class="flex gap-3">
-                            <button onclick="closeModal()" class="px-6 py-3 bg-zinc-800 hover:bg-zinc-700 rounded-xl font-semibold">
-                                <i class="fa-solid fa-xmark mr-2"></i>Close
+                            <button onclick="loadFirstAidGuideContent()" class="px-6 py-3 bg-zinc-800 hover:bg-zinc-700 rounded-xl font-semibold">
+                                <i class="fa-solid fa-arrow-left mr-2"></i>Back to Guides
                             </button>
                             <!-- Emergency call button removed for critical conditions -->
                         </div>
                     </div>
                 `;
                 
-                guidePage.innerHTML = html;
+                // Load into dynamic content area instead of replacing page content
+                const dynamicContentArea = document.getElementById('dynamicContentArea');
+                if (dynamicContentArea) {
+                    dynamicContentArea.innerHTML = html;
+                }
             }
         })
         .catch(error => {
@@ -2699,6 +3359,15 @@ console.log('closeModal function loaded inline:', typeof closeModal);
 <div class="card-s p-4 text-center"><div class="w-10 h-10 rounded-full bg-yellow-600/20 flex items-center justify-center mx-auto mb-2 text-yellow-400 font-bold">A</div><p class="text-sm font-semibold">Airway</p><p class="text-xs text-zinc-500 mt-1">Open and clear</p></div>
 <div class="card-s p-4 text-center"><div class="w-10 h-10 rounded-full bg-teal-600/20 flex items-center justify-center mx-auto mb-2 text-teal-400 font-bold">B</div><p class="text-sm font-semibold">Breathing</p><p class="text-xs text-zinc-500 mt-1">Look, listen, feel</p></div>
 <div class="card-s p-4 text-center"><div class="w-10 h-10 rounded-full bg-green-600/20 flex items-center justify-center mx-auto mb-2 text-green-400 font-bold">C</div><p class="text-sm font-semibold">Circulation</p><p class="text-xs text-zinc-500 mt-1">Pulse, bleeding</p></div>
+</div>
+
+<!-- Dynamic Content Area -->
+<div class="mt-8 mb-8" id="dynamicContentArea">
+    <div class="card-s p-12 text-center">
+        <i class="fa-solid fa-hand-pointer text-4xl text-zinc-600 mb-4"></i>
+        <h3 class="text-xl font-semibold text-white mb-2">Select a Tool</h3>
+        <p class="text-zinc-400">Click on Body Map, First Aid Guide, Symptom Checker, CPR Assistant, or Contacts to load content here</p>
+    </div>
 </div>
 </div>
 </div>
@@ -3102,10 +3771,14 @@ function renderContacts(){
 }
 
 function callContact(phone, name){
+    console.log('callContact called with:', phone, name);
     if(confirm('Call '+name+' at '+phone+'?')){
         window.location.href='tel:'+phone;
     }
 }
+
+// Ensure callContact is always available globally
+window.callContact = callContact;
 
 
 function deleteContact(id, name){
@@ -3593,9 +4266,27 @@ if (typeof window.goTo === 'undefined') {
         console.error('goTo function called but not properly initialized');
         alert('Navigation error - please refresh the page');
     };
-} else {
-    console.log('All functions properly loaded before DOM ready');
 }
+
+// Immediate function availability - ensure goTo works even if script loading is delayed
+window.goTo = goTo;
+window.showZone = showZone;
+window.showZoneFallback = showZoneFallback;
+window.closeZoneConditions = closeZoneConditions;
+window.showGuideDetails = showGuideDetails;
+window.checkerNext = checkerNext;
+window.showResult = showResult;
+window.resetChecker = resetChecker;
+window.toggleCPR = toggleCPR;
+window.adjBPM = adjBPM;
+window.resetCPR = resetCPR;
+window.updateZonePanel = updateZonePanel;
+window.clearZonePanel = clearZonePanel;
+window.callEmergency = callEmergency;
+window.openSOS = openSOS;
+window.callContact = callContact;
+
+console.log('All functions properly loaded before DOM ready');
 
 // Initialize page functionality
 document.addEventListener('DOMContentLoaded', function() {
@@ -3686,6 +4377,30 @@ function renderContentForActivePage() {
 
 // Call the function after a short delay to ensure pages are loaded
 setTimeout(renderContentForActivePage, 100);
+
+// Debug: Check if CPR functions are available
+setTimeout(function() {
+    console.log('=== CPR Functions Availability Check ===');
+    console.log('window.toggleCPR:', typeof window.toggleCPR);
+    console.log('window.adjBPM:', typeof window.adjBPM);
+    console.log('window.resetCPR:', typeof window.resetCPR);
+    console.log('CPR Variables:');
+    console.log('cprInterval:', typeof cprInterval !== 'undefined' ? cprInterval : 'undefined');
+    console.log('cprCount:', typeof cprCount !== 'undefined' ? cprCount : 'undefined');
+    console.log('cprBPM:', typeof cprBPM !== 'undefined' ? cprBPM : 'undefined');
+    console.log('cprPhase:', typeof cprPhase !== 'undefined' ? cprPhase : 'undefined');
+    console.log('cprCompressions:', typeof cprCompressions !== 'undefined' ? cprCompressions : 'undefined');
+    
+    // Force ensure CPR functions are available globally
+    window.toggleCPR = toggleCPR;
+    window.adjBPM = adjBPM;
+    window.resetCPR = resetCPR;
+    
+    console.log('After forcing global assignment:');
+    console.log('window.toggleCPR:', typeof window.toggleCPR);
+    console.log('window.adjBPM:', typeof window.adjBPM);
+    console.log('window.resetCPR:', typeof window.resetCPR);
+}, 500);
 </script>
 </body>
 </html>
