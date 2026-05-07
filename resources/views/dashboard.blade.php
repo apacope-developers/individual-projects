@@ -19,7 +19,7 @@
   --breakpoint-2xl: 1536px;
   
   --container-padding: 1rem;
-  --sidebar-width: 220px;
+  --sidebar-width: 260px;
   --mobile-bar-height: 60px;
 }
   
@@ -41,7 +41,7 @@
 body{font-family:'DM Sans',sans-serif;background:#09090B;color:#fafafa;min-height:100vh}
 h1,h2,h3,h4,h5,h6{font-family:'Space Grotesk',sans-serif}
 .bg-grid{background-image:radial-gradient(ellipse 80% 50% at 50% 0%,rgba(239,68,68,.06) 0%,transparent 60%),radial-gradient(ellipse 60% 40% at 80% 100%,rgba(45,212,191,.04) 0%,transparent 60%),linear-gradient(rgba(63,63,70,.15) 1px,transparent 1px),linear-gradient(90deg,rgba(63,63,70,.15) 1px,transparent 1px);background-size:100% 100%,100% 100%,40px 40px,40px 40px}
-.card{background:#18181B;border:1px solid #27272A;border-radius:12px;transition:all .25s}
+.card{background:#18181B;border:1px solid #27272A;border-radius:12px}
 .card:hover{border-color:#3F3F46;transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.3)}
 .card-s{background:#18181B;border:1px solid #27272A;border-radius:12px}
 .quick-card{cursor:pointer;position:relative;overflow:hidden}
@@ -51,12 +51,12 @@ h1,h2,h3,h4,h5,h6{font-family:'Space Grotesk',sans-serif}
 .sidebar.mobile-hidden{transform:translateX(-100%)}
 .mobile-menu-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:35}
 .mobile-menu-overlay.show{display:block}
-.nav-item::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:0;background:#EF4444;border-radius:0 4px 4px 0;transition:height .2s}
+.nav-item::before{content:'';position:absolute;left:0;top:50%;width:3px;height:0;background:#EF4444;border-radius:0 4px 4px 0}
 .nav-item.active::before{height:60%}.nav-item.active{background:rgba(239,68,68,.1);color:#EF4444}
-.sos-fab{position:fixed;bottom:24px;right:24px;z-index:5000;width:56px;height:56px;border-radius:50%;background:#EF4444;color:white;border:none;font-size:18px;cursor:pointer;box-shadow:0 4px 20px rgba(239,68,68,.4);transition:all .3s}
+.sos-fab{position:fixed;bottom:24px;right:24px;z-index:5000;width:56px;height:56px;border-radius:50%;background:#EF4444;color:white;border:none;font-size:18px;cursor:pointer;box-shadow:0 4px 20px rgba(239,68,68,.4)}
 .sos-fab:hover{transform:scale(1.1);box-shadow:0 6px 30px rgba(239,68,68,.6)}
-.page{display:none;animation:fadeSlide .3s ease}.page.active{display:block}#pg-contacts.active{display:flex}
-@keyframes fadeSlide{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.page{display:none;margin-top:0;padding-top:0;position:relative;top:0}.page.active{display:block;margin-top:0;padding-top:0;position:relative;top:0}#pg-contacts.active{display:flex;margin-top:0;padding-top:0;position:relative;top:0}
+@keyframes fadeSlide{from{opacity:0}to{opacity:1}}
 .modal-bg{position:fixed;inset:0;z-index:7000;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);display:none;justify-content:center;align-items:center;padding:20px}
 .modal-bg.open{display:flex}
 .modal-box{background:#18181B;border:1px solid #2722A;border-radius:16px;max-width:560px;width:100%;max-height:80vh;overflow-y:auto;animation:modalIn .3s ease}
@@ -72,12 +72,12 @@ h1,h2,h3,h4,h5,h6{font-family:'Space Grotesk',sans-serif}
 .sev-urgent{background:rgba(249,115,22,.15);color:#FDBA74;border:1px solid rgba(249,115,22,.3)}
 .sev-moderate{background:rgba(234,179,8,.15);color:#FDE047;border:1px solid rgba(234,179,8,.3)}
 .sev-minor{background:rgba(34,197,94,.15);color:#86EFAC;border:1px solid rgba(34,197,94,.3)}
-.step-dot{width:10px;height:10px;border-radius:50%;background:#3F3F46;transition:all .3s}
+.step-dot{width:10px;height:10px;border-radius:50%;background:#3F3F46}
 .step-dot.active{background:#EF4444;box-shadow:0 0 8px rgba(239,68,68,.5)}
 .step-dot.done{background:#2DD4BF}
-.search-input{background:#18181B;border:1px solid #272PA;border-radius:10px;padding:10px 16px 10px 42px;width:100%;outline:none;transition:border-color .2s}
+.search-input{background:#18181B;border:1px solid #272PA;border-radius:10px;padding:10px 16px 10px 42px;width:100%;outline:none}
 .search-input:focus{border-color:#EF4444}.search-input::placeholder{color:#71717A}
-.kit-check{appearance:none;width:20px;height:20px;border:2px solid #3F3F46;border-radius:6px;cursor:pointer;transition:all .2s;flex-shrink:0}
+.kit-check{appearance:none;width:20px;height:20px;border:2px solid #3F3F46;border-radius:6px;cursor:pointer;flex-shrink:0}
 .kit-check:checked{background:#2DD4BF;border-color:#2DD4BF;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 16 16' fill='%2309090B' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3E%3C/svg%3E")}
 .kit-check:checked+span{text-decoration:line-through;color:#71717A}
 .cpr-pulse{animation:cprPulse calc(60s/var(--bpm)) ease-in-out infinite}
@@ -86,13 +86,14 @@ h1,h2,h3,h4,h5,h6{font-family:'Space Grotesk',sans-serif}
 @keyframes pulseRing{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.4)}70%{box-shadow:0 0 0 15px rgba(239,68,68,0)}}
 .float-card{animation:floatCard 6s ease-in-out infinite}
 @keyframes floatCard{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
-.body-zone{fill:rgba(45,212,191,.08);stroke:rgba(45,212,191,.25);stroke-width:1;cursor:pointer;transition:all .3s}
+.body-zone{fill:rgba(45,212,191,.08);stroke:rgba(45,212,191,.25);stroke-width:1;cursor:pointer}
 .body-zone:hover{fill:rgba(239,68,68,.2);stroke:#EF4444;stroke-width:1.5}
 .body-outline{fill:none;stroke:#3F3F46;stroke-width:1.5}
+.main-c{min-height:100vh;padding-left:calc(var(--sidebar-width) + 1.5rem)}
 @media(max-width:768px){
   .sidebar{display:none!important}
   .mob-bar{display:flex!important}
-  .main-c{padding-bottom:80px!important;margin-left:0!important}
+  .main-c{padding:0.75rem 1rem 1rem!important;padding-left:1rem!important}
   .admin-main{margin-left:0!important;padding:1rem!important}
   .page{padding:1rem}
   .modal-box{margin:1rem;max-width:none}
@@ -253,7 +254,7 @@ function updateVoiceButton(listening) {
     
     if (listening) {
         voiceBtn.classList.remove('bg-zinc-700', 'hover:bg-zinc-600');
-        voiceBtn.classList.add('bg-red-600', 'hover:bg-red-500', 'animate-pulse');
+        voiceBtn.classList.add('bg-red-600', 'hover:bg-red-500');
         voiceIcon.classList.remove('fa-microphone');
         voiceIcon.classList.add('fa-microphone-slash');
         voiceBtn.title = 'Voice Search (Click to stop)';
@@ -269,7 +270,7 @@ function updateVoiceButton(listening) {
 // Toast notification function
 function showToast(message, type = 'info') {
     const toast = document.createElement('div');
-    toast.className = `toast fixed bottom-24 right-6 z-50 px-4 py-3 rounded-lg shadow-lg transform transition-all duration-300 translate-x-full`;
+    toast.className = `toast fixed bottom-24 right-6 z-50 px-4 py-3 rounded-lg shadow-lg transform translate-x-full`;
     
     const bgColor = type === 'error' ? 'bg-red-600' : type === 'success' ? 'bg-green-600' : 'bg-blue-600';
     toast.classList.add(bgColor);
@@ -520,7 +521,7 @@ window.displayAIRecommendations = function(aiData, query) {
                              rec.severity === 'moderate' ? 'yellow' : 'green';
         
         html += `
-            <div class="p-4 border-b border-zinc-800 hover:bg-zinc-800/50 cursor-pointer transition-colors" onclick="showAIRecommendationDetails(this)" data-rec='${JSON.stringify(rec).replace(/'/g, "&apos;")}' data-ai='${JSON.stringify(aiData).replace(/'/g, "&apos;")}'>
+            <div class="p-4 border-b border-zinc-800 hover:bg-zinc-800/50 cursor-pointer " onclick="showAIRecommendationDetails(this)" data-rec='${JSON.stringify(rec).replace(/'/g, "&apos;")}' data-ai='${JSON.stringify(aiData).replace(/'/g, "&apos;")}'>
                 <div class="flex items-start gap-3">
                     <div class="w-10 h-10 rounded-lg bg-zinc-800 flex items-center justify-center flex-shrink-0">
                         <i class="fa-solid fa-heart-pulse text-${severityColor}-400"></i>
@@ -559,7 +560,7 @@ window.displayAIRecommendations = function(aiData, query) {
     // Add close button at the bottom
     html += `
         <div class="p-3 border-t border-zinc-800">
-            <button onclick="closeSearchResults()" class="w-full px-4 py-2 bg-zinc-700 hover:bg-zinc-600 rounded-lg font-semibold text-white transition-colors flex items-center justify-center gap-2">
+            <button onclick="closeSearchResults()" class="w-full px-4 py-2 bg-zinc-700 hover:bg-zinc-600 rounded-lg font-semibold text-white flex items-center justify-center gap-2">
                 <i class="fa-solid fa-times"></i>
                 Close Results
             </button>
@@ -618,7 +619,7 @@ window.displayEmergencySearchResults = function(results, query) {
         `;
     } else {
       searchResults.innerHTML = results.slice(0, 5).map(condition => `
-        <div class="p-4 border-b border-zinc-800 hover:bg-zinc-800/50 cursor-pointer transition-colors" onclick="goTo('guide')">
+        <div class="p-4 border-b border-zinc-800 hover:bg-zinc-800/50 cursor-pointer " onclick="goTo('guide')">
           <div class="flex items-start gap-3">
             <div class="w-10 h-10 rounded-lg bg-zinc-800 flex items-center justify-center flex-shrink-0">
               <i class="fa-solid ${condition.icon} text-red-400"></i>
@@ -1776,7 +1777,7 @@ function updateZonePanel(zone, conditions) {
         const hasDonts = condition.donts && condition.donts.length > 0;
         
         conditionsHTML += `
-            <div class="bg-zinc-800/50 border border-zinc-700 rounded-xl p-4 hover:border-red-600/50 transition-all">
+            <div class="bg-zinc-800/50 border border-zinc-700 rounded-xl p-4 hover:border-red-600/50">
                 <div class="flex items-start gap-3">
                     <div class="w-10 h-10 rounded-lg bg-red-600/20 flex items-center justify-center flex-shrink-0">
                         <i class="fa-solid ${condition.icon} text-red-400"></i>
@@ -1839,10 +1840,10 @@ function updateZonePanel(zone, conditions) {
                         
                         <div class="flex gap-2 flex-wrap">
                             <!-- Emergency Call button removed -->
-                            <button onclick="showConditionTooltip('${zone}', '${condition.name.replace(/'/g, "\\'")}', '${condition.steps[0].replace(/'/g, "\\'")}')" class="px-3 py-2 bg-zinc-600 hover:bg-zinc-500 text-white rounded text-xs font-semibold transition-colors">
+                            <button onclick="showConditionTooltip('${zone}', '${condition.name.replace(/'/g, "\\'")}', '${condition.steps[0].replace(/'/g, "\\'")}')" class="px-3 py-2 bg-zinc-600 hover:bg-zinc-500 text-white rounded text-xs font-semibold">
                                 <i class="fa-solid fa-info-circle mr-1"></i>Quick Tips
                             </button>
-                            <button onclick="goTo('guide')" class="px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded text-xs font-semibold transition-colors">
+                            <button onclick="goTo('guide')" class="px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded text-xs font-semibold">
                                 <i class="fa-solid fa-book-medical mr-1"></i>Full Guide
                             </button>
                         </div>
@@ -1860,10 +1861,10 @@ function updateZonePanel(zone, conditions) {
                 <strong>Important:</strong> This information is for emergency guidance only. Always seek professional medical care for serious injuries.
             </p>
             <div class="flex gap-2">
-                <button onclick="clearBodyMapTooltips()" class="px-3 py-1 bg-zinc-600 hover:bg-zinc-500 text-white rounded text-xs font-semibold transition-colors">
+                <button onclick="clearBodyMapTooltips()" class="px-3 py-1 bg-zinc-600 hover:bg-zinc-500 text-white rounded text-xs font-semibold">
                     <i class="fa-solid fa-times mr-1"></i>Clear Selection
                 </button>
-                <button onclick="goTo('guide')" class="px-3 py-1 bg-blue-600 hover:bg-blue-500 text-white rounded text-xs font-semibold transition-colors">
+                <button onclick="goTo('guide')" class="px-3 py-1 bg-blue-600 hover:bg-blue-500 text-white rounded text-xs font-semibold">
                     <i class="fa-solid fa-book-medical mr-1"></i>View All Guides
                 </button>
             </div>
@@ -2350,7 +2351,7 @@ function checkerNext(type) {
     
     html += `
         </div>
-        <button onclick="resetChecker()" class="text-zinc-500 hover:text-zinc-300 text-sm transition-colors">
+        <button onclick="resetChecker()" class="text-zinc-500 hover:text-zinc-300 text-sm">
             <i class="fa-solid fa-arrow-left mr-1"></i> Start Over
         </button>
     `;
@@ -2558,8 +2559,8 @@ console.log('closeModal function loaded inline:', typeof closeModal);
 <h2 class="text-4xl font-bold text-red-100" style="text-shadow:0 0 20px rgba(239,68,68,.3)">SOS EMERGENCY</h2>
 <p class="text-red-200/70 mt-2 text-lg">Stay calm. Help is on the way.</p></div>
 <div class="flex flex-col gap-3 w-full max-w-xs mb-8">
-<a href="tel:912" class="flex items-center justify-center gap-3 bg-red-600 hover:bg-red-500 text-white py-4 px-6 rounded-xl text-lg font-semibold transition-all"><i class="fa-solid fa-phone"></i> Call Emergency (912)</a>
-<button onclick="closeSOS()" class="flex items-center justify-center gap-3 bg-white/10 hover:bg-white/15 text-white py-4 px-6 rounded-xl text-lg font-semibold transition-all"><i class="fa-solid fa-location-dot"></i> Share Location</button></div>
+<a href="tel:912" class="flex items-center justify-center gap-3 bg-red-600 hover:bg-red-500 text-white py-4 px-6 rounded-xl text-lg font-semibold"><i class="fa-solid fa-phone"></i> Call Emergency (912)</a>
+<button onclick="closeSOS()" class="flex items-center justify-center gap-3 bg-white/10 hover:bg-white/15 text-white py-4 px-6 rounded-xl text-lg font-semibold "><i class="fa-solid fa-location-dot"></i> Share Location</button></div>
 <div class="grid grid-cols-2 gap-3 w-full max-w-sm mb-6">
 <button onclick="closeSOS();goTo('cpr')" class="card p-4 text-center hover:border-red-500/50 cursor-pointer"><i class="fa-solid fa-heart-pulse text-2xl text-red-400 mb-1"></i><p class="text-sm text-zinc-300">CPR</p></button>
 <button onclick="closeSOS();goTo('guide')" class="card p-4 text-center hover:border-red-500/50 cursor-pointer"><i class="fa-solid fa-droplet text-2xl text-red-400 mb-1"></i><p class="text-sm text-zinc-300">Bleeding</p></button>
@@ -2593,7 +2594,7 @@ console.log('closeModal function loaded inline:', typeof closeModal);
         </div>
         @if(Auth::user()->is_admin)
           <div class="mt-3 px-2">
-            <a href="/admin" class="flex items-center gap-2 px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg text-zinc-100 transition-colors">
+            <a href="/admin" class="flex items-center gap-2 px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg text-zinc-100">
               <i class="fa-solid fa-gauge-high w-5 text-center"></i>
               <span>Admin Panel</span>
             </a>
@@ -2601,17 +2602,17 @@ console.log('closeModal function loaded inline:', typeof closeModal);
         @endif
       </div>
 </div>
-<nav class="flex-1 flex flex-col gap-1 px-3" id="sideNav">
-<button class="nav-item active flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm w-full text-left" onclick="goTo('dashboard')"><i class="fa-solid fa-house-medical w-5 text-center"></i><span>Dashboard</span></button>
-<button class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm w-full text-left text-zinc-400" onclick="goTo('bodymap')"><i class="fa-solid fa-person w-5 text-center"></i><span>Body Map</span></button>
-<button class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm w-full text-left text-zinc-400" onclick="goTo('checker')"><i class="fa-solid fa-stethoscope w-5 text-center"></i><span>Symptom Checker</span></button>
-<button class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm w-full text-left text-zinc-400" onclick="goTo('guide')"><i class="fa-solid fa-book-medical w-5 text-center"></i><span>First Aid Guide</span></button>
-<button class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm w-full text-left text-zinc-400" onclick="goTo('cpr')"><i class="fa-solid fa-heart-circle-check w-5 text-center"></i><span>CPR Assistant</span></button>
-<button class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm w-full text-left text-zinc-400" onclick="goTo('contacts')"><i class="fa-solid fa-phone-volume w-5 text-center"></i><span>Contacts</span></button>
+<nav class="flex-1 flex flex-col gap-1 px-2" id="sideNav">
+<button class="nav-item active flex items-center gap-3 px-2 py-2.5 rounded-lg text-sm w-full text-left" onclick="goTo('dashboard')"><i class="fa-solid fa-house-medical w-5 text-center"></i><span>Dashboard</span></button>
+<button class="nav-item flex items-center gap-3 px-2 py-2.5 rounded-lg text-sm w-full text-left text-zinc-400" onclick="goTo('bodymap')"><i class="fa-solid fa-person w-5 text-center"></i><span>Body Map</span></button>
+<button class="nav-item flex items-center gap-3 px-2 py-2.5 rounded-lg text-sm w-full text-left text-zinc-400" onclick="goTo('checker')"><i class="fa-solid fa-stethoscope w-5 text-center"></i><span>Symptom Checker</span></button>
+<button class="nav-item flex items-center gap-3 px-2 py-2.5 rounded-lg text-sm w-full text-left text-zinc-400" onclick="goTo('guide')"><i class="fa-solid fa-book-medical w-5 text-center"></i><span>First Aid Guide</span></button>
+<button class="nav-item flex items-center gap-3 px-2 py-2.5 rounded-lg text-sm w-full text-left text-zinc-400" onclick="goTo('cpr')"><i class="fa-solid fa-heart-circle-check w-5 text-center"></i><span>CPR Assistant</span></button>
+<button class="nav-item flex items-center gap-3 px-2 py-2.5 rounded-lg text-sm w-full text-left text-zinc-400" onclick="goTo('contacts')"><i class="fa-solid fa-phone-volume w-5 text-center"></i><span>Contacts</span></button>
 <div class="px-5 mt-auto">
 <div class="bg-[#18181B] border border-zinc-800 rounded-lg p-3">
 <p class="text-[11px] text-zinc-500 mb-1">Emergency Number</p>
-<a href="tel:912" class="text-red-400 font-bold text-lg hover:text-red-300 transition-colors">912</a>
+<a href="tel:912" class="text-red-400 font-bold text-lg hover:text-red-300">912</a>
 </div>
 <div class="px-5 mt-2">
 <p class="text-[11px] text-zinc-600">Logged in as:</p>
@@ -2619,12 +2620,12 @@ console.log('closeModal function loaded inline:', typeof closeModal);
 </div>
 <form method="POST" action="/logout" class="mt-3 px-2">
 @csrf
-<button type="submit" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm w-full text-left text-red-400 hover:bg-red-600/10"><i class="fa-solid fa-right-from-bracket w-5 text-center"></i><span>Logout</span></button>
+<button type="submit" class="nav-item flex items-center gap-3 px-2 py-2.5 rounded-lg text-sm w-full text-left text-red-400 hover:bg-red-600/10"><i class="fa-solid fa-right-from-bracket w-5 text-center"></i><span>Logout</span></button>
 </form>
 </div>
 </aside>
 
-<main class="flex-1 overflow-y-auto main-c p-6 md:p-8">
+<main class="overflow-y-auto main-c" style="padding: 0 1.5rem 1.5rem; padding-left: calc(var(--sidebar-width) + 1.5rem);">
 
 <!-- DASHBOARD -->
 <div class="page active" id="pg-dashboard">
@@ -2652,12 +2653,12 @@ console.log('closeModal function loaded inline:', typeof closeModal);
       <button 
         id="voiceSearchBtn" 
         onclick="toggleVoiceSearch()" 
-        class="absolute right-20 top-1/2 -translate-y-1/2 w-8 h-8 bg-zinc-700 hover:bg-zinc-600 text-zinc-300 rounded-lg flex items-center justify-center transition-all"
+        class="absolute right-20 top-1/2 -translate-y-1/2 w-8 h-8 bg-zinc-700 hover:bg-zinc-600 text-zinc-300 rounded-lg flex items-center justify-center"
         title="Voice Search (Click to start)"
       >
         <i id="voiceIcon" class="fa-solid fa-microphone text-sm"></i>
       </button>
-      <button onclick="performSearchClick()" class="absolute right-2 top-1/2 -translate-y-1/2 bg-red-600 hover:bg-red-500 text-white px-3 py-1 rounded-lg text-sm font-medium transition-colors">
+      <button onclick="performSearchClick()" class="absolute right-2 top-1/2 -translate-y-1/2 bg-red-600 hover:bg-red-500 text-white px-3 py-1 rounded-lg text-sm font-medium">
         Search
       </button>
       <div id="searchResults" class="absolute top-full left-0 right-0 mt-2 bg-[#18181B] backdrop-blur-xl border border-zinc-800 rounded-xl shadow-2xl hidden z-[9999] max-h-96 overflow-y-auto">
@@ -2672,8 +2673,8 @@ console.log('closeModal function loaded inline:', typeof closeModal);
       </p>
     </div>
   </div>
-</div>
 
+<!-- DASHBOARD STATS AND ACTIONS -->
 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
 <div class="card-s p-4"><p class="text-zinc-500 text-xs mb-1">Conditions</p><p class="text-2xl font-bold" style="color:#2DD4BF">12</p></div>
 <div class="card-s p-4"><p class="text-zinc-500 text-xs mb-1">Body Zones</p><p class="text-2xl font-bold" style="color:#2DD4BF">7</p></div>
@@ -2700,12 +2701,13 @@ console.log('closeModal function loaded inline:', typeof closeModal);
 <div class="card-s p-4 text-center"><div class="w-10 h-10 rounded-full bg-green-600/20 flex items-center justify-center mx-auto mb-2 text-green-400 font-bold">C</div><p class="text-sm font-semibold">Circulation</p><p class="text-xs text-zinc-500 mt-1">Pulse, bleeding</p></div>
 </div>
 </div>
+</div>
 
 <!-- BODY MAP -->
-<div class="page" id="pg-bodymap">
-<div class="mb-6"><h2 class="text-3xl font-bold mb-1">Interactive Body Map</h2><p class="text-zinc-400">Click on a body region to see related conditions</p></div>
-<div class="mb-4">
-    <button onclick="showZone('body-wide')" class="px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg font-semibold transition-colors">
+<div class="page" id="pg-bodymap" style="margin-top:0 !important; padding-top:0 !important; position:relative !important; top:0 !important;">
+<div><h2 class="text-3xl font-bold mb-1">Interactive Body Map</h2><p class="text-zinc-400">Click on a body region to see related conditions</p></div>
+<div class="mb-2">
+    <button onclick="showZone('body-wide')" class="px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg font-semibold">
         <i class="fa-solid fa-exclamation-triangle mr-2"></i>
         View Body-Wide Emergency Conditions
     </button>
@@ -2734,8 +2736,8 @@ console.log('closeModal function loaded inline:', typeof closeModal);
 </div>
 
 <!-- SYMPTOM CHECKER -->
-<div class="page" id="pg-checker">
-<div class="mb-6"><h2 class="text-3xl font-bold mb-1">Smart Symptom Checker</h2><p class="text-zinc-400">Answer a few questions to get a triage assessment</p></div>
+<div class="page" id="pg-checker" style="margin-top:0 !important; padding-top:0 !important; position:relative !important; top:0 !important;">
+<div><h2 class="text-3xl font-bold mb-1">Smart Symptom Checker</h2><p class="text-zinc-400">Answer a few questions to get a triage assessment</p></div>
 <div class="max-w-2xl">
 <div class="flex items-center gap-2 mb-6"><div class="step-dot active"></div><div class="h-px flex-1 bg-zinc-800"></div><div class="step-dot"></div><div class="h-px flex-1 bg-zinc-800"></div><div class="step-dot"></div></div>
 <div class="card-s p-6 mb-4"><p class="text-xs text-zinc-500 mb-1">Question 1</p><h3 class="font-semibold text-lg">What is the main problem?</h3></div>
@@ -2753,13 +2755,13 @@ console.log('closeModal function loaded inline:', typeof closeModal);
 </div>
 
 <!-- FIRST AID GUIDE -->
-<div class="page" id="pg-guide">
-<div class="mb-6"><h2 class="text-3xl font-bold mb-1">First Aid Guide</h2><p class="text-zinc-400">Step-by-step emergency procedures</p></div>
+<div class="page" id="pg-guide" style="margin-top:0 !important; padding-top:0 !important; position:relative !important; top:0 !important;">
+<div><h2 class="text-3xl font-bold mb-1">First Aid Guide</h2><p class="text-zinc-400">Step-by-step emergency procedures</p></div>
 <div id="guideContainer">
     @if($firstAidGuides->count() > 0)
     <div class="space-y-4">
         @foreach($firstAidGuides as $guide)
-        <div class="card-s p-6 cursor-pointer hover:border-zinc-700 transition-all" onclick="showGuideDetails({{ $guide->id }})">
+        <div class="card-s p-6 cursor-pointer hover:border-zinc-700" onclick="showGuideDetails({{ $guide->id }})">
             <div class="flex items-start justify-between">
                 <div class="flex items-start gap-4">
                     <div class="w-12 h-12 rounded-lg bg-red-600/20 flex items-center justify-center">
@@ -2797,8 +2799,8 @@ console.log('closeModal function loaded inline:', typeof closeModal);
 </div>
 
 <!-- CPR ASSISTANT -->
-<div class="page" id="pg-cpr">
-<div class="mb-6"><h2 class="text-3xl font-bold mb-1">CPR Assistant</h2><p class="text-zinc-400">Real-time metronome and compression counter</p></div>
+<div class="page" id="pg-cpr" style="margin-top:0 !important; padding-top:0 !important; position:relative !important; top:0 !important;">
+<div><h2 class="text-3xl font-bold mb-1">CPR Assistant</h2><p class="text-zinc-400">Real-time metronome and compression counter</p></div>
 <div class="flex flex-col lg:flex-row gap-6">
 <div class="flex-1"><div class="card-s p-8 flex flex-col items-center">
 <div class="relative w-48 h-48 mb-6"><div class="absolute inset-0 rounded-full border-4 border-zinc-800"></div><div class="absolute inset-3 rounded-full border-2 border-zinc-700/50"></div><div class="absolute inset-0 rounded-full bg-zinc-800/30 flex items-center justify-center" id="cprPulse"><div class="text-center"><p class="text-5xl font-bold" id="cprCount">0</p><p class="text-xs text-zinc-400 mt-1">compressions</p></div></div></div>
@@ -2815,15 +2817,15 @@ console.log('closeModal function loaded inline:', typeof closeModal);
 </div>
 
 <!-- CONTACTS -->
-<div class="page" id="pg-contacts" style="align-items: center; justify-content: center; min-height: 100vh; padding: 0 16px;">
+<div class="page" id="pg-contacts" style="margin-top:0 !important; padding-top:0 !important; position:relative !important; top:0 !important; align-items: center; justify-content: center; min-height: 100vh; padding: 0 16px;">
 <div class="max-w-4xl w-full">
-<div class="mb-6"><h2 class="text-3xl font-bold mb-1">Emergency Contacts</h2><p class="text-zinc-400">One-tap access to emergency numbers</p></div>
+<div><h2 class="text-3xl font-bold mb-1">Emergency Contacts</h2><p class="text-zinc-400">One-tap access to emergency numbers</p></div>
 
 <!-- Emergency Services -->
 @if($emergencyContacts->count() > 0)
 <div class="space-y-4">
     @foreach($emergencyContacts as $contact)
-    <div class="bg-[#18181B] border border-zinc-800 rounded-xl p-6 hover:border-red-600/50 transition-all cursor-pointer" onclick="callContact('{{ $contact->phone }}', '{{ $contact->name }}')">
+    <div class="bg-[#18181B] border border-zinc-800 rounded-xl p-6 hover:border-red-600/50  cursor-pointer" onclick="callContact('{{ $contact->phone }}', '{{ $contact->name }}')">
         <div class="flex items-center justify-between">
             <div class="flex items-center">
                 <div class="w-12 h-12 rounded-xl bg-red-600/20 flex items-center justify-center mr-4">
@@ -2836,7 +2838,7 @@ console.log('closeModal function loaded inline:', typeof closeModal);
                     </p>
                 </div>
             </div>
-            <button onclick="event.stopPropagation(); callContact('{{ $contact->phone }}', '{{ $contact->name }}')" class="px-6 py-3 bg-red-600 hover:bg-red-500 text-white rounded-lg transition-colors font-semibold">
+            <button onclick="event.stopPropagation(); callContact('{{ $contact->phone }}', '{{ $contact->name }}')" class="px-6 py-3 bg-red-600 hover:bg-red-500 text-white rounded-lg  font-semibold">
                 <i class="fa-solid fa-phone mr-2"></i>Call
             </button>
         </div>
@@ -2859,7 +2861,7 @@ console.log('closeModal function loaded inline:', typeof closeModal);
     </h3>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         @foreach($doctors as $doctor)
-        <div class="bg-[#18181B] border border-zinc-800 rounded-xl p-6 hover:border-blue-600/50 transition-all">
+        <div class="bg-[#18181B] border border-zinc-800 rounded-xl p-6 hover:border-blue-600/50 ">
             <div class="flex items-start justify-between mb-4">
                 <div class="flex items-center">
                     <div class="w-12 h-12 rounded-xl bg-blue-600/20 flex items-center justify-center mr-3">
@@ -2907,11 +2909,11 @@ console.log('closeModal function loaded inline:', typeof closeModal);
                     </div>
                 </div>
                 <div class="flex gap-2">
-                    <button onclick="callContact('{{ $doctor->phone }}', 'Dr. {{ $doctor->full_name }}')" class="flex-1 px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors text-sm">
+                    <button onclick="callContact('{{ $doctor->phone }}', 'Dr. {{ $doctor->full_name }}')" class="flex-1 px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg  text-sm">
                         <i class="fa-solid fa-phone mr-1"></i>Call
                     </button>
                     @if($doctor->whatsapp)
-                    <button onclick="callContact('{{ $doctor->whatsapp }}', 'Dr. {{ $doctor->full_name }} (WhatsApp)')" class="px-3 py-1 bg-green-600 hover:bg-green-500 text-white rounded-lg transition-colors text-sm">
+                    <button onclick="callContact('{{ $doctor->whatsapp }}', 'Dr. {{ $doctor->full_name }} (WhatsApp)')" class="px-3 py-1 bg-green-600 hover:bg-green-500 text-white rounded-lg  text-sm">
                         <i class="fab fa-whatsapp mr-1"></i>WhatsApp
                     </button>
                     @endif
@@ -3025,7 +3027,7 @@ function renderEmergencyContacts() {
     let html = '';
     contacts.forEach(contact => {
         html += `
-            <div class="bg-[#18181B] border border-zinc-800 rounded-xl p-6 hover:border-red-600/50 transition-all">
+            <div class="bg-[#18181B] border border-zinc-800 rounded-xl p-6 hover:border-red-600/50 ">
                 <div class="flex items-start justify-between mb-4">
                     <div class="flex items-center">
                         <div class="w-12 h-12 rounded-xl bg-red-600/20 flex items-center justify-center mr-3">
@@ -3037,7 +3039,7 @@ function renderEmergencyContacts() {
                         </div>
                     </div>
                     ${!contact.isDefault ? `
-                        <button onclick="deleteEmergencyContact('${contact.id}', '${contact.name}')" class="text-red-400 hover:text-red-300 transition-colors">
+                        <button onclick="deleteEmergencyContact('${contact.id}', '${contact.name}')" class="text-red-400 hover:text-red-300 ">
                             <i class="fa-solid fa-trash"></i>
                         </button>
                     ` : ''}
@@ -3047,7 +3049,7 @@ function renderEmergencyContacts() {
                         <i class="fa-solid fa-phone mr-2"></i>${contact.phone}
                     </div>
                     <div class="flex gap-2">
-                        <button onclick="callContact('${contact.phone}', '${contact.name}')" class="px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg transition-colors">
+                        <button onclick="callContact('${contact.phone}', '${contact.name}')" class="px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg ">
                             <i class="fa-solid fa-phone mr-2"></i>Call
                         </button>
                     </div>
@@ -3166,13 +3168,13 @@ function openModal(h){document.getElementById('modalBox').innerHTML=h;document.g
 function showZone(z){document.querySelectorAll('.body-zone').forEach(function(e){e.classList.remove('active')});event.target.classList.add('active');var zn=ZONES[z];if(!zn)return;var h='<div class="card-s p-6"><div class="flex items-center gap-3 mb-5"><div class="w-3 h-3 rounded-full" style="background:'+zn.color+'"></div><h3 class="font-bold text-xl">'+zn.label+'</h3></div><div class="space-y-4">';zn.conditions.forEach(function(c){h+='<div class="p-4 rounded-lg bg-zinc-900/50 border border-zinc-800/50"><div class="flex items-start justify-between mb-2"><h4 class="font-semibold text-sm">'+c.name+'</h4><span class="sev-'+c.severity+' text-[11px] px-2 py-0.5 rounded-full font-medium">'+c.severity+'</span></div><p class="text-zinc-400 text-xs mb-3">'+c.desc+'</p><div class="p-3 rounded-md bg-zinc-800/50"><p class="text-xs font-semibold text-teal-400 mb-1"><i class="fa-solid fa-kit-medical mr-1"></i> First Aid:</p><p class="text-xs text-zinc-300">'+c.action+'</p></div></div></div>'});h+='</div></div>';document.getElementById('zonePanel').innerHTML=h}
 
 var activeCat='all';
-function renderGuide(f){f=(f||'').toLowerCase();var fl=CONDITIONS;if(activeCat!=='all')fl=fl.filter(function(c){return c.category===activeCat});if(f)fl=fl.filter(function(c){return c.name.toLowerCase().indexOf(f)!==-1||c.summary.toLowerCase().indexOf(f)!==-1});var g=document.getElementById('guideGrid');if(!fl.length){g.innerHTML='<div class="col-span-full text-center py-12 text-zinc-500"><i class="fa-solid fa-search text-3xl mb-3 block"></i><p>No matches found</p></div>';return}g.innerHTML=fl.map(function(c){return '<div class="card p-4 cursor-pointer hover:border-red-500/30 transition-all" onclick="showCM(\''+c.id+'\')"><div class="flex items-start justify-between mb-3"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-lg bg-zinc-800 flex items-center justify-center"><i class="fa-solid '+c.icon+' text-red-400"></i></div><div><h4 class="font-semibold text-sm">'+c.name+'</h4><p class="text-[11px] text-zinc-500 capitalize">'+c.category+'</p></div></div><span class="sev-'+c.severity+' text-[10px] px-2 py-0.5 rounded-full font-medium">'+c.severity+'</span></div><p class="text-xs text-zinc-400 line-clamp-2">'+c.summary+'</p><div class="flex items-center gap-2 mt-3 text-[11px] text-zinc-500"><span><i class="fa-solid fa-list-ol mr-1"></i>'+c.steps.length+' steps</span><span class="w-1 h-1 rounded-full bg-zinc-700"></span>'+(c.call912?'<span class="text-red-400"><i class="fa-solid fa-phone-volume mr-1"></i>Call 912</span>':'<span>Self-care</span>')+'</div></div>'}).join('')}
+function renderGuide(f){f=(f||'').toLowerCase();var fl=CONDITIONS;if(activeCat!=='all')fl=fl.filter(function(c){return c.category===activeCat});if(f)fl=fl.filter(function(c){return c.name.toLowerCase().indexOf(f)!==-1||c.summary.toLowerCase().indexOf(f)!==-1});var g=document.getElementById('guideGrid');if(!fl.length){g.innerHTML='<div class="col-span-full text-center py-12 text-zinc-500"><i class="fa-solid fa-search text-3xl mb-3 block"></i><p>No matches found</p></div>';return}g.innerHTML=fl.map(function(c){return '<div class="card p-4 cursor-pointer hover:border-red-500/30 " onclick="showCM(\''+c.id+'\')"><div class="flex items-start justify-between mb-3"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-lg bg-zinc-800 flex items-center justify-center"><i class="fa-solid '+c.icon+' text-red-400"></i></div><div><h4 class="font-semibold text-sm">'+c.name+'</h4><p class="text-[11px] text-zinc-500 capitalize">'+c.category+'</p></div></div><span class="sev-'+c.severity+' text-[10px] px-2 py-0.5 rounded-full font-medium">'+c.severity+'</span></div><p class="text-xs text-zinc-400 line-clamp-2">'+c.summary+'</p><div class="flex items-center gap-2 mt-3 text-[11px] text-zinc-500"><span><i class="fa-solid fa-list-ol mr-1"></i>'+c.steps.length+' steps</span><span class="w-1 h-1 rounded-full bg-zinc-700"></span>'+(c.call912?'<span class="text-red-400"><i class="fa-solid fa-phone-volume mr-1"></i>Call 912</span>':'<span>Self-care</span>')+'</div></div>'}).join('')}
 function filterGuide(v){renderGuide(v)}
 function filterCat(c){activeCat=c;renderGuide();var bs=document.querySelectorAll('#guideFilters button');bs.forEach(function(b){b.className='px-3 py-1.5 rounded-lg text-xs font-medium bg-zinc-800 text-zinc-400 border border-transparent hover:border-zinc-700'});event.target.className='px-3 py-1.5 rounded-lg text-xs font-medium bg-red-600/20 text-red-400 border border-red-600/30'}
 function showCM(id){var c=CONDITIONS.find(function(x){return x.id===id});if(!c)return;var sh=c.steps.map(function(s,i){return '<li class="flex gap-3 text-sm"><span class="w-6 h-6 rounded-full bg-red-600/20 text-red-400 flex items-center justify-center flex-shrink-0 text-xs font-bold">'+(i+1)+'</span><span class="text-zinc-300">'+s+'</span></li>'}).join('');var dh=c.dos.map(function(d){return '<li class="text-xs text-zinc-300">'+d+'</li>'}).join('');var nh=c.donts.map(function(d){return '<li class="text-xs text-zinc-300">'+d+'</li>'}).join('');var h='<div class="flex items-center justify-between p-5 border-b border-zinc-800"><h3 class="font-semibold text-lg">'+c.name+'</h3><button onclick="closeModal()" class="w-8 h-8 rounded-lg hover:bg-zinc-800 flex items-center justify-center"><i class="fa-solid fa-xmark text-zinc-400"></i></button></div><div class="p-6"><div class="flex items-center gap-3 mb-4"><span class="sev-'+c.severity+' text-xs px-3 py-1 rounded-full font-semibold uppercase">'+c.severity+'</span>'+(c.call912?'<span class="text-xs px-3 py-1 rounded-full bg-red-600/20 text-red-400 border border-red-600/30 font-semibold">Call 912</span>':'<span class="text-xs px-3 py-1 rounded-full bg-zinc-800 text-zinc-400">Self-care</span>')+'</div><p class="text-zinc-300 text-sm mb-5">'+c.summary+'</p><h4 class="font-semibold text-sm text-teal-400 mb-3"><i class="fa-solid fa-list-ol mr-2"></i>Steps</h4><ol class="space-y-2 mb-6">'+sh+'</ol><div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div class="p-4 rounded-lg bg-green-600/5 border border-green-600/15"><h5 class="text-xs font-bold text-green-400 mb-2"><i class="fa-solid fa-check mr-1"></i> DO</h5><ul class="space-y-1.5">'+dh+'</ul></div><div class="p-4 rounded-lg bg-red-600/5 border border-red-600/15"><h5 class="text-xs font-bold text-red-400 mb-2"><i class="fa-solid fa-xmark mr-1"></i> DON\'T</h5><ul class="space-y-1.5">'+nh+'</ul></div></div></div>';openModal(h)}
 
 // checkerQ1 will be initialized when DOM is ready
-function renderContacts(){var h='';CONTACTS.forEach(function(c){h+='<div class="card p-5"><div class="flex items-center gap-4"><div class="w-12 h-12 rounded-full bg-zinc-800 flex items-center justify-center"><i class="fa-solid '+c.icon+' text-teal-400"></i></div><div class="flex-1"><h4 class="font-semibold text-sm">'+c.name+'</h4><p class="text-zinc-400 text-xs">'+c.type+'</p></div><a href="tel:'+c.phone+'" class="px-4 py-2 bg-teal-600 hover:bg-teal-500 rounded-lg text-sm font-semibold text-white transition-colors"><i class="fa-solid fa-phone mr-2"></i>Call</a></div></div>'});document.getElementById('contactsGrid').innerHTML=h}
+function renderContacts(){var h='';CONTACTS.forEach(function(c){h+='<div class="card p-5"><div class="flex items-center gap-4"><div class="w-12 h-12 rounded-full bg-zinc-800 flex items-center justify-center"><i class="fa-solid '+c.icon+' text-teal-400"></i></div><div class="flex-1"><h4 class="font-semibold text-sm">'+c.name+'</h4><p class="text-zinc-400 text-xs">'+c.type+'</p></div><a href="tel:'+c.phone+'" class="px-4 py-2 bg-teal-600 hover:bg-teal-500 rounded-lg text-sm font-semibold text-white "><i class="fa-solid fa-phone mr-2"></i>Call</a></div></div>'});document.getElementById('contactsGrid').innerHTML=h}
 // Emergency Search Functionality with AI Recommendations
 function performSearch(query) {
     const searchResults = document.getElementById('searchResults');
@@ -3285,7 +3287,7 @@ function displayAIRecommendations(aiData, query) {
                              rec.severity === 'moderate' ? 'yellow' : 'green';
         
         html += `
-            <div class="p-4 border-b border-zinc-800 hover:bg-zinc-800/50 cursor-pointer transition-colors" onclick="showAIRecommendationDetails(this)" data-rec='${JSON.stringify(rec).replace(/'/g, "&apos;")}' data-ai='${JSON.stringify(aiData).replace(/'/g, "&apos;")}'>
+            <div class="p-4 border-b border-zinc-800 hover:bg-zinc-800/50 cursor-pointer " onclick="showAIRecommendationDetails(this)" data-rec='${JSON.stringify(rec).replace(/'/g, "&apos;")}' data-ai='${JSON.stringify(aiData).replace(/'/g, "&apos;")}'>
                 <div class="flex items-start gap-3">
                     <div class="w-10 h-10 rounded-lg bg-zinc-800 flex items-center justify-center flex-shrink-0">
                         <i class="fa-solid fa-heart-pulse text-${severityColor}-400"></i>
@@ -3419,7 +3421,7 @@ function displayEmergencySearchResults(results, query) {
         `;
     } else {
       searchResults.innerHTML = results.slice(0, 5).map(condition => `
-        <div class="p-4 border-b border-zinc-800 hover:bg-zinc-800/50 cursor-pointer transition-colors" onclick="goTo('guide')">
+        <div class="p-4 border-b border-zinc-800 hover:bg-zinc-800/50 cursor-pointer " onclick="goTo('guide')">
           <div class="flex items-start gap-3">
             <div class="w-10 h-10 rounded-lg bg-zinc-800 flex items-center justify-center flex-shrink-0">
               <i class="fa-solid ${condition.icon} text-red-400"></i>
@@ -3537,10 +3539,10 @@ function displayEmergencySearchResults(results, query) {
         ` : ''}
         
         <div class="flex gap-3">
-          <button onclick="closeModal()" class="flex-1 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg font-semibold transition-colors">
+          <button onclick="closeModal()" class="flex-1 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg font-semibold ">
             Close
           </button>
-          ${recommendation.emergency_call ? '<button onclick="openSOS()" class="flex-1 px-4 py-2 bg-red-600 hover:bg-red-500 rounded-lg text-center font-semibold transition-colors"><i class="fa-solid fa-phone-volume mr-2"></i>Call Emergency Services</button>' : ''}
+          ${recommendation.emergency_call ? '<button onclick="openSOS()" class="flex-1 px-4 py-2 bg-red-600 hover:bg-red-500 rounded-lg text-center font-semibold "><i class="fa-solid fa-phone-volume mr-2"></i>Call Emergency Services</button>' : ''}
         </div>
       </div>
     `;
