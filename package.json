@@ -1,0 +1,11 @@
+{
+  "name": "healthcare-system",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "backend": "cd backend && node server.js",
+    "backend:dev": "cd backend && npm run dev",
+    "frontend": "cd frontend && npm run dev",
+    "seed:admin": "cd backend && node scripts/seedAdmin.js"
+  }
+}
