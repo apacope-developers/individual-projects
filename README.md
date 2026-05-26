@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 # LifeLine Emergency First Aid System
 
 ## 🚀 Overview
@@ -285,7 +285,4 @@ php artisan serve --host=0.0.0.0 --port=8000
 **LifeLine: Saving Lives Through Technology** 🚑💙
 
 *For emergencies, always call 912 or your local emergency number immediately.*
-=======
-# individual-projects
-This repository is created to store and manage individual student projects.
->>>>>>> 4cdbc7183eebb1d0eb66be58d629e04adb97c082
+
