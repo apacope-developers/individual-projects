@@ -1,0 +1,21 @@
+services:
+  pgsql:
+    image: postgres:18beta1
+    container_name: my_project_pgsql
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: my_project
+      POSTGRES_USER: my_project_user
+      POSTGRES_PASSWORD: secret
+    volumes:
+      - pgsql_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U my_project_user -d my_project"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgsql_data:

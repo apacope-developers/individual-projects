@@ -1,0 +1,23 @@
+{
+    "$schema": "https://www.schemastore.org/package.json",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "build": "vite build",
+        "dev": "vite",
+        "test": "nightwatch",
+        "test:admin": "nightwatch tests/e2e/admin.test.js",
+        "test:auth": "nightwatch tests/e2e/auth.test.js",
+        "test:attendance": "nightwatch tests/e2e/attendance.test.js"
+    },
+    "devDependencies": {
+        "@tailwindcss/vite": "^4.0.0",
+        "axios": "^1.11.0",
+        "chromedriver": "^131.0.0",
+        "concurrently": "^9.0.1",
+        "laravel-vite-plugin": "^2.0.0",
+        "nightwatch": "^3.7.0",
+        "tailwindcss": "^4.0.0",
+        "vite": "^7.0.7"
+    }
+}

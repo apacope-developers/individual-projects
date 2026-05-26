@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites errors="0"
+            failures="1"
+            tests="1">
+
+  <testsuite name="auth.test" id="auth.test"
+    errors="0" failures="1" hostname="" package="auth.test" skipped="5"
+    tests="1" time="10.68" timestamp="">
+  
+    <testcase name="Login page loads correctly" classname="auth.test" time="8.904" assertions="6">
+
+    
+
+    
+
+    
+
+    
+
+      <failure message="Testing if element &lt;h2&gt; contains text &#39;Login&#39; in 5000ms - expected &#34;contains text &#39;Login&#39;&#34; but got: &#34;does not contain &#39;Login&#39;&#34; (5033ms)">    at Login page loads correctly (file:///C:/Users/Administrator/Herd/my_project/tests/e2e/auth.test.js:18:15)</failure>
+
+    
+    </testcase>
+  
+
+  
+
+    
+
+  
+    
+    <testcase
+      name="Login fails with wrong credentials" classname="auth.test">
+      <skipped />
+    </testcase>
+    
+    <testcase
+      name="Admin can login and is redirected to dashboard" classname="auth.test">
+      <skipped />
+    </testcase>
+    
+    <testcase
+      name="Teacher can login and is redirected to attendance page" classname="auth.test">
+      <skipped />
+    </testcase>
+    
+    <testcase
+      name="User can logout successfully" classname="auth.test">
+      <skipped />
+    </testcase>
+    
+    <testcase
+      name="Register page loads correctly" classname="auth.test">
+      <skipped />
+    </testcase>
+    
+  
+  </testsuite>
+</testsuites>

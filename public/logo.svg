@@ -1,0 +1,29 @@
+<svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a365d;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0f0f1e;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background circle -->
+  <circle cx="20" cy="20" r="18" fill="url(#logoGradient)" />
+  
+  <!-- Calendar icon -->
+  <rect x="8" y="10" width="24" height="20" rx="2" fill="white" />
+  <rect x="8" y="10" width="24" height="6" rx="2" fill="#1a365d" />
+  
+  <!-- Calendar lines -->
+  <line x1="12" y1="8" x2="12" y2="12" stroke="white" stroke-width="2" stroke-linecap="round" />
+  <line x1="20" y1="8" x2="20" y2="12" stroke="white" stroke-width="2" stroke-linecap="round" />
+  <line x1="28" y1="8" x2="28" y2="12" stroke="white" stroke-width="2" stroke-linecap="round" />
+  
+  <!-- Check marks for attendance -->
+  <circle cx="14" cy="20" r="1.5" fill="#28a745" />
+  <circle cx="20" cy="20" r="1.5" fill="#28a745" />
+  <circle cx="26" cy="20" r="1.5" fill="#dc3545" />
+  
+  <circle cx="14" cy="25" r="1.5" fill="#28a745" />
+  <circle cx="20" cy="25" r="1.5" fill="#ffc107" />
+  <circle cx="26" cy="25" r="1.5" fill="#28a745" />
+</svg>
