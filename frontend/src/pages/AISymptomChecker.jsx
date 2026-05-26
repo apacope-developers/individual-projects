@@ -340,6 +340,23 @@ const AISymptomChecker = () => {
             </ul>
           </div>
 
+          {/* Generated Related Symptoms */}
+          {result.generated_related_symptoms && result.generated_related_symptoms.length > 0 && (
+            <div className="mb-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+              <h3 className="font-semibold text-gray-900 dark:text-white mb-2">🔍 AI-Generated Related Symptoms</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                Based on your symptoms, you may also experience:
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {result.generated_related_symptoms.map((symptom, index) => (
+                  <span key={index} className="bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300 px-3 py-1 rounded-full text-sm">
+                    {symptom}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Suggested Specialty */}
           <div className="mb-4">
             <h3 className="font-semibold text-gray-900 dark:text-white mb-2">{t('suggestedSpecialty')}</h3>

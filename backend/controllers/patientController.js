@@ -54,24 +54,43 @@ const getMedicalRecords = async (req, res, next) => {
   try {
     const user = req.user;
 
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: 'User not authenticated'
+      });
+    }
+
+    if (user.role !== 'patient') {
+      return res.status(403).json({
+        success: false,
+        message: 'Only patients can access their medical records'
+      });
+    }
+
     const patient = await getOrCreatePatient(user);
     if (!patient) {
-      return res.status(404).json({
+      return res.status(500).json({
         success: false,
-        message: 'Patient profile not found'
+        message: 'Failed to create or retrieve patient profile'
       });
     }
 
     const records = await MedicalRecord.findAll({
       where: { patient_id: patient.id },
-      order: [['createdAt', 'DESC']]
+      order: [['createdAt', 'DESC']],
+      attributes: {
+        exclude: ['updatedAt']
+      }
     });
 
     res.status(200).json({
       success: true,
-      data: records
+      data: records || [],
+      message: records.length === 0 ? 'No medical records found' : `Found ${records.length} medical record(s)`
     });
   } catch (error) {
+    console.error('Error in getMedicalRecords:', error);
     next(error);
   }
 };
@@ -84,25 +103,32 @@ const uploadMedicalRecord = async (req, res, next) => {
     const user = req.user;
     const { title, description, record_type } = req.body;
 
+    if (!user || user.role !== 'patient') {
+      return res.status(403).json({
+        success: false,
+        message: 'Only patients can upload medical records'
+      });
+    }
+
     if (!req.file) {
       return res.status(400).json({
         success: false,
-        message: 'No file uploaded'
+        message: 'No file uploaded. Please select a file.'
       });
     }
 
     const patient = await getOrCreatePatient(user);
     if (!patient) {
-      return res.status(404).json({
+      return res.status(500).json({
         success: false,
-        message: 'Patient profile not found'
+        message: 'Failed to create or retrieve patient profile'
       });
     }
 
     const record = await MedicalRecord.create({
       patient_id: patient.id,
-      title,
-      description,
+      title: title || 'Unnamed Record',
+      description: description || '',
       file_url: `/uploads/documents/${req.file.filename}`,
       file_type: req.file.mimetype,
       file_size: req.file.size,
@@ -116,6 +142,7 @@ const uploadMedicalRecord = async (req, res, next) => {
       data: record
     });
   } catch (error) {
+    console.error('Error in uploadMedicalRecord:', error);
     next(error);
   }
 };

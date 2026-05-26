@@ -10,8 +10,10 @@ router.get('/doctors', authenticate, isAdmin, adminController.getAllDoctorsAdmin
 router.post('/doctors', authenticate, isAdmin, adminController.createDoctor);
 router.put('/doctors/:id/approve', authenticate, isAdmin, adminController.approveDoctor);
 router.put('/doctors/:id/suspend', authenticate, isAdmin, adminController.suspendDoctor);
+router.delete('/doctors/:id', authenticate, isAdmin, adminController.deleteDoctor);
 router.put('/users/:id/deactivate', authenticate, isAdmin, adminController.deactivateUser);
 router.put('/users/:id/activate', authenticate, isAdmin, adminController.activateUser);
+router.delete('/users/:id', authenticate, isAdmin, adminController.deleteUser);
 router.get('/appointments', authenticate, isAdmin, adminController.getAllAppointmentsAdmin);
 router.get('/analytics', authenticate, isAdmin, adminController.getAnalytics);
 

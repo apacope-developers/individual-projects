@@ -17,6 +17,7 @@ import {
   FolderOpen,
   ChevronRight,
   Plus,
+  Bell,
 } from 'lucide-react';
 
 const PatientDashboard = () => {
@@ -30,6 +31,26 @@ const PatientDashboard = () => {
   useEffect(() => {
     loadDashboardData();
   }, []);
+
+  const parseAppointmentDate = (appointment) => {
+    if (!appointment?.date || !appointment?.time_slot) return null;
+    const timeSlot = appointment.time_slot.split('-')[0].trim();
+    let dateTime = new Date(`${appointment.date} ${timeSlot}`);
+    if (isNaN(dateTime)) {
+      dateTime = new Date(`${appointment.date}T${timeSlot}`);
+    }
+    return isNaN(dateTime) ? null : dateTime;
+  };
+
+  const getReminderText = (appointment) => {
+    const appointmentDate = parseAppointmentDate(appointment);
+    if (!appointmentDate) return '';
+    const minutesToStart = Math.round((appointmentDate.getTime() - Date.now()) / 60000);
+    if (minutesToStart > 0 && minutesToStart <= 60) {
+      return `${t('startingSoon')} ${minutesToStart} ${t('minutes')}`;
+    }
+    return '';
+  };
 
   const loadDashboardData = async () => {
     try {
@@ -169,7 +190,7 @@ const PatientDashboard = () => {
 
       {/* Quick Actions */}
       <div>
-        <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-4">Quick Actions</h2>
+        <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-4">{t('quickActions')}</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {quickActions.map((action) => {
             const Icon = action.icon;
@@ -242,7 +263,7 @@ const PatientDashboard = () => {
                     className="btn-primary text-sm inline-flex items-center justify-center"
                   >
                     <Plus className="w-4 h-4 mr-2" />
-                    Join Call
+                    {t('joinCall')}
                   </Link>
                 </div>
               </div>

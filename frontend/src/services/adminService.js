@@ -31,6 +31,13 @@ export const adminService = {
     return response.data;
   },
 
+  deleteDoctor: async (id, reason = '') => {
+    const response = await api.delete(`/admin/doctors/${id}`, {
+      data: { reason }
+    });
+    return response.data;
+  },
+
   deactivateUser: async (id) => {
     const response = await api.put(`/admin/users/${id}/deactivate`);
     return response.data;
@@ -38,6 +45,13 @@ export const adminService = {
 
   activateUser: async (id) => {
     const response = await api.put(`/admin/users/${id}/activate`);
+    return response.data;
+  },
+
+  deleteUser: async (id, reason = '') => {
+    const response = await api.delete(`/admin/users/${id}`, {
+      data: { reason }
+    });
     return response.data;
   },
 

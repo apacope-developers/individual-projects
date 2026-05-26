@@ -77,7 +77,7 @@ const DoctorList = () => {
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{t('findDoctors')}</h1>
-        <p className="text-gray-600 dark:text-gray-400 mt-2">Browse and book appointments with qualified healthcare professionals</p>
+        <p className="text-gray-600 dark:text-gray-400 mt-2">{t('findDoctorsDesc')}</p>
       </div>
 
       {/* Search and Filters */}
@@ -198,24 +198,24 @@ const DoctorList = () => {
                 )}
               </div>
 
-              <div className="mt-4 flex items-center justify-between">
+              <div className="mt-4 flex items-center justify-between gap-3">
                 {doctor.available ? (
-                  <span className="badge badge-success">Available</span>
+                  <span className="badge badge-success">{t('availableNow')}</span>
                 ) : (
-                  <span className="badge badge-warning">Unavailable</span>
+                  <span className="badge badge-warning">{t('unavailable')}</span>
                 )}
-                <div className="flex space-x-2">
+                <div className="flex flex-wrap gap-2">
                   <Link
                     to={`/doctors/${doctor.id}`}
-                    className="btn-outline text-xs"
+                    className="btn-outline min-w-[90px] text-xs inline-flex items-center justify-center"
                   >
-                    View
+                    {t('view')}
                   </Link>
                   <Link
                     to={`/book-appointment/${doctor.id}`}
-                    className="btn-primary text-xs"
+                    className="btn-primary min-w-[110px] text-xs inline-flex items-center justify-center"
                   >
-                    Book
+                    {t('bookAppointment')}
                   </Link>
                 </div>
               </div>
@@ -225,8 +225,8 @@ const DoctorList = () => {
       ) : (
         <div className="card text-center py-12">
           <Stethoscope className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No Doctors Found</h3>
-          <p className="text-gray-600 dark:text-gray-400">Try adjusting your filters or search terms</p>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">{t('noDoctorsFound')}</h3>
+          <p className="text-gray-600 dark:text-gray-400">{t('adjustFiltersOrSearch')}</p>
         </div>
       )}
     </div>

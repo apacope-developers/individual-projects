@@ -18,6 +18,7 @@ import {
   ChevronRight,
   Stethoscope,
   TrendingUp,
+  Bell,
 } from 'lucide-react';
 
 const DoctorDashboard = () => {
@@ -49,6 +50,26 @@ const DoctorDashboard = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const parseAppointmentDate = (appointment) => {
+    if (!appointment?.date || !appointment?.time_slot) return null;
+    const timeSlot = appointment.time_slot.split('-')[0].trim();
+    let dateTime = new Date(`${appointment.date} ${timeSlot}`);
+    if (isNaN(dateTime)) {
+      dateTime = new Date(`${appointment.date}T${timeSlot}`);
+    }
+    return isNaN(dateTime) ? null : dateTime;
+  };
+
+  const getReminderText = (appointment) => {
+    const appointmentDate = parseAppointmentDate(appointment);
+    if (!appointmentDate) return '';
+    const minutesToStart = Math.round((appointmentDate.getTime() - Date.now()) / 60000);
+    if (minutesToStart > 0 && minutesToStart <= 60) {
+      return `${t('startingSoon')} ${minutesToStart} ${t('minutes')}`;
+    }
+    return '';
   };
 
   const handleCompleteAppointment = async (appointmentId) => {
@@ -94,43 +115,37 @@ const DoctorDashboard = () => {
         <div className="card border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="text-sm text-slate-500 dark:text-slate-400">Total Appointments</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">{t('totalAppointmentsStats')}</p>
               <p className="text-3xl font-semibold text-slate-900 dark:text-white mt-2">{stats?.totalAppointments || 0}</p>
             </div>
-            <div className="rounded-2xl bg-blue-500/10 p-3">
-              <Calendar className="w-10 h-10 text-blue-600 dark:text-blue-300" />
-            </div>
+            <Calendar className="w-10 h-10 text-blue-600 dark:text-blue-300" />
           </div>
         </div>
 
         <div className="card border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="text-sm text-slate-500 dark:text-slate-400">Completed</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">{t('completedAppointments')}</p>
               <p className="text-3xl font-semibold text-slate-900 dark:text-white mt-2">{stats?.completedAppointments || 0}</p>
             </div>
-            <div className="rounded-2xl bg-emerald-500/10 p-3">
-              <CheckCircle className="w-10 h-10 text-emerald-600 dark:text-emerald-300" />
-            </div>
+            <CheckCircle className="w-10 h-10 text-emerald-600 dark:text-emerald-300" />
           </div>
         </div>
 
         <div className="card border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="text-sm text-slate-500 dark:text-slate-400">Upcoming</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">{t('upcomingAppointments')}</p>
               <p className="text-3xl font-semibold text-slate-900 dark:text-white mt-2">{stats?.upcomingAppointments || 0}</p>
             </div>
-            <div className="rounded-2xl bg-violet-500/10 p-3">
-              <Clock className="w-10 h-10 text-violet-600 dark:text-violet-300" />
-            </div>
+            <Clock className="w-10 h-10 text-violet-600 dark:text-violet-300" />
           </div>
         </div>
 
         <div className="card border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="text-sm text-slate-500 dark:text-slate-400">Total Earnings</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">{t('totalEarnings')}</p>
               <p className="text-3xl font-semibold text-slate-900 dark:text-white mt-2">${stats?.totalEarnings?.toFixed(2) || '0.00'}</p>
             </div>
             <div className="rounded-2xl bg-orange-500/10 p-3">
@@ -148,99 +163,105 @@ const DoctorDashboard = () => {
               <Star className="w-10 h-10 text-yellow-600 dark:text-yellow-300" />
             </div>
             <div>
-              <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Your Rating</p>
+              <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{t('yourRating')}</p>
               <p className="text-4xl font-semibold text-slate-900 dark:text-white">{stats?.rating?.toFixed(1) || '0.0'}</p>
-              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Based on {stats?.totalReviews || 0} reviews</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{t('basedOnReviews', { count: stats?.totalReviews || 0 })}</p>
             </div>
           </div>
           <TrendingUp className="w-16 h-16 text-yellow-500 dark:text-yellow-300" />
         </div>
       </div>
 
-      {/* Today's Appointments */}
       <div>
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-4">
-          <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Today's Appointments</h2>
+          <h2 className="text-xl font-semibold text-slate-900 dark:text-white">{t('todaysAppointments')}</h2>
           <button
             onClick={() => navigate('/doctor/appointments')}
             className="text-primary-600 hover:text-primary-700 text-sm font-medium"
           >
-            View All
+            {t('viewAll')}
           </button>
         </div>
 
         {appointments.length > 0 ? (
           <div className="space-y-4">
-            {appointments.map((appointment) => (
-              <div key={appointment.id} className="card border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">
-                <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0">
-                      <User className="w-6 h-6 text-primary-600" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-slate-900 dark:text-white">
-                        {appointment.patient?.user?.name}
-                      </h3>
-                      <p className="text-sm text-slate-500 dark:text-slate-400">{appointment.reason || 'General consultation'}</p>
-                      <div className="mt-2 flex flex-wrap items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
-                        <div className="flex items-center gap-1">
-                          <Clock className="w-4 h-4" />
-                          <span>{appointment.time_slot}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          {appointment.type === 'video' ? (
-                            <Video className="w-4 h-4" />
-                          ) : (
-                            <Stethoscope className="w-4 h-4" />
+            {appointments.map((appointment) => {
+              const reminderText = getReminderText(appointment);
+              return (
+                <div key={appointment.id} className="card border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">
+                  <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0">
+                        <User className="w-6 h-6 text-primary-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-slate-900 dark:text-white">{appointment.patient?.user?.name}</h3>
+                        <p className="text-sm text-slate-500 dark:text-slate-400">{appointment.reason || t('generalConsultation')}</p>
+                        <div className="mt-2 flex flex-wrap items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
+                          <div className="flex items-center gap-1">
+                            <Clock className="w-4 h-4" />
+                            <span>{appointment.time_slot}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            {appointment.type === 'video' ? (
+                              <Video className="w-4 h-4" />
+                            ) : (
+                              <Stethoscope className="w-4 h-4" />
+                            )}
+                            <span>{appointment.type === 'video' ? t('videoCall') : t('inPerson')}</span>
+                          </div>
+                          {reminderText && (
+                            <span className="badge badge-info inline-flex items-center gap-1">
+                              <Bell className="w-4 h-4" />
+                              {reminderText}
+                            </span>
                           )}
-                          <span>{appointment.type === 'video' ? 'Video Call' : 'In-Person'}</span>
                         </div>
                       </div>
                     </div>
-                  </div>
 
-                  <div className="flex flex-wrap items-center gap-2">
-                    {appointment.type === 'video' && (
+                    <div className="flex flex-wrap items-center gap-2">
+                      {appointment.type === 'video' && (
+                        <button
+                          onClick={() => navigate(`/video-consultation/${appointment.id}`)}
+                          className="btn-primary text-sm inline-flex items-center"
+                        >
+                          <Video className="w-4 h-4 mr-1" />
+                          {t('joinCall')}
+                        </button>
+                      )}
                       <button
-                        onClick={() => navigate(`/video-consultation/${appointment.id}`)}
-                        className="btn-primary text-sm inline-flex items-center"
+                        onClick={() => handleCompleteAppointment(appointment.id)}
+                        className="btn-secondary text-sm inline-flex items-center"
                       >
-                        <Video className="w-4 h-4 mr-1" />
-                        Join Call
+                        <CheckCircle className="w-4 h-4 mr-1" />
+                        {t('complete')}
                       </button>
-                    )}
-                    <button
-                      onClick={() => handleCompleteAppointment(appointment.id)}
-                      className="btn-secondary text-sm inline-flex items-center"
-                    >
-                      <CheckCircle className="w-4 h-4 mr-1" />
-                      Complete
-                    </button>
-                    <button
-                      onClick={() => handleCancelAppointment(appointment.id)}
-                      className="btn-outline text-sm inline-flex items-center"
-                    >
-                      <XCircle className="w-4 h-4 mr-1" />
-                      Cancel
-                    </button>
+                      <button
+                        onClick={() => handleCancelAppointment(appointment.id)}
+                        className="btn-outline text-sm inline-flex items-center"
+                      >
+                        <XCircle className="w-4 h-4 mr-1" />
+                        {t('cancel')}
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         ) : (
           <div className="card bg-white dark:bg-slate-950 text-center py-12">
             <Calendar className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">No Appointments Today</h3>
-            <p className="text-slate-600 dark:text-slate-400">Enjoy your free time!</p>
+            <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">{t('noAppointmentsToday')}</h3>
+            <p className="text-slate-600 dark:text-slate-400">{t('enjoyFreeTime')}</p>
           </div>
         )}
       </div>
 
       {/* Quick Actions */}
       <div>
-        <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-4">Quick Actions</h2>
+        <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-4">{t('quickActions')}</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <button
             onClick={() => navigate('/profile')}
@@ -251,8 +272,8 @@ const DoctorDashboard = () => {
                 <Calendar className="w-6 h-6 text-blue-600" />
               </div>
               <div>
-                <h3 className="font-semibold text-slate-900 dark:text-white">Manage Availability</h3>
-                <p className="text-sm text-slate-500 dark:text-slate-400">Set your time slots</p>
+                <h3 className="font-semibold text-slate-900 dark:text-white">{t('manageAvailability')}</h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400">{t('setYourTimeSlots')}</p>
               </div>
               <ChevronRight className="w-5 h-5 text-slate-400 ml-auto" />
             </div>
@@ -267,8 +288,8 @@ const DoctorDashboard = () => {
                 <Users className="w-6 h-6 text-green-600" />
               </div>
               <div>
-                <h3 className="font-semibold text-slate-900 dark:text-white">View Patients</h3>
-                <p className="text-sm text-slate-500 dark:text-slate-400">Manage patient list</p>
+                <h3 className="font-semibold text-slate-900 dark:text-white">{t('viewPatients')}</h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400">{t('managePatientList')}</p>
               </div>
               <ChevronRight className="w-5 h-5 text-slate-400 ml-auto" />
             </div>
@@ -283,8 +304,8 @@ const DoctorDashboard = () => {
                 <Stethoscope className="w-6 h-6 text-violet-600" />
               </div>
               <div>
-                <h3 className="font-semibold text-slate-900 dark:text-white">Write Prescription</h3>
-                <p className="text-sm text-slate-500 dark:text-slate-400">Create prescriptions</p>
+                <h3 className="font-semibold text-slate-900 dark:text-white">{t('writePrescription')}</h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400">{t('createPrescriptions')}</p>
               </div>
               <ChevronRight className="w-5 h-5 text-slate-400 ml-auto" />
             </div>

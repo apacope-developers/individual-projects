@@ -418,6 +418,132 @@ const getAnalytics = async (req, res, next) => {
   }
 };
 
+/**
+ * Delete doctor (with record tracking)
+ */
+const deleteDoctor = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const doctor = await Doctor.findByPk(id, {
+      include: [{ model: User, as: 'user' }]
+    });
+
+    if (!doctor) {
+      return res.status(404).json({
+        success: false,
+        message: 'Doctor not found'
+      });
+    }
+
+    // Check for active appointments
+    const activeAppointments = await Appointment.count({
+      where: {
+        doctor_id: id,
+        status: { [Op.in]: ['pending', 'confirmed', 'in-progress'] }
+      }
+    });
+
+    if (activeAppointments > 0) {
+      return res.status(400).json({
+        success: false,
+        message: `Cannot delete doctor with ${activeAppointments} active appointments. Please cancel or complete all appointments first.`
+      });
+    }
+
+    // Store deletion record
+    const deletionRecord = {
+      deleted_by_admin_id: req.user.id,
+      doctor_id: id,
+      doctor_name: doctor.user.name,
+      doctor_email: doctor.user.email,
+      specialty: doctor.specialty,
+      deleted_at: new Date(),
+      reason: req.body.reason || 'Admin deletion'
+    };
+
+    // Delete associated records
+    await Appointment.destroy({ where: { doctor_id: id } });
+    await Review.destroy({ where: { doctor_id: id } });
+
+    // Delete doctor record
+    const user = doctor.user;
+    await doctor.destroy();
+    await user.destroy();
+
+    res.status(200).json({
+      success: true,
+      message: 'Doctor deleted successfully',
+      deletionRecord
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Delete user (with record tracking)
+ */
+const deleteUser = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const user = await User.findByPk(id);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Prevent self-deletion
+    if (user.id === req.user.id) {
+      return res.status(400).json({
+        success: false,
+        message: 'Cannot delete your own account'
+      });
+    }
+
+    // Store deletion record
+    const deletionRecord = {
+      deleted_by_admin_id: req.user.id,
+      user_id: id,
+      user_name: user.name,
+      user_email: user.email,
+      user_role: user.role,
+      deleted_at: new Date(),
+      reason: req.body.reason || 'Admin deletion'
+    };
+
+    // Delete associated records based on role
+    if (user.role === 'doctor') {
+      const doctor = await Doctor.findOne({ where: { user_id: id } });
+      if (doctor) {
+        await Appointment.destroy({ where: { doctor_id: doctor.id } });
+        await Review.destroy({ where: { doctor_id: doctor.id } });
+        await doctor.destroy();
+      }
+    } else if (user.role === 'patient') {
+      const patient = await Patient.findOne({ where: { user_id: id } });
+      if (patient) {
+        await Appointment.destroy({ where: { patient_id: patient.id } });
+        await patient.destroy();
+      }
+    }
+
+    // Delete user
+    await user.destroy();
+
+    res.status(200).json({
+      success: true,
+      message: 'User deleted successfully',
+      deletionRecord
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getDashboardStats,
   getAllUsers,
@@ -428,5 +554,6 @@ module.exports = {
   deactivateUser,
   activateUser,
   getAllAppointmentsAdmin,
-  getAnalytics
-};
+  getAnalytics,
+  deleteDoctor,
+  deleteUser

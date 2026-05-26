@@ -64,7 +64,9 @@ const Login = () => {
         </div>
 
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-8 border border-gray-200 dark:border-gray-700">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Sign In</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">{t('signIn')}</h2>
+
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">{t('loginHint')}</p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
@@ -111,10 +113,10 @@ const Login = () => {
                   onChange={(e) => setRememberMe(e.target.checked)}
                   className="w-4 h-4 text-blue-600 rounded border-gray-300 dark:border-gray-600"
                 />
-                <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">Remember me</span>
+                <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">{t('rememberMe')}</span>
               </label>
               <Link to="/forgot-password" className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700">
-                Forgot password?
+                {t('forgotPassword')}
               </Link>
             </div>
 
@@ -123,12 +125,12 @@ const Login = () => {
               disabled={loading} 
               className="w-full py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
             >
-              {loading ? 'Signing in...' : 'Sign In'}
+              {loading ? t('signingIn') : t('signIn')}
             </button>
           </form>
 
           <p className="mt-6 text-center text-gray-600 dark:text-gray-400">
-            Don't have an account? <Link to="/register" className="text-blue-600 dark:text-blue-400 font-medium">Sign Up</Link>
+            {t('noAccount')} <Link to="/register" className="text-blue-600 dark:text-blue-400 font-medium">{t('signUp')}</Link>
           </p>
         </div>
       </div>

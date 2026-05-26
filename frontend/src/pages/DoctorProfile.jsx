@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { doctorService } from '../services/doctorService';
 import { appointmentService } from '../services/appointmentService';
+import { useLanguage } from '../context/LanguageContext';
 import { toast } from 'react-hot-toast';
 import { ProfileAvatar } from '../utils/photoUrl';
 import {
@@ -17,6 +18,7 @@ import {
 } from 'lucide-react';
 
 const DoctorProfile = () => {
+  const { t } = useLanguage();
   const { id } = useParams();
   const navigate = useNavigate();
   const [doctor, setDoctor] = useState(null);
@@ -41,15 +43,15 @@ const DoctorProfile = () => {
       setDoctor(doctorData.data);
       setTimeSlots(slotsData.data);
     } catch (error) {
-      toast.error('Failed to load doctor data');
+      toast.error(t('failedLoadDoctor'));
     } finally {
       setLoading(false);
     }
   };
 
-  const handleBookAppointment = async () => {
+  const handleBookAppointment = async (type = 'in-person') => {
     if (!selectedDate || !selectedSlot) {
-      toast.error('Please select a date and time slot');
+      toast.error(t('selectDateAndSlot'));
       return;
     }
 
@@ -59,12 +61,12 @@ const DoctorProfile = () => {
         doctor_id: parseInt(id),
         date: selectedDate,
         time_slot: selectedSlot,
-        type: 'in-person',
+        type,
       });
-      toast.success('Appointment booked successfully!');
-      navigate('/dashboard');
+      toast.success(type === 'video' ? t('bookingSuccessful') : t('bookingSuccessful'));
+      navigate('/appointments');
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to book appointment');
+      toast.error(error.response?.data?.message || t('failedBookAppointment'));
     } finally {
       setBookingLoading(false);
     }
@@ -80,11 +82,11 @@ const DoctorProfile = () => {
 
   if (!doctor) {
     return (
-      <div className="card text-center py-12">
+      <div className="card text-center py-12 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
         <Stethoscope className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">Doctor Not Found</h3>
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">{t('doctorNotFound')}</h3>
         <Link to="/doctors" className="btn-primary">
-          Back to Doctors
+          {t('backButton')}
         </Link>
       </div>
     );
@@ -93,9 +95,9 @@ const DoctorProfile = () => {
   return (
     <div className="space-y-6">
       {/* Back Button */}
-      <Link to="/doctors" className="inline-flex items-center text-gray-600 hover:text-gray-900">
+      <Link to="/doctors" className="inline-flex items-center text-gray-600 hover:text-gray-900 dark:text-slate-300 dark:hover:text-white">
         <ChevronLeft className="w-4 h-4 mr-1" />
-        Back to Doctors
+        {t('backButton')}
       </Link>
 
       {/* Doctor Header */}
@@ -122,7 +124,7 @@ const DoctorProfile = () => {
                     {doctor.rating?.toFixed(1)}
                   </span>
                   <span className="text-gray-500 ml-1">
-                    ({doctor.total_reviews} reviews)
+                    ({doctor.total_reviews} {t('reviews')})
                   </span>
                 </div>
               </div>
@@ -133,19 +135,19 @@ const DoctorProfile = () => {
                 <GraduationCap className="w-5 h-5 mr-2" />
                 {doctor.qualification}
               </div>
-              <div className="flex items-center text-gray-600">
+              <div className="flex items-center text-gray-600 dark:text-slate-300">
                 <Clock className="w-5 h-5 mr-2" />
-                {doctor.experience} years experience
+                {doctor.experience} {t('yearsExperience')}
               </div>
-              <div className="flex items-center text-gray-600">
+              <div className="flex items-center text-gray-600 dark:text-slate-300">
                 <MapPin className="w-5 h-5 mr-2" />
-                {doctor.medical_school || 'Medical School'}
+                {doctor.medical_school || t('medicalSchool')}
               </div>
             </div>
 
             {doctor.available && (
               <div className="mt-4">
-                <span className="badge badge-success">Available for Appointments</span>
+                <span className="badge badge-success">{t('availableForAppointments')}</span>
               </div>
             )}
           </div>
@@ -156,15 +158,15 @@ const DoctorProfile = () => {
         {/* About */}
         <div className="lg:col-span-2 space-y-6">
           <div className="card">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">About</h2>
-            <p className="text-gray-600 leading-relaxed">
-              {doctor.bio || 'No bio available.'}
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">{t('about')}</h2>
+            <p className="text-gray-600 dark:text-slate-300 leading-relaxed">
+              {doctor.bio || t('noBioAvailable')}
             </p>
           </div>
 
           {/* Reviews */}
           <div className="card">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Patient Reviews</h2>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">{t('patientReviews')}</h2>
             {doctor.reviews && doctor.reviews.length > 0 ? (
               <div className="space-y-4">
                 {doctor.reviews.slice(0, 3).map((review) => (
@@ -198,7 +200,7 @@ const DoctorProfile = () => {
                 ))}
               </div>
             ) : (
-              <p className="text-gray-600">No reviews yet.</p>
+              <p className="text-gray-600 dark:text-slate-300">{t('noReviewsYet')}</p>
             )}
           </div>
         </div>
@@ -206,10 +208,10 @@ const DoctorProfile = () => {
         {/* Booking */}
         <div className="lg:col-span-1">
           <div className="card sticky top-4">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Book Appointment</h2>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">{t('bookAppointment')}</h2>
             
             <div className="mb-4">
-              <p className="text-sm text-gray-500">Consultation Fee</p>
+              <p className="text-sm text-gray-500">{t('consultationFee')}</p>
               <p className="text-2xl font-bold text-gray-900">
                 ${doctor.consultation_fee}
               </p>
@@ -217,8 +219,8 @@ const DoctorProfile = () => {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Select Date
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  {t('selectDate')}
                 </label>
                 <input
                   type="date"
@@ -231,8 +233,8 @@ const DoctorProfile = () => {
 
               {selectedDate && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Available Time Slots
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    {t('selectTimeSlot')}
                   </label>
                   <div className="grid grid-cols-2 gap-2">
                     {['09:00-10:00', '10:00-11:00', '11:00-12:00', '14:00-15:00', '15:00-16:00', '16:00-17:00'].map((slot) => (
@@ -254,15 +256,19 @@ const DoctorProfile = () => {
 
               <div className="space-y-2">
                 <button
-                  onClick={handleBookAppointment}
+                  onClick={() => handleBookAppointment('in-person')}
                   disabled={bookingLoading || !selectedDate || !selectedSlot}
                   className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {bookingLoading ? 'Booking...' : 'Book Appointment'}
+                  {bookingLoading ? t('booking') : t('bookAppointment')}
                 </button>
-                <button className="w-full btn-outline flex items-center justify-center">
+                <button
+                  onClick={() => handleBookAppointment('video')}
+                  disabled={bookingLoading || !selectedDate || !selectedSlot}
+                  className="w-full btn-outline flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                >
                   <Video className="w-4 h-4 mr-2" />
-                  Book Video Consultation
+                  {t('bookVideoConsultation')}
                 </button>
               </div>
             </div>

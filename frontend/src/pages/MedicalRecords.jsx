@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { patientService } from '../services/patientService';
-import { getAssetUrl } from '../services/api';
+import api, { getAssetUrl } from '../services/api';
 import { toast } from 'react-hot-toast';
 import { FolderOpen, Upload, Download, Trash2, FileText, Image, Calendar, Eye, X } from 'lucide-react';
 
@@ -79,9 +79,22 @@ const MedicalRecords = () => {
     }
   };
 
-  const handleDownload = (record) => {
-    const url = getAssetUrl(record.file_url);
-    window.open(url, '_blank');
+  const getPreviewUrl = (record) => getAssetUrl(record.file_url);
+
+  const handleDownload = async (record) => {
+    try {
+      const response = await api.get(getPreviewUrl(record), { responseType: 'blob' });
+      const blobUrl = window.URL.createObjectURL(response.data);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = `${record.title || 'medical_record'}`.replace(/\s+/g, '_');
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      toast.error(t('failedDownloadRecord'));
+    }
   };
 
   const handlePreview = (record) => {
@@ -160,18 +173,16 @@ const MedicalRecords = () => {
               </div>
 
               <div className="flex items-center space-x-2">
-                {isImageFile(record.file_type) && (
-                  <button
-                    onClick={() => handlePreview(record)}
-                    className="flex-1 btn-outline text-sm flex items-center justify-center hover:bg-primary-50 dark:hover:bg-primary-900/30"
-                  >
-                    <Eye className="w-4 h-4 mr-1" />
-                    View
-                  </button>
-                )}
+                <button
+                  onClick={() => handlePreview(record)}
+                  className="flex-1 btn-outline text-sm flex items-center justify-center hover:bg-primary-50 dark:hover:bg-primary-900/30"
+                >
+                  <Eye className="w-4 h-4 mr-1" />
+                  {t('view')}
+                </button>
                 <button
                   onClick={() => handleDownload(record)}
-                  className={`${isImageFile(record.file_type) ? 'flex-1' : 'flex-1'} btn-outline text-sm flex items-center justify-center hover:bg-primary-50 dark:hover:bg-primary-900/30`}
+                  className="flex-1 btn-primary text-sm flex items-center justify-center hover:bg-primary-600/90 dark:hover:bg-primary-700"
                 >
                   <Download className="w-4 h-4 mr-1" />
                   {t('download')}
@@ -317,9 +328,17 @@ const MedicalRecords = () => {
               {isImageFile(previewRecord.file_type) ? (
                 <div className="mb-4">
                   <img
-                    src={getAssetUrl(previewRecord.file_url)}
+                    src={getPreviewUrl(previewRecord)}
                     alt={previewRecord.title}
                     className="w-full h-auto rounded-lg"
+                  />
+                </div>
+              ) : previewRecord.file_type?.includes('pdf') ? (
+                <div className="mb-4">
+                  <iframe
+                    src={getPreviewUrl(previewRecord)}
+                    title={previewRecord.title}
+                    className="w-full h-[600px] rounded-lg border border-gray-200 dark:border-gray-700"
                   />
                 </div>
               ) : (

@@ -40,7 +40,7 @@ const Layout = () => {
         { path: '/dashboard', icon: LayoutDashboard, label: t('dashboard') },
         { path: '/doctors', icon: Stethoscope, label: t('findDoctors') },
         { path: '/book-appointment', icon: Calendar, label: t('bookAppointment') },
-        { path: '/ai-checker', icon: Brain, label: 'AI Symptom Checker' },
+        { path: '/ai-checker', icon: Brain, label: t('aiChecker') },
         { path: '/prescriptions', icon: Pill, label: t('prescriptions') },
         { path: '/medical-records', icon: FolderOpen, label: t('medicalRecords') },
         { path: '/profile', icon: User, label: t('profile') },
@@ -49,7 +49,7 @@ const Layout = () => {
       return [
         { path: '/doctor/dashboard', icon: LayoutDashboard, label: t('dashboard') },
         { path: '/doctor/appointments', icon: Calendar, label: t('appointments') },
-        { path: '/doctor/patients', icon: User, label: 'Patients' },
+        { path: '/doctor/patients', icon: User, label: t('patients') },
         { path: '/doctor/prescriptions', icon: Pill, label: t('prescriptions') },
         { path: '/profile', icon: User, label: t('profile') },
       ];
