@@ -1,0 +1,25 @@
+{
+  "name": "bloodconnect",
+  "version": "1.0.0",
+  "description": "A modern, full-stack blood donation management system connecting donors with hospitals in need of blood donations.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rwiziganura/bloodconnect.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/rwiziganura/bloodconnect/issues"
+  },
+  "homepage": "https://github.com/rwiziganura/bloodconnect#readme",
+  "devDependencies": {
+    "chromedriver": "^148.0.2",
+    "nightwatch": "^3.15.0"
+  }
+}
